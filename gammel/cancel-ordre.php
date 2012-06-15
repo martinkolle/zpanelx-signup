@@ -1,0 +1,1 @@
+<h1>Din ordre er blevet afvist eller afbrudt!</h1>

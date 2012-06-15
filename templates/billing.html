@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>:title</title>
+</head>
+
+<body>
+
+<div align="center">
+	<div id="error">
+		<div id="error-inner">
+			:error
+		</div>
+	</div>
+	<form method="POST" action=":action">
+			<table border="0" width="500" id="table1">
+		<tr>
+			<td><font face="Verdana" size="2">Username:</font></td>
+			<td width="252"><font face="Verdana">
+			<input type="text" name="username" size="30"></font></td>
+		</tr>
+		<tr>
+			<td><font face="Verdana" size="2">Email Address:</font></td>
+			<td width="252"><font face="Verdana">
+			<input type="text" name="email" size="30"></font></td>
+		</tr>
+		<tr>
+			<td><font face="Verdana" size="2">Full Name:</font></td>
+			<td width="252"><font face="Verdana">
+			<input type="text" name="fullname" size="30"></font></td>
+		</tr>
+		<tr>
+			<td><font face="Verdana" size="2">Postal Address:</font></td>
+			<td width="252"><font face="Verdana">
+			<textarea rows="6" name="address" cols="25"></textarea></font></td>
+		</tr>
+		<tr>
+			<td><font face="Verdana" size="2">Post Code:</font></td>
+			<td width="252"><font face="Verdana">
+			<input type="text" name="postcode" size="20"></font></td>
+		</tr>
+		<tr>
+			<td><font face="Verdana" size="2">Tel.Number:</font></td>
+			<td width="252"><font face="Verdana">
+			<input type="text" name="telephone" size="30"></font></td>
+		</tr>
+	</table>
+	<div align="center">
+		<table border="1" width="500" id="table2" style="border-collapse: collapse" bordercolor="#C0C0C0">
+			<tr>
+				<td><font face="Verdana" size="2"><b>Package:</b></font><p>
+				Package Name: 
+				<input type="text" name="packagename" size="20" disabled="true" value=":selectedpackagename">
+				<input type="hidden" name="packageid" size="1" value=":pid"></font><p><font face="Verdana" size="2">Select how you want to pay:
+					<select size="1" name="payperiod">
+					:payoptions
+					</select>
+	 				<br>
+	 			</td>
+	 		</tr>
+		</table>
+		<p><input type="submit" value="Submit" name="SubmitForm">
+	</div>
+	</form>
+</div>
+</body>
+</html>

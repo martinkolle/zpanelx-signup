@@ -1,0 +1,79 @@
+<p><b>Creating a payment method:</b></p>
+<p>Insert HTML to create a payment method. This HTML will be displayed on the 
+payment options page. Where values such as the invoice ID, user alias, payment 
+amount should be entered, enter the following variables instead. For example, 
+&quot;&lt;input type=&quot;hidden&quot; name=&quot;a1&quot; value=&quot;$itmvalue&quot; /&gt;&quot; $itmvalue will be replaced 
+with the fee.</p>
+<p>Where using the PayPal API for automatic enabling of accounts, read the 
+following carefully.</p>
+<p>Variables:</p>
+<p>$itmvalue = amount the user will pay e.g. 5<br>
+$userid = the user alias entered during signup. For example 'zpanel'.<br>
+$invid = the unique ID for the invoice created during signup<br>
+$subscrper = used for subscription based payment links. Will set the payment 
+interval. For example, if the user selected monthly subscription, this will be 
+'1', if user selected quarterly payment intervals this will be '3' and for 
+yearly payment intervals this will be '12'.</p>
+<p><b>PayPal API:</b></p>
+<p>For this to work, set item_number to '$userid'</p>
+<p>Add this to the button HTML to ensure accounts are activated in real-time:<br>
+&quot;&lt;input type=&quot;hidden&quot; name=&quot;notify_url&quot; value=&quot;<font color="#FF0000">[WEB-URL-TO-SCRIPT]/</font>PayPalAPI.php&quot; 
+/&gt;&quot;<br>
+&nbsp;</p>
+<p><b>PayPal Subscription based API:</b></p>
+<p>For this to work, set item_number to '$invid'<br>
+&quot;&lt;input type=&quot;hidden&quot; name=&quot;notify_url&quot; value=&quot;<font color="#FF0000">[WEB-URL-TO-SCRIPT]/</font>PayPalAPI-Subsc.php&quot; 
+/&gt;&quot;</p>
+<p><b>Sandbox</b></p>
+<p>For testing purposes, use the PayPal Sandbox.</p>
+<p>Edit the PayPalAPI.php and PayPalAPI-Subsc.php file:<br>
+- replace <a href="https://www.paypal.co">https://www.paypal.co</a>m with 
+https://sandbox.paypal.com</p>
+<p>Ensure your payment links point to sandbox.paypal.com also.</p>
+<p><b>Sample PayPal Subscription data:</b></p>
+<p>This will setup a recurring subscription, all you need to do is add your 
+PayPal Email in the bit in red.</p>
+<table border="1" width="712" style="border-collapse: collapse" bordercolor="#000080" id="table1">
+	<tr>
+		<td>&lt;form action=&quot;https://www.paypal.com/cgi-bin/webscr&quot; method=&quot;post&quot;&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;cmd&quot; value=&quot;_xclick-subscriptions&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;no_note&quot; value=&quot;1&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;a3&quot; value=&quot;$itmvalue&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;p3&quot; value=&quot;$subscrper&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;t3&quot; value=&quot;M&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;business&quot; value=&quot;<font color="#FF0000">[YOUR-PAYPAL-EMAIL]</font>&quot; 
+		/&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;src&quot; value=&quot;1&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;srt&quot; value=&quot;0&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;sra&quot; value=&quot;1&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;modify&quot; value=&quot;0&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;usr_manage&quot; value=&quot;0&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;item_name&quot; value=&quot;ACC: $userid&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;currency_code&quot; value=&quot;GBP&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;lc&quot; value=&quot;GB&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;charset&quot; value=&quot;windows-1252&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;item_number&quot; value=&quot;$userid&quot; /&gt;<br>
+		&lt;input type=&quot;hidden&quot; name=&quot;notify_url&quot; value=&quot;http://billing.interwebproject.com/test/PayPalAPI-Subsc.php&quot; 
+		/&gt;<br>
+		&lt;input type=&quot;image&quot; src=&quot;https://www.paypal.com/en_GB/i/btn/btn_subscribeCC_LG.gif&quot; 
+		border=&quot;0&quot; name=&quot;submit&quot; alt=&quot;PayPal - The safer, easier way to pay 
+		online!&quot; /&gt;<br>
+		&lt;/form&gt;</td>
+	</tr>
+</table>
+<p><b>Sample PayPal Standard Payment Data:</b></p>
+<table border="1" width="712" style="border-collapse: collapse" bordercolor="#000080" id="table2">
+	<tr>
+		<td>&lt;form name=_xclick action=https://www.paypal.com/cgi-bin/webscr 
+		method=post&gt;&lt;input type=hidden name=cmd value=_xclick&gt;&lt;input type=hidden 
+		name=business value=<font color="#FF0000">[YOUR-PAYPAL-EMAIL]</font>&gt;&lt;input 
+		type=hidden name=currency_code value=GBP&gt;&lt;input type=hidden name=item_name 
+		value=ACC:$userid&gt;&lt;input type=hidden name=item_number value=$invid&gt;&lt;input 
+		type=hidden name=callback_url value=http://billing.interwebproject.com/test/PayPalAPI.php&gt;&lt;input 
+		type=hidden name=amount value=$itmvalue&gt;&lt;input type=image src=http://www.paypal.com/en_US/i/btn/btn_buynow_LG.gif 
+		border=0 name=submit&gt;<br>
+		&lt;/form&gt;</td>
+	</tr>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
