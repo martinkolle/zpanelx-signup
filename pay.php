@@ -8,9 +8,8 @@
  *  @license    http://opensource.org/licenses/gpl-3.0.html
  */
 
-include 'db_connect.php';
 include ('db.php');
-include 'config/functions.php';
+include ('config/functions.php');
 
 $token = $_GET['id'];
 $error = array();
@@ -21,12 +20,12 @@ $html['title'] = "Pay for hosting";
 $db = db::getConnection();
 $stmt = $db->prepare("SELECT * FROM x_invoice WHERE token= ?");
     
-if($stmt->execute(array($token))){
-     $row = $stmt->fetch();
-     $invpaid = $row['inv_payment_method'];
-     $amount = $row['inv_amount'];
-     $invoiceuser = $row['inv_user'];
-}
+$stmt->execute(array($token));
+$row = $stmt->fetch();
+$invpaid = $row['inv_payment_method'];
+$amount = $row['inv_amount'];
+$invoiceuser = $row['inv_user'];
+
 
 if(!isset($token)){
      $error[] = "No payment id have been set";

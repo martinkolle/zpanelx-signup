@@ -4,10 +4,10 @@
 // Not for resale
 define('zxBilling', 1);
 
+include 'config/functions.php';
 include ('db.php');
 include 'db_connect.php';
 //include 'config/config.php';
-include 'config/functions.php';
 
 $pid = $_GET['pid'];
 //connect to the database
