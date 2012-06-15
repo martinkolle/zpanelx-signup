@@ -18,7 +18,7 @@ Please upload the files to you server, and install the module aka. yourdomain.co
 
 Go to yourdomain.com/adm and add prices for the packages you have made in zpanelx.
 When you have added prices, please go to Add payments method: I have made this example for paypal: (NB: sandbox testing!!):
-<pre>
+<blockquote>
 <form name="form1" method="post" action="https://www.sandbox.paypal.com/cgi-bin/webscr">
 <input name="last_name" value="kwldqm" type="hidden">
 <input name="invoice" value="$invid" type="hidden">
@@ -39,7 +39,7 @@ When you have added prices, please go to Add payments method: I have made this e
  <input type="hidden" name="notify_url" value="http://billing.kmweb.dk/ipn.php" />
 <input value="Forsæt til betaling »" class="defbtn" type="submit">
 </form>
-</pre>
+</blockquote>
 License
 ==============
 THIS MODULE IS RELEASED UNDER GNU/GPL V.3 
