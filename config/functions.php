@@ -32,7 +32,6 @@ class zpanelx{
 		* @author Tony
 		* @return true or false 
 	*/
-
 	function sendWelcomeMail($id){
 
 		$db = $db->getConnection();
@@ -78,7 +77,6 @@ class zpanelx{
 	        for ($i = 0; $i < $length; $i++) {
 	            $password .= $characters[mt_rand(0, $charactersLength)];
 	        }        
-	        
 	        return $password;
 	}
 
@@ -178,19 +176,22 @@ class zpanelx{
 			switch($payperiod){
 				case '1':
 					$selectedpackageprice = $row['pk_price_pm'];
+					$hostingTime = "3"; //month
 				break;
 				case '2' :
 					$selectedpackageprice = $row['pk_price_pq'];
+					$hostingTime = "6"; //month
 				break;
 				case'3':
 					$selectedpackageprice = $row['pk_price_py'];
+					$hostingTime = "12"; //month
 				break;
 			}
 
 		}
 
 		$todaydate = date("Y-m-d");// current date
-		$newdate = strtotime(date("Y-m-d", strtotime($todaydate)) . "+1 month");
+		$newdate = strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
 		$newdate = date('Y-m-d', $newdate);
 
 		//add user to table
@@ -211,6 +212,10 @@ class zpanelx{
 		if(!$stmt->execute($query)){
 			echo $stmt->errorInfo();
 		}
+
+		//add to next mounth bandwidth
+		$stmt = $db->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (" . $user_id . "," . date("Ym", time()) . ", 0, 0)");
+		$stmt->execute();
 
 		//add to invoice
 		$stmt = $db->prepare("INSERT INTO x_invoice(inv_user, inv_amount, inv_description, inv_duedate, inv_createddate, inv_act, token) VALUES (:user_id,:selectedpackageprice,'Initial Signup',:todaydate,:todaydate,'1',:token)");
@@ -257,6 +262,23 @@ class zpanelx{
 				return $default;
 			}
 		}
+	function create_dir($dir){
+		// set up basic connection
+		$con = ssh2_connect(self::getConfig('sftp_server'));
+
+		// login with username and password
+		$login_result = ssh2_auth_password($con, self::getConfig('sftp_user_name'), self::getConfig('sftp_user_pass') );
+		$sftp = ssh2_sftp($con);
+
+		// try to create the directory $dir
+		if (ssh2_sftp_mkdir($con, $dir)) {
+			return true;
+		}else {
+ 			return false;
+		}
+		// close the connection
+		ftp_close($con);
+	}
 }
 
 ?>

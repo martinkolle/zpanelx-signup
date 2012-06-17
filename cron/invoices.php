@@ -1,12 +1,12 @@
 <?php
 
-include '../db_connect.php';
-include '../config/config.php';
 include '../config/functions.php';
+include '../db_connect.php';
 
 $todaydate = date("Y-m-d");// current date
 $newdate = strtotime(date("Y-m-d", strtotime($todaydate)) . "+" . $invoicedays . " day");
-$newdate = date('Y-m-d', $newdate);
+
+echo $newdate;
 
 mysql_select_db($DBNAME, $con);
 $sqlquery = "SELECT * FROM x_accounts WHERE ac_invoice_nextdue='" . $newdate . "'";
