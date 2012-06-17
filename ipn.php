@@ -97,14 +97,37 @@ if ($verified) {
         }
             //if the amount not is correct, the account will not be disabled. 
            if(empty($error)){ 
+
+                //Update the hosting time - when should the user expire
+                $sql = "SELECT * FROM x_accounts WHERE ?";
+                $query = $pdo->prepare($sql);   
+                $row = $query->execute(array($invoiceuserid))->fetch();
+
+                switch($row['ac_invoice_period']){
+                    case '1':
+                        $hostingTime = "3"; //month
+                    break;
+                    case '2' :
+                        $hostingTime = "6"; //month
+                    break;
+                    case'3':
+                        $hostingTime = "12"; //month
+                    break;
+                }
+
+                $date = date('Y-m-d');
+                $nextdue = strtotime ( $hostingTime." days" , strtotime ( $date ) ) ;
+                $nextdue = date ( 'Y-m-d' , $nextdue );
+
                 //activate the account
-                $sql = "UPDATE x_accounts SET ac_enabled_in = '1' WHERE ac_id_pk= :user_id";
+                $sql = "UPDATE x_accounts SET ac_enabled_in = '1', ac_invoice_nextdue = :nextdue WHERE ac_id_pk= :user_id";
                 $query = $pdo->prepare($sql);
-                if(!$query->execute(array(':user_id'=>$invoiceuserid)))
+                if(!$query->execute(array(':nextdue'=>$nextdue,':user_id'=>$invoiceuserid)))
                 {
                     error_log($query->errorInfo());
                     $error[] = $query->errorInfo();
                 }
+                //TODO: make the folders
             }
     }
     else{
