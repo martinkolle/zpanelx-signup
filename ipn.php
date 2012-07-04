@@ -1,7 +1,7 @@
 <?php
 /**
  *  @package    Zpanelx Auto-sign-up
- *  @author     Tony Maclennan & Martin Kollerup
+ *  @author     Martin Kollerup
  *  @license    http://opensource.org/licenses/gpl-3.0.html
  */
 
@@ -61,7 +61,15 @@ if ($verified) {
     $payment_currency = $_POST['mc_currency'];
     $txn_id = $_POST['txn_id'];
     $receiver_email = $_POST['receiver_email'];
+    $business = $_POST['business'];
     $payer_email = $_POST['payer_email'];
+
+    if($business != zpanelx::getConfig('email_paypal')){
+        $error[] .= "INVALID PAYMENT: A wrong paypal email have been used: ".$business." and invoice id: ".$invoice;  
+    }
+    if($payment_currency != zpanelx::getConfig('cs')){
+        $error[] .= "INVALID PAYMENT: Paypal returned a wrong currency(".$payment_currency.") relative to the settings. Invice id: ".$invoice;  
+    }
 
     //Check that the invoice is here.
     $stmt = $pdo->prepare("SELECT * FROM x_invoice WHERE token = ?");
@@ -114,6 +122,7 @@ if ($verified) {
                             $hostingTime = "12"; //month
                         break;
                     }
+                }
                 else{
                     error_log($stmt->errorInfo());
                     $error[] .= print_r($stmt->errorInfo());
