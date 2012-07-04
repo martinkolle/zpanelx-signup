@@ -3,66 +3,59 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>:title</title>
+	<title>Buy hosting</title>
+	<link href="templates/style.css" rel="stylesheet" type="text/css">	
+	:head
 </head>
 
 <body>
-
-<div align="center">
-	<div id="error">
-		<div id="error-inner">
-			:error
+<div id="main">
+	<form method="POST" action=":action">	
+		<div id="error">
+			<div id="error-inner">
+			:error		
+			</div>
 		</div>
-	</div>
-	<form method="POST" action=":action">
-			<table border="0" width="500" id="table1">
-		<tr>
-			<td><font face="Verdana" size="2">Username:</font></td>
-			<td width="252"><font face="Verdana">
-			<input type="text" name="username" size="30"></font></td>
-		</tr>
-		<tr>
-			<td><font face="Verdana" size="2">Email Address:</font></td>
-			<td width="252"><font face="Verdana">
-			<input type="text" name="email" size="30"></font></td>
-		</tr>
-		<tr>
-			<td><font face="Verdana" size="2">Full Name:</font></td>
-			<td width="252"><font face="Verdana">
-			<input type="text" name="fullname" size="30"></font></td>
-		</tr>
-		<tr>
-			<td><font face="Verdana" size="2">Postal Address:</font></td>
-			<td width="252"><font face="Verdana">
-			<textarea rows="6" name="address" cols="25"></textarea></font></td>
-		</tr>
-		<tr>
-			<td><font face="Verdana" size="2">Post Code:</font></td>
-			<td width="252"><font face="Verdana">
-			<input type="text" name="postcode" size="20"></font></td>
-		</tr>
-		<tr>
-			<td><font face="Verdana" size="2">Tel.Number:</font></td>
-			<td width="252"><font face="Verdana">
-			<input type="text" name="telephone" size="30"></font></td>
-		</tr>
-	</table>
-	<div align="center">
-		<table border="1" width="500" id="table2" style="border-collapse: collapse" bordercolor="#C0C0C0">
-			<tr>
-				<td><font face="Verdana" size="2"><b>Package:</b></font><p>
-				Package Name: 
-				<input type="text" name="packagename" size="20" disabled="true" value=":selectedpackagename">
-				<input type="hidden" name="packageid" size="1" value=":pid"></font><p><font face="Verdana" size="2">Select how you want to pay:
-					<select size="1" name="payperiod">
-					:payoptions
-					</select>
-	 				<br>
-	 			</td>
-	 		</tr>
-		</table>
-		<p><input type="submit" value="Submit" name="SubmitForm">
-	</div>
+		<div id="main-inner">
+			<div id="left">
+				<div id="box">
+					<h2>Your information</h2>
+					<div id="login">
+						<h3>Login </h3>
+						<input type="text" name="username" value=":username"><br />
+						<input type="text" name="email" value=":email">
+					</div>
+					<div id="information">
+						<h3>Customer</h3>
+						<input type="text" name="fullname" value=":fullname">
+						<textarea name="address" cols="25">:adress</textarea>
+						<input type="text" name="postcode" size="20" value=":postcode">
+						<input type="text" name="telephone" value=":telephone">
+					</div>
+				</div>
+			</div>
+
+			<div id="right" class="pay">
+				<div id="box">
+					<h2>Payment period</h2>
+						<input type="hidden" name="packagename" size="20" disabled="true" value=":selectedpackagename">
+						<input type="hidden" name="packageid" size="1" value=":pid">
+							:payoptions
+				</div>
+			</div>
+			<div id="right" class="trans">
+				<div id="box">
+					<h2>Transfer website</h2>
+						<input type="text" name="website" value=":transfer_website" />
+						<br />
+						<input type="checkbox" name="help_dns">I want to have help with transfer of the doamin. <br />
+						I don't have a domain.
+				</div>
+			</div>		
+		</div>
+		<div id="bottom">
+			<input type="submit" value="Create account and choose payment >>" name="SubmitForm" />
+		</div>
 	</form>
 </div>
 </body>

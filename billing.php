@@ -21,8 +21,11 @@ if (isset($_POST['SubmitForm'])) {
 	$email 		= filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
 	$fullname 	= filter_var($_POST["fullname"],FILTER_SANITIZE_STRING);
 	$adress 	= filter_var($_POST["address"], FILTER_SANITIZE_STRING);
-	$postcode 	= ctype_digit($_POST["postcode"]);
-	$telephone 	= ctype_digit($_POST["telephone"]);
+	$transfer	= filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING);
+	$website	= filter_var($_POST["website"], FILTER_SANITIZE_STRING);
+
+	$postcode 	= ($_POST["postcode"]);
+	$telephone 	= ($_POST["telephone"]);
 	//TODO: IS THE INFORMATIONS RIGHT
 	
 	$payperiod 	= $_POST['payperiod'];
@@ -54,6 +57,9 @@ if (isset($_POST['SubmitForm'])) {
 	if (empty($telephone)) {
 		$error[] = "Telephone number missing";
 	}
+	if (empty($payperiod)) {
+		$error[] = "Payperiod is missing";
+	}
 
 	$stmt = $db->prepare("SELECT * FROM x_accounts WHERE ac_user_vc= ?");
 		
@@ -67,9 +73,18 @@ if (isset($_POST['SubmitForm'])) {
 	}
 
 	//If there not are any erorrs.. proceed.
+	//TODO: Add the påassword when the payment is accepted
 	if(!$error){
 		//add the new user
-		zpanelx::newUser($payperiod, $packageid, $token, zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone);
+		//use "newUser" if you don't want to use the API!!!
+		zpanelx::newUser2($payperiod, $packageid, $token, zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone);
+		
+		if(isset(zpanelx::$newUserError)){
+			$error = "It is currently not possible to crate your account. A notification have been sent to the provider.<br /><b>We are sorry!</b>";
+			$template = file_get_contents('templates/billing_error.html');
+			$template = str_replace('{{title}}', "Errors", $template);
+			$template = str_replace('{{error}}', $error, $template);
+		}
 		//the user will be redirected from the function
 	}
 	else{
@@ -95,13 +110,13 @@ if(!empty($pid)){
 	if(!empty($selectedpackagename)){
 		//add payments options
 		if (!$pricepm == "0") {
-			$loadpayoptions = "<option selected value=1>Monthly @ " . $cs . $pricepm . "</option>";
+			$loadpayoptions = '<input type="radio" name="payperiod" selected value="1">Monthly @ ' . $cs . $pricepm . '</input><br />';
 		}
 		if (!$pricepq == "0") {
-			$loadpayoptions .= "<option value=2>Quarterly @ " . $cs . $pricepq . "</option>";
+			$loadpayoptions .= "<input type=\"radio\" name=\"payperiod\" value=\"2\">Quarterly @ " . $cs . $pricepq . "</input><br />";
 		}
 		if (!$pricepy == "0") {
-			$loadpayoptions .= "<option value=3>Yearly @ " . $cs . $pricepy . "</option>";
+			$loadpayoptions .= "<input type=\"radio\" name=\"payperiod\" value=\"3\">Yearly @ " . $cs . $pricepy . "</input><br />";
 		}
 
 		$template = file_get_contents('templates/billing.html');
@@ -110,11 +125,23 @@ if(!empty($pid)){
 		$template = str_replace(':payoptions', $loadpayoptions, $template);
 		$template = str_replace(':pid', $pid, $template);
 		$template = str_replace(':title', "Buy hosting", $template);
+
+		//if post use the entered value, else enter the field name
+		$template = ($username ? str_replace(':username', $username, $template) : str_replace(':username', "Username", $template));
+		$template = ($email ? str_replace(':email', $email, $template) : str_replace(':email', "Email", $template));
+		$template = ($fullname ? str_replace(':fullname', $fullname, $template) : str_replace(':fullname', "Full name", $template));
+		$template = ($adress ? str_replace(':adress', $adress, $template) : str_replace(':adress', "Adress", $template));
+		$template = ($postcode ? str_replace(':postcode', $postcode, $template) : str_replace(':postcode', "Post code", $template));
+		$template = ($telephone ? str_replace(':telephone', $telephone, $template) : str_replace(':telephone', "Telephone", $template));
+
 		if($error){
 			$template = str_replace(':error', $error, $template);
+			$template = str_replace(':head', '<style type="text/css">#error{display:block !important;}</style>', $template);
 		}
 		else{
 			$template = str_replace(':error', "", $template);
+			$template = str_replace(':head', "", $template);
+
 		}
 
 
@@ -122,15 +149,15 @@ if(!empty($pid)){
 	else{
 		$error = "Invalid Package selected";
 		$template = file_get_contents('templates/billing_error.html');
-		$template = str_replace(':title', "Errors", $template);
-		$template = str_replace(':error', $error, $template);
+		$template = str_replace('{{title}}', "Errors", $template);
+		$template = str_replace('{{error}}', $error, $template);
 	}
 } //end pid is not empty
 else{
 		$error = "No package selected";
 		$template = file_get_contents('templates/billing_error.html');
-		$template = str_replace(':title', "Errors", $template);
-		$template = str_replace(':error', $error, $template);
+		$template = str_replace('{{title}}', "Errors", $template);
+		$template = str_replace('{{error}}', $error, $template);
 }
 	echo $template;
 ?>

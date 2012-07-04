@@ -7,6 +7,7 @@
  */
 
 class zpanelx{
+	static $newUserError;
 	function sendemail($emailto, $emailsubject, $emailbody, $fromEmailName = "KMWeb.dk") {
 
 		//get from email
@@ -83,7 +84,6 @@ class zpanelx{
 
 	/**
 	    * Generate the token the payment should be specified with.
-	    * There is fallback to mt:rand() if openssl not is supported
 	    * @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
 	    * @return token
 	*/
@@ -103,7 +103,7 @@ class zpanelx{
 	}
 
 	/**
-		* Check if the email is true
+		* Check if the email is true | Uuuuh, this is danish! ;)
 		* @credit http://phptips.dk/check_email_adresse_inklusive_dns_mx_record_lookup.tip
 		* @return true or false 1
 	*/
@@ -164,11 +164,13 @@ class zpanelx{
 	   return $isValid;
 	}
 
-
+	/**
+	* Lets add the user to the database and make the folders. WUHU!!
+	* @
+	*/
 	function newUser($payperiod, $packageid, $token, $password, $username, $email, $fullname, $adress, $postcode, $telephone){
 
 		$db = db::getConnection();
-
 		$stmt = $db->prepare("SELECT * FROM x_packages WHERE pk_id_pk= ?");
 			
 		if($stmt->execute(array($packageid))){
@@ -187,7 +189,6 @@ class zpanelx{
 					$hostingTime = "12"; //month
 				break;
 			}
-
 		}
 
 		$todaydate = date("Y-m-d");// current date
@@ -196,7 +197,6 @@ class zpanelx{
 
 		//add user to table
 		$stmt = $db->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_email_vc, ac_reseller_fk, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc,ac_enabled_in,ac_price_pm,ac_invoice_nextdue,ac_invoice_period) VALUES (:username, :password,:email,'1',:packageid,'3','zpanelx','default','0',:selectedpackageprice,:newdate,:payperiod)");
-		
 		$query = array(':username'=>$username, ':password'=>md5($password),':email'=>$email, ':packageid'=>$packageid, ':selectedpackageprice'=>$selectedpackageprice, ':newdate'=>$newdate,':payperiod'=>$payperiod);
 		
 		if(!$stmt->execute($query)){
@@ -206,7 +206,6 @@ class zpanelx{
 
 		//add to profile
 		$stmt = $db->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_language_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:user_id, :username, 'en', '0', '0', :adress, :postcode, :telephone, '')");
-		
 		$query = array(':user_id'=>$user_id, ':username'=>$username,':adress'=>$adress, ':postcode'=>$postcode, ':telephone'=>$telephone);
 		
 		if(!$stmt->execute($query)){
@@ -219,7 +218,6 @@ class zpanelx{
 
 		//add to invoice
 		$stmt = $db->prepare("INSERT INTO x_invoice(inv_user, inv_amount, inv_description, inv_duedate, inv_createddate, inv_act, token) VALUES (:user_id,:selectedpackageprice,'Initial Signup',:todaydate,:todaydate,'1',:token)");
-		
 		$query = array(':user_id'=>$user_id, ':selectedpackageprice'=>$selectedpackageprice,':todaydate'=>$todaydate, ':todaydate'=>$todaydate, ':token'=>$token);
 		
 		if(!$stmt->execute($query)){
@@ -236,48 +234,135 @@ class zpanelx{
 		$emailtext = str_replace('$userid',$username,$emailtext);
 		$emailtext = str_replace('$password',$password,$emailtext);
 
-		self::sendemail($_POST["email"], "New Account Created", $emailtext);
+		//send a email to the user that they have been created.
+		self::sendemail($email, "New Account Created", $emailtext);
 
+		//redirect to the payment page
 		header( 'Location: pay.php?id=' . $token );
 
 	}//end new user
+
+	function newUser2($payperiod, $packageid, $token, $password, $username, $email, $fullname, $address, $postcode, $telephone){
+		require 'xmwsclient.class.php';
+
+		$error = null;
+		$db = db::getConnection();
+		$stmt = $db->prepare("SELECT * FROM x_packages WHERE pk_id_pk= ?");
+			
+		if($stmt->execute(array($packageid))){
+			$row = $stmt->fetch();
+			switch($payperiod){
+				case '1':
+					$selectedpackageprice = $row['pk_price_pm'];
+					$hostingTime = "3"; //month
+				break;
+				case '2' :
+					$selectedpackageprice = $row['pk_price_pq'];
+					$hostingTime = "6"; //month
+				break;
+				case'3':
+					$selectedpackageprice = $row['pk_price_py'];
+					$hostingTime = "12"; //month
+				break;
+			}
+		}
+
+		$xmws = new xmwsclient();
+		$xmws->InitRequest(self::getConfig('zpanel_url'), 'manage_clients', 'CreateClient', self::getConfig('api'));
+		$xmws->SetRequestData('<resellerid>'.self::getConfig('reseller_id').'</resellerid>
+                        <username>'.$username.'</username>
+                        <packageid>'.$packageid.'</packageid>
+                        <groupid>'.self::getConfig('groupid').'</groupid>
+                        <fullname>'.$fullname.'</fullname>
+                        <email>'.$email.'</email>
+                        <postcode>'.$postcode.'</postcode>
+                        <address>'.$address.'</address>
+                        <phone>'.$telephone.'</phone>
+                        <password>867hhvlk</password>
+                        <sendemail>0</sendemail>
+                        <emailsubject>0</emailsubject>
+                        <emailbody>0</emailbody>');
+
+		$returnClient = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+
+		$userId = $returnClient['xmws']['content']['uid'];
+		$todaydate = date("Y-m-d");// current date
+		$newdate = strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
+		$newdate = date('Y-m-d', $newdate);
+		
+		if($returnClient['xmws']['content']['created'] == 'true'){
+			$client = new xmwsclient();
+			$client->InitRequest(self::getConfig('zpanel_url'), 'manage_clients', 'DisableClient', self::getConfig('api'));
+			$client->SetRequestData('<uid>'.$userId.'</uid>');
+			$returnDisable = $client->XMLDataToArray($client->Request($client->BuildRequest()), 0);
+
+			if($returnDisable['xmws']['content']['disabled'] == 'true'){
+				$xmws = new xmwsclient();
+				$xmws->InitRequest(self::getConfig('zpanel_url'), 'reseller_billing', 'CreateInvoice', self::getConfig('api'));
+				$xmws->SetRequestData('<user_id>'.$userId.'</user_id>
+		                        		<selectedpackageprice>'.$selectedpackageprice.'</selectedpackageprice>
+		                        		<token>'.$token.'</token>
+		                        		<price>'.$selectedpackageprice.'</price>
+		                        		<invoice_nextdue>'.$newdate.'</invoice_nextdue>
+		                        		<invoice_period>'.$payperiod.'</invoice_period>');
+				$returnInvoice = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+				
+				if($returnInvoice['xmws']['content'] == "1"){
+					$emailtext = file_get_contents("templates/emails/user_reg.html");
+					$emailtext = str_replace('$fullname',$fullname,$emailtext);
+					$emailtext = str_replace('$pathto',self::getConfig('billing_url'),$emailtext);
+					$emailtext = str_replace('$invid',$token,$emailtext);
+					$emailtext = str_replace('$userid',$username,$emailtext);
+					$emailtext = str_replace('$password',$password,$emailtext);
+
+					//send a email to the user that they have been created.
+					self::sendemail($email, "New Account Created", $emailtext);
+
+					//redirect to the payment page
+					header( 'Location: pay.php?id=' . $token );
+				}else {
+					self::sendemail(self::getConfig('email_paypal_error'), "Error disabling account", "The invoice have not been created for user: ".$username );
+					if (self::getConfig('DEBUG')){echo "error invoice";}
+					self::$newUserError = true;
+				}
+			} else {
+				self::sendemail(self::getConfig('email_paypal_error'), "Error disabling account", "A new account have been created but not disabled. The invoice have for this reason not been created and the user cannot pay. User: ".$username);
+				if (self::getConfig('DEBUG')){echo "error disabling ".$userId;}
+				self::$newUserError = true;
+				}
+		} else {
+				self::sendemail(self::getConfig('email_paypal_error'), "Error creating account", "A new account have tried to be created, but failed");
+				if (self::getConfig('DEBUG')){echo "error creating";}
+				self::$newUserError = true;
+				}
+		
+		/**if (isset($error) && self::getConfig('DEBUG') == false){
+			return false;	
+		}*/
+		/*print_r($returnClient);
+		print_r($returnDisable);
+		print_r($xmws->BuildRequest());
+		print_r($client->BuildRequest());*/
+	}
 
 	/**
 	 * Get the config values
 	 * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
 	*/
-		public static function getConfig( $key, $default = null )
+	public static function getConfig( $key, $default = null )
+	{
+		if( !class_exists('zConfig') )
 		{
-			if( !class_exists('zConfig') )
-			{
-				require_once('config.php');
-			}
-			$config = new zConfig;
-
-			$class_vars = get_class_vars('zConfig');
-			if( array_key_exists($key, $class_vars) ){
-				return $class_vars[$key];
-			}
-			else{
-				return $default;
-			}
+			require_once('config.php');
 		}
-	function create_dir($dir){
-		// set up basic connection
-		$con = ssh2_connect(self::getConfig('sftp_server'));
-
-		// login with username and password
-		$login_result = ssh2_auth_password($con, self::getConfig('sftp_user_name'), self::getConfig('sftp_user_pass') );
-		$sftp = ssh2_sftp($con);
-
-		// try to create the directory $dir
-		if (ssh2_sftp_mkdir($con, $dir)) {
-			return true;
-		}else {
- 			return false;
+		$config = new zConfig;
+		$class_vars = get_class_vars('zConfig');
+		if( array_key_exists($key, $class_vars) ){
+			return $class_vars[$key];
 		}
-		// close the connection
-		ftp_close($con);
+		else{
+			return $default;
+		}
 	}
 }
 

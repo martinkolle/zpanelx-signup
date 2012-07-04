@@ -24,7 +24,7 @@ include('ipnlistener.php');
 $listener = new IpnListener();
 
 //testing = true
-$listener->use_sandbox = true;
+$listener->use_sandbox = zpanelx::getConfig('test');
 
 /*
 To post over standard HTTP connection, use:
@@ -99,24 +99,28 @@ if ($verified) {
            if(empty($error)){ 
 
                 //Update the hosting time - when should the user expire
-                $sql = "SELECT * FROM x_accounts WHERE ?";
-                $query = $pdo->prepare($sql);   
-                $row = $query->execute(array($invoiceuserid))->fetch();
+                $stmt = $pdo->prepare("SELECT * FROM x_accounts WHERE ?");
+                if($stmt->execute(array($invoiceuserid))){
+                    $row = $stmt->fetch();   
 
-                switch($row['ac_invoice_period']){
-                    case '1':
-                        $hostingTime = "3"; //month
-                    break;
-                    case '2' :
-                        $hostingTime = "6"; //month
-                    break;
-                    case'3':
-                        $hostingTime = "12"; //month
-                    break;
+                    switch($row['ac_invoice_period']){
+                        case '1':
+                            $hostingTime = "3"; //month
+                        break;
+                        case '2' :
+                            $hostingTime = "6"; //month
+                        break;
+                        case'3':
+                            $hostingTime = "12"; //month
+                        break;
+                    }
+                else{
+                    error_log($stmt->errorInfo());
+                    $error[] .= print_r($stmt->errorInfo());
                 }
 
                 $date = date('Y-m-d');
-                $nextdue = strtotime ( $hostingTime." days" , strtotime ( $date ) ) ;
+                $nextdue = strtotime ( $hostingTime." month" , strtotime ( $date ) ) ;
                 $nextdue = date ( 'Y-m-d' , $nextdue );
 
                 //activate the account
@@ -127,7 +131,6 @@ if ($verified) {
                     error_log($query->errorInfo());
                     $error[] = $query->errorInfo();
                 }
-                //TODO: make the folders
             }
     }
     else{

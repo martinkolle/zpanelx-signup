@@ -1,0 +1,3 @@
+payment.png: http://findicons.com/icon/177343/credit_card_blue
+billing.png: http://findicons.com/icon/177226/currency_dollar
+package.png: http://findicons.com/icon/169254/ark?id=376187# (GNU/GPL)

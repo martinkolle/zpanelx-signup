@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+<name>Reseller Billing</name>
+<version>100</version>
+<defaultcat>Reseller</defaultcat>
+<desc>Billing system</desc>
+<authorname>Martin Kollerup</authorname>
+<authoremail>martiinkolle@gmail.com</authoremail>
+<authorurl>http://www.martiinkolle.dk/</authorurl>
+<updateurl>http://update.martiinkolle.dk/billing.xml</updateurl>
+</module>

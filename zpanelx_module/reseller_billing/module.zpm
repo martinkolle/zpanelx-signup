@@ -1,0 +1,266 @@
+<div class="zmodule_header" id="zmodule_header_"><img src="<@ ModuleIcon @>" border="0"><@ ModuleName @></div>
+<style type="text/css">
+img.menu{height:70px;}
+#top{margin-top:15px;}
+div.module{float:left;width:110px;height:80px;border:1px solid;border-radius: 3px; -moz-border-radius:3px; -webkit-border-radius:3px;padding:6px;margin-right:10px;}
+div.module:hover{opacity:0.7;}
+div.module-inner{margin:0 auto;width:110px;text-align: center}
+input.id, input.act{width:20px;}
+input.date{width:80px;}
+input.payment_method{width:80px;}
+input.amount{width:50px;}
+
+#newData{width:300px;height:250px;}
+</style>
+
+<script type="text/javascript">
+function deleteInvoice(id){
+	var deleteInv = confirm ("<: Want to delete invoice: :> " + id);
+	if (deleteInv){window.location="./?module=reseller_billing&view=invoice&action=DeleteBilling&deleteId=" + id;}
+	else {return;}
+}
+function deletePayment(id){
+	var deleteInv = confirm ("<: Want to delete payment: :> " + id);
+	if (deleteInv){window.location="./?module=reseller_billing&view=payment_method&action=DeletePayment&deleteId=" + id;}
+	else {return;}
+}
+function deletePackage(id){
+	alert('<: Please delete through the Package manager :>');
+}
+function editPackage(id, name, price_pm, price_pq, price_py){
+	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
+    $('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py+" #zannounce");
+    alert("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py);
+}
+
+if(document.URL.indexOf("CreatePayment") >= 0){ 
+	window.location = "./?module=reseller_billing&view=payment_method";
+}
+</script>
+
+<@ Result @>
+
+<div id="top" style="width:100%;height:100px;">
+	<div id="top-inner">
+		<a href="./?module=reseller_billing&view=invoice">
+			<div class="module">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/billing.png" class="menu" />
+				<span>Invoices</span>
+				</div>
+			</div>
+		</a>
+		<a href="./?module=reseller_billing&view=payment_method">
+			<div class="module">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/payment.png" class="menu" />
+				<span>Payment methods</span>
+				</div>
+			</div>
+		</a>
+		<a href="./?module=reseller_billing&view=package">
+			<div class="module">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/package.png" class="menu" />
+				<span>Package price</span>
+				</div>
+			</div>
+		</a>
+	</div>
+</div>
+
+<% if ViewInvoice %>
+	<% if Billings %>
+		<div class="zform_wrapper">
+		<h2><: Reseller invoice :></h2>
+			<table>
+				<thead>
+				<tr valign="top">
+					<td><: Id :></td>
+					<td><: User id :></td>
+					<td><: Amount :></td>
+					<td><: Descripton :></td>
+					<td><: Due date :></td>
+					<td><: Created date :></td>
+					<td><: Payment method :></td>
+					<td><: Payment id :></td>
+					<td><: Act :></td>
+					<td><: Token :></td>
+				</tr>
+				</thead>
+				<tbody>
+				<% loop Billings %>
+				<tr valign="top">
+					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="id" /> </td>
+					<td><input disabled="disabled" class="id" type="text" value="<& user_id &>" name="inv_id" /> </td>
+					<td><input type="text" class="amount" value="<& amount &>" name="amount" /> </td>
+					<td><input type="text" value="<& description &>" name="description" /> </td>
+					<td><input type="text" class="date" value="<& due_date &>" name="due_date" /> </td>
+					<td><input type="text" class="date" value="<& createddate &>" name="creadteddate" /> </td>
+					<td><input type="text" class="payment_method" value="<& payment_method &>" name="payment_method" /> </td>
+					<td><input type="text" value="<& payment_id &>" name="payment_id" /> </td>
+					<td><input type="text" class="act" value="<& act &>" name="act" /> </td>
+					<td><input type="text" value="<& token &>" name="token" /> </td>
+					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="deleteInvoice(<& id &>)"><: Delete :></button></td>
+				</tr>
+				<% endloop %>
+				</tbody>
+			</table>
+		</div>
+	<% else %>
+		<div>No invoices where found </div>
+	<% endif %>
+<% endif %>
+
+<% if ViewPayment %>
+
+	<% if EditPayment %>
+	<div class="zgrid_wrapper">
+	        <h2><: Edit payment :></h2>
+	        <form action="./?module=reseller_billing&action=EditPayment" method="post">
+		        <table class="zform">
+			        <tr>
+				        <th><: Name :>:</th>
+				        <td><input type="text" name="name" id="name" value="<@ EditPaymentName @>" /></td>
+			        </tr>
+			        <tr>
+				        <th><: Active :>:</th>
+				        <td><input type="text" name="active" id="active" value="<@ EditPaymentActive @>" /></td>
+			        </tr>
+			        <tr>
+				        <th><: Data :>:</th>
+				        <td><textarea name="data" id="data" cols="45" rows="5"><@ EditPaymentData @></textarea></td>
+			        </tr>
+			        <tr>
+				        <th><input type="hidden" name="id" value="<@ EditPaymentID @>" /></th>
+				        <td>
+						<button class="fg-button ui-state-default ui-corner-all" type="submit" id="button" name="inSubmit" value="Save"><: Save :></button>
+						<button class="fg-button ui-state-default ui-corner-all type="button" onclick="window.location.href='./?module=reseller_billing&view=payment_method';return false;"><: Cancel :></button>
+						</td>
+			        </tr>
+		        </table>
+	        </form>
+		</div>
+	<% endif %>
+
+	<% if Payments %>
+	<div class="zform_wrapper">
+		<h2><: Payment methods :></h2>
+			<table>
+				<thead>
+				<tr valign="top">
+					<td><: Id :></td>
+					<td><: Name :></td>
+					<td><: Data :></td>
+					<td><: Active :></td>
+					<td> <: Action :></td>
+				</tr>
+				</thead>
+				<tbody>
+			<% loop Payments %>
+				<tr valign="top">
+						<td><input disabled="disabled" class="id" type="text" value="<& pm_id &>" name="pm_id" /> </td>
+						<td><input type="text" class="name" value="<& name &>" name="pm_name" /> </td>
+						<td><textarea name="pm_data"><& data &></textarea> </td>
+						<td><input type="text" class="active" value="<& active &>" name="pm_active" /> </td>
+						<td style="width:150px;"><button class="fg-button ui-state-default ui-corner-all type="button" onclick="window.location.href='./?module=reseller_billing&view=payment_method&show=Edit&other=<& pm_id &> ';return false;"><: Edit :></button>
+						 <button class="fg-button ui-state-default ui-corner-all" onclick="deletePayment(<& pm_id &>)"><: Delete :></button>
+						</td>
+				</tr>
+			<% endloop %>
+				</tbody>
+			</table>
+	</div>
+	<% endif %>
+	<div class="zform_wrapper">
+				<div style="float:right;width:40%;posiion:absolute; margin-top:0;margin-right:10px;">
+        <h2><: Help to add package :></h2>
+        You can use the variables: <br />
+	     <b>{{action}}</b>: The post url to paypal <br />
+	     <b>{{user_firstname}}</b>. The first name - the fullname is added here<br />
+	     <b>{{invoice}}</b>: Invoice id to identify the payer. Also know as token<br />
+	     <b>{{email}}</b>The email for the payer<br />
+	     <b>{{return_url}}</b>: The thanks page<br />
+	     <b>{{business}}</b>: Your business paypal email! VERY IMPORTANT!<br />
+	     <b>{{item_name}}</b>: Package and month<br />
+	     <b>{{country}}</b>: Country code<br />
+	     <b>{{amount}}</b> The total price<br />
+	     <b>{{logo}}</b>a url to your logo <br /> 
+	     <b>{{notify_url}}</b>: Paypal will send a notifikation to this url, and will accept the payment. IMPORTANT!
+	     <b>{{cs}}</b>: Currency. Eg. DKK
+   	 	</div>
+		<h2><: New payment method :></h2>
+		<form action="./?module=reseller_billing&action=CreatePayment" method="post">
+        	<table class="zform">
+		        <tr>
+			        <th><: Name :>:</th>
+			        <td><input type="text" name="newName" id="newName" value="<@ formName @>" /></td>
+		        </tr>
+		        <tr>
+			        <th><: Data :>:</th>
+			        <td><textarea name="newData" id="newData"><@ formData @></textarea></td>
+		        </tr>
+		        <tr>
+			        <th><: Activate :>:</th>
+			        <td><select name="newActive">
+			        		<option value="1"><: Activated :></option>
+			        		<option value="0"><: Deactivated :> </option>
+			        	</select>
+		        </tr>
+		        <tr>
+			        <th></th>
+			        <td><button class="fg-button ui-state-default ui-corner-all" type="submit" id="button" name="inSubmit" value="Save"><: Save :></button></td>
+		        </tr>
+	        </table>
+        </form>
+	</div>
+<% endif %>
+
+<% if ViewPackage %>
+	<% if Packages %>
+		<div id="billing-message"></div>
+		<div class="zform_wrapper">
+		<h2><: Packages :></h2>
+			<table>
+				<thead>
+				<tr valign="top">
+					<td><: Id :></td>
+					<td><: Name :></td>
+					<td><: reseller :></td>
+					<td><: Price @ mounth :></td>
+					<td><: Price @ quater :></td>
+					<td><: Price @ year :></td>
+				</tr>
+				</thead>
+				<tbody>
+				<% loop Packages %>
+				<tr valign="top" class="<& id &>">
+					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="<& id &>" /> </td>
+					<td><input type="text" class="name" value="<& name &>" name="name" /> </td>
+					<td><input type="text" class="reseller" value="<& reseller &>" name="reseller" /> </td>
+					<td><input type="text" class="price_pm" value="<& price_pm &>" name="price_pm" /> </td>
+					<td><input type="text" class="price_pq"value="<& price_pq &>" name="price_pq" /> </td>
+					<td><input type="text" class="price_py" value="<& price_py &>" name="price_py" /> </td>
+					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPackage($(this).closest('tr').find('input.id').val(),
+																													$(this).closest('tr').find('input.name').val(),
+																													$(this).closest('tr').find('input.price_pm').val(),
+																													$(this).closest('tr').find('input.price_pq').val(),
+																													$(this).closest('tr').find('input.price_py').val());"><: Edit :></button></td>
+				</tr>
+				<% endloop %>
+				</tbody>
+			</table>
+		</div>
+	<% else %>
+		<div>No invoices where found </div>
+	<% endif %>
+
+	<% if Packages %>
+	<div class="zform_wrapper">
+	<h2><: Package help :></h2>
+	<p>Add the price for the packages. </p>
+	<p>If you leave the input with a "0", will it not be possible to pay for that period</p>
+	</div>
+	<% endif %>
+
+<% endif %>
