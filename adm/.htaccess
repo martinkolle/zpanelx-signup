@@ -1,4 +1,0 @@
-AuthUserFile /etc/zpanel/panel/modules/htpasswd/assets/files/1.htpasswd
-AuthType Basic
-AuthName "Restricted Area"
-Require valid-user
