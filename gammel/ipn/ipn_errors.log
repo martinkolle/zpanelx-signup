@@ -1,3 +1,0 @@
-[28-May-2012 09:14:03] PHP Notice:  Undefined index: payer_email in /var/zpanel/hostdata/zadmin/public_html/billing_kmweb_dk/ipn/ipn2.php on line 91
-[28-May-2012 09:14:03] PHP Notice:  Undefined index: payer_email in /var/zpanel/hostdata/zadmin/public_html/billing_kmweb_dk/ipn/ipn2.php on line 102
-[01-Jun-2012 12:36:34 UTC] Invalid HTTP request method.
