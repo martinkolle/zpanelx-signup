@@ -915,27 +915,6 @@ class module_controller {
 		}
 		return $uselength;
     }
-    //wee need to check if the user exits, and return in the xml.
-    static function getUserExits($username){
-        global $zdbh;
-        if (!fs_director::CheckForEmptyValue($username)) {
-            $sql = "SELECT COUNT(*) FROM x_accounts WHERE UPPER(ac_user_vc)='" . strtoupper($username) . "' AND ac_deleted_ts IS NULL";
-            if ($numrows = $zdbh->query($sql)) {
-                if ($numrows->fetchColumn() <> 0) {
-                    return "Username allready exits";
-                } else{
-                    return true;
-                }
-            }
-            if (!self::IsValidUserName($username)) {
-                return "Username is not valid";
-            } else{
-                return true;
-            }
-        } else{
-            return "Username is empty";
-        }
-    }
     static function getUserId($username){
         global $zdbh;
         $sql='SELECT ac_id_pk FROM x_accounts WHERE ac_user_vc=?';
