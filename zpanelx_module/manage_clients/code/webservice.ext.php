@@ -89,14 +89,14 @@ class webservice extends ws_xmws {
         $response = null;
 
         $UsernameExits = module_controller::getUserExits($contenttags['username']);
-        if ($UsernameExits === true){
+        if ($UsernameExits == true){
             $response = "true";
         } else {
-            $respons = $UsernameExits;
+            $response = $UsernameExits;
         }  
         $dataobject = new runtime_dataobject();
         $dataobject->addItemValue('response', '');
-        $dataobject->addItemValue('content', $respons);
+        $dataobject->addItemValue('content', $response);
         return $dataobject->getDataObject();
     }
 
