@@ -1,29 +1,24 @@
 <?php
 /**
+ * This a simple ipn for paypal
+ *
  *  @package    Zpanelx Auto-sign-up
  *  @author     Martin Kollerup
  *  @license    http://opensource.org/licenses/gpl-3.0.html
+ *  @link       build on http://www.micahcarrick.com/paypal-ipn-with-php.html
  */
-
-/**
- *
- * This a simple ipn for paypal
- * @link build on http://www.micahcarrick.com/paypal-ipn-with-php.html
-*/
  
 error_reporting(E_ALL);
 ini_set('log_errors', true);
-ini_set('error_log', dirname(__FILE__).'/ipn_errors.log');
+ini_set('error_log', dirname(__FILE__).'/log/ipn_errors.log');
 
 
-include('db.php');
-include('config/functions.php');
+include('lib/db.php');
+include('lib/functions.php');
 
 // instantiate the IpnListener class
-include('ipnlistener.php');
+include('lib/ipnlistener.php');
 $listener = new IpnListener();
-
-//testing = true
 $listener->use_sandbox = zpanelx::getConfig('test');
 
 /*
