@@ -23,16 +23,16 @@ class module_controller {
     *At the end optional fields, but required
     */
     static function getModuleName(){
-    	return ui_module::GetModuleName();
+        return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-    	return ui_language::translate(ui_module::GetModuleDescription());
+        return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-	static function getModuleIcon() {
-		global $controller;
-		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+    static function getModuleIcon() {
+        global $controller;
+        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
@@ -408,6 +408,85 @@ class module_controller {
         } else{
             return true;
         }
+    }
+
+    static function IsValidUserName($username) {
+        if (!preg_match('/^[a-z\d][a-z\d-]{0,62}$/i', $username) || preg_match('/-$/', $username)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+    * We need to check if the user exits, and return in the xml.
+    * @return:
+    * 1: Username is not valid
+    * 2: Username allready exits
+    * 3: Username is available
+    * 4: Username is empty
+    */
+    static function getUserExits($username){
+        global $zdbh;
+        if (!self::IsValidUserName($username)) {
+            return 1;
+        }
+        if (!fs_director::CheckForEmptyValue($username)) {
+            $sql = "SELECT COUNT(*) FROM x_accounts WHERE UPPER(ac_user_vc)='" . strtoupper($username)."'";
+            if ($numrows = $zdbh->query($sql)) {
+                if ($numrows->fetchColumn() <> 0) {
+                    return 2;
+                } else {
+                    return 3;
+                }
+            }
+        } else{
+            return 4;
+        }
+    }
+
+    /**
+    * Get the package informations
+    * @return query
+    */
+    static function ApiPackage($pk_id){
+        global $zdbh;
+        //select package informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_packages WHERE pk_id_pk= ? AND pk_price_pm IS NOT NULL AND pk_price_pq IS NOT NULL AND pk_price_py IS NOT NULL AND pk_deleted_ts IS NULL");
+        $stmt->execute(array($pk_id));
+        return $stmt->fetch();
+    }
+
+    static function ApiInvoice($token){
+        global $zdbh;
+        //select package informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_invoice WHERE token= ?");
+        $stmt->execute(array($token));
+        return $stmt->fetch();
+    }
+
+    static function ApiAccount($ac_id){
+        global $zdbh;
+        //select package informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_id_pk= ? AND ac_deleted_ts IS NULL");
+        $stmt->execute(array($ac_id));
+        return $stmt->fetch();
+    }
+
+    static function ApiPayment_method(){
+        global $zdbh;
+        //select package informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_payment_methods WHERE pm_active='1'");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    static function ApiProfile($user_id){
+        global $zdbh;
+        //select package informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_profiles WHERE ud_user_fk= ?");
+        $stmt->execute(array($user_id));
+        return $stmt->fetch();
     }
 
     /**
