@@ -23,16 +23,16 @@ class module_controller {
     *At the end optional fields, but required
     */
     static function getModuleName(){
-        return ui_module::GetModuleName();
+    	return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-        return ui_language::translate(ui_module::GetModuleDescription());
+    	return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-    static function getModuleIcon() {
-        global $controller;
-        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+	static function getModuleIcon() {
+		global $controller;
+		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
@@ -461,8 +461,11 @@ class module_controller {
         global $zdbh;
         //select package informations
         $stmt = $zdbh->prepare("SELECT * FROM x_invoice WHERE token= ?");
-        $stmt->execute(array($token));
-        return $stmt->fetch();
+        if($stmt->execute(array($token))){
+            return $stmt->fetch();
+        } else {
+            return false;
+        }
     }
 
     static function ApiAccount($ac_id){
@@ -487,6 +490,53 @@ class module_controller {
         $stmt = $zdbh->prepare("SELECT * FROM x_profiles WHERE ud_user_fk= ?");
         $stmt->execute(array($user_id));
         return $stmt->fetch();
+    }
+
+    static function ApiPayment($user_id,$txn_id,$invoice){
+        global $zdbh;
+        $response = "1";
+
+        // Set that we have received the payment from paypal
+        $sql = "UPDATE x_invoice SET inv_payment_method = 'PayPal', inv_payment_id = :txn_id WHERE token = :invoice";
+        $query = $zdbh->prepare($sql);
+
+        if(!$query->execute(array(':txn_id'=>$txn_id, ':invoice'=>$invoice)))
+        {
+           $response = "2";
+        }
+
+        //if the amount not is correct, the account will not be disabled. 
+        //Update the hosting time - when should the user expire
+        $stmt = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_id_pk = ?");
+        if($stmt->execute(array($user_id))){
+           $row = $stmt->fetch();   
+               switch($row['ac_invoice_period']){
+                    case '1':
+                        $hostingTime = "3"; //month
+                    break;
+                        $hostingTime = "6"; //month
+                    break;
+                    case'3':
+                        $hostingTime = "12"; //month
+                    break;
+                }
+        }
+        else{
+            $response = "3";
+        }
+
+        $date = date('Y-m-d');
+        $nextdue = strtotime ( $hostingTime." month" , strtotime ( $date ) ) ;
+        $nextdue = date ( 'Y-m-d' , $nextdue );
+
+        //activate the account
+        $sql = "UPDATE x_accounts SET ac_enabled_in = '1', ac_invoice_nextdue = :nextdue WHERE ac_id_pk= :user_id";
+        $query = $zdbh->prepare($sql);
+        if(!$query->execute(array(':nextdue'=>$nextdue,':user_id'=>$user_id)))
+        {
+           $response = "4";
+        }
+        return $response;
     }
 
     /**
