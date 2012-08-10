@@ -2,13 +2,13 @@
 
 echo "<h1>Install zpanel x SignUp</h1>";
 echo "Please follow these guides.:";
-echo "<ul><li>Edit your database settings in the config/config.php</li>";
-echo "</ul>";
+echo "<ul><li>Edit your database settings in the config.php</li>";
+echo "</ul><br />";
 echo "<font color=red>This script is offered without liability, use at own risk.</font>";
-echo "Refresh the page if you have edited the settings...";
+echo "Refresh the page if you have edited the settings...<br />";
 
-include 'db.php';
-include 'config/functions.php';
+//sinclude 'lib/db.php';
+include 'lib/functions.php';
 
 //connect to the databse
 $db = db::getConnection();
@@ -72,8 +72,9 @@ else{
 }
 
 
-$someinfo .= "<p><br /><b>Next steps:</b><br>- Add a cron job scheduled to run daily: [WEB-URL-TO-SCRIPT]/cron/invoices.php";
-$someinfo .= "<br>- Delete file /adm/install.php<br>- Personalise emails in /templates/emails<br>(emails are automatically sent on sign up and when clicking 'welcome email' in the admin area).";
-$someinfo .="<br /><b>ZPANELX SIGNUO HAVE BEEN INSTALLED";
+$someinfo .= "<p><br /><b>Next steps:</b><br>- Add a cron job scheduled to run daily: [WEB-URL-TO-SCRIPT]/cron/pay.php";
+$someinfo .= "<br>- Delete file install.php<br>- Personalise emails in /templates/emails<br>";
+$someinfo .= "Edit emails in '/templates/emails/'. Emails are automatically sent on sign up, activated and expired";
+$someinfo .="<br /><b>ZPANELX SIGNUO HAVE BEEN INSTALLED</b>";
 
 echo $someinfo;

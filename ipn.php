@@ -15,9 +15,8 @@ ini_set('error_log', dirname(__FILE__).'/log/ipn_errors.log');
 
 include('lib/db.php');
 include('lib/functions.php');
-
-// instantiate the IpnListener class
 include('lib/ipnlistener.php');
+include('lib/xmwsclient.class.php');
 $listener = new IpnListener();
 $listener->use_sandbox = zpanelx::getConfig('test');
 
@@ -45,10 +44,6 @@ was "INVALID".
 */
 if ($verified) {
 
-    $error = array();
-    //connect to the databse
-    $pdo = db::getConnection();
-
     $item_name = $_POST['item_name'];
     $invoice = $_POST['invoice'];
     $payment_status = $_POST['payment_status'];
@@ -60,96 +55,61 @@ if ($verified) {
     $payer_email = $_POST['payer_email'];
 
     if($business != zpanelx::getConfig('email_paypal')){
-        $error[] .= "INVALID PAYMENT: A wrong paypal email have been used: ".$business." and invoice id: ".$invoice;  
+        zpanelx::error("INVALID PAYMENT: A wrong paypal email have been used: ".$business." and invoice id: ".$invoice);  
     }
     if($payment_currency != zpanelx::getConfig('cs')){
-        $error[] .= "INVALID PAYMENT: Paypal returned a wrong currency(".$payment_currency.") relative to the settings. Invice id: ".$invoice;  
+        zpanelx::error("INVALID PAYMENT: Paypal returned a wrong currency(".$payment_currency.") relative to the settings. Invice id: ".$invoice);  
     }
 
-    //Check that the invoice is here.
-    $stmt = $pdo->prepare("SELECT * FROM x_invoice WHERE token = ?");
-    if($stmt->execute(array($invoice)))
-    {
-        $row = $stmt->fetch();   
-        $invoiceamount = $row['inv_amount'];
-        $invoiceaction = $row['inv_act'];
-        $invoiceuserid = $row['inv_user'];
-    }
-    else{
-        //we need both to add it to the log and report to the seller
-        error_log($stmt->errorInfo());
-        $error[] .= print_r($stmt->errorInfo());
-    }
+    //Check if the invoice id exits or have been paid
+    $data     = "<token>".$invoice."</token>";
+    $invoice  = zpanelx::api("reseller_billing", "Invoice", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
 
-    if(empty($error)){
-        //Do the user have paid the same as we want!?
-        //TODO: Add something with tax
-        if ($invoiceamount != $_POST['mc_gross']) {
-            $error[] .= "INVALID PAYMENT: ".$invoice." (invoice number) - ".$payment_amount." (payment received) - ".$invoiceamount." (invoice amount)";  
-        }
-
-        // Set that we have received the payment from paypal
-        $sql = "UPDATE x_invoice SET inv_payment_method = 'PayPal', inv_payment_id = :txn_id WHERE token = :invoice";
-        $query = $pdo->prepare($sql);
-        
-        if(!$query->execute(array(':txn_id'=>$txn_id, ':invoice'=>$invoice)))
-        {
-            //we need both to add it to the log and report to the seller
-            error_log($query->errorInfo());
-            $error[] = $query->errorInfo();
-        }
-            //if the amount not is correct, the account will not be disabled. 
-           if(empty($error)){ 
-
-                //Update the hosting time - when should the user expire
-                $stmt = $pdo->prepare("SELECT * FROM x_accounts WHERE ?");
-                if($stmt->execute(array($invoiceuserid))){
-                    $row = $stmt->fetch();   
-
-                    switch($row['ac_invoice_period']){
-                        case '1':
-                            $hostingTime = "3"; //month
-                        break;
-                        case '2' :
-                            $hostingTime = "6"; //month
-                        break;
-                        case'3':
-                            $hostingTime = "12"; //month
-                        break;
-                    }
-                }
-                else{
-                    error_log($stmt->errorInfo());
-                    $error[] .= print_r($stmt->errorInfo());
-                }
-
-                $date = date('Y-m-d');
-                $nextdue = strtotime ( $hostingTime." month" , strtotime ( $date ) ) ;
-                $nextdue = date ( 'Y-m-d' , $nextdue );
-
-                //activate the account
-                $sql = "UPDATE x_accounts SET ac_enabled_in = '1', ac_invoice_nextdue = :nextdue WHERE ac_id_pk= :user_id";
-                $query = $pdo->prepare($sql);
-                if(!$query->execute(array(':nextdue'=>$nextdue,':user_id'=>$invoiceuserid)))
-                {
-                    error_log($query->errorInfo());
-                    $error[] = $query->errorInfo();
-                }
-            }
+    if($invoice['xmws']['content']['code'] == "0"){
+        zpanelx::error("Invoice id was not found");
+    } 
+    elseif($invoice['xmws']['content']['code'] == "1"){
+        $inv_user      = $invoice['xmws']['content']['invoice']['user'];
+        $inv_amount    = $invoice['xmws']['content']['invoice']['amount'];
+        $inv_paid      = $invoice['xmws']['content']['invoice']['payment_id'];
+        $inv_id        = $invoice['xmws']['content']['invoice']['id'];
     }
     else{
-        $error[] .= "A invoice, which allready exits have been tried to be paid. The invoice is: ". $invoice;
+        zpanelx::error("Invoice data could not be loaded");
     }
 
-    if(!empty($error)){
+    if(!$inv_user){
+        //Forcing to show the error
+        zpanelx::error("Invoice id was not found in the system");
+    } 
+    elseif($inv_paid != "no"){
+        //FOrcing to show the error
+        zpanelx::error("This invoice has already been paid.");
+    }
+    
+    //Do the user have paid the same as we want!?
+    //TODO: Add something with tax
+    if ($inv_amount != $_POST['mc_gross']) {
+        zpanelx::error("INVALID PAYMENT: ".$invoice." (invoice number) - ".$payment_amount." (payment received) - ".$inv_amount." (invoice amount)");  
+    }
+
+    $data = "<user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
+    $invoice = zpanelx::api("reseller_billing", "Payment", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+
+    if($invoice['xmws']['content']['code'] == "2"){
+        zpanelx::error("PAYMENT ERROR: Could not create invoice");
+    }
+    elseif($invoice['xmws']['content']['code'] == "3"){
+        zpanelx::error("PAYMENT ERROR: Could not fetch account data");
+    }
+
+    if(!empty(zpanelx::$zerror)){
         zpanelx::sendemail(zpanelx::getConfig('email_paypal_error'),"Invalid payment received", 
-            implode('<br />',$error)."<br />".$listener->getTextReport());
+            implode('<br />',zpanelx::$zerror)."<br />".$listener->getTextReport());
     }
-    $db = null;//close pdo connection
 
 } else {
     //there have been some problem with the Payment.. There have been sent a report to the admin.
     zpanelx::sendmail(zpanelx::getConfig('email_paypal_error'), 'Invalid IPN', $listener->getTextReport());
 }
-
 ?>
