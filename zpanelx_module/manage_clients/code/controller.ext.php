@@ -906,16 +906,6 @@ class module_controller {
     }
 
     static function getMinPassLength() {
-<<<<<<< HEAD
-		$minpasswordlength=ctrl_options::GetOption('password_minlength');
-		$trylength = 9;
-		if ($trylength < $minpasswordlength){
-			$uselength = $minpasswordlength;
-		} else {
-			$uselength = $trylength;
-		}
-		return $uselength;
-=======
         $minpasswordlength=ctrl_options::GetOption('password_minlength');
         $trylength = 9;
         if ($trylength < $minpasswordlength){
@@ -924,8 +914,8 @@ class module_controller {
             $uselength = $trylength;
         }
         return $uselength;
->>>>>>> more api integration
     }
+    
     static function getUserId($username){
         global $zdbh;
         $sql='SELECT ac_id_pk FROM x_accounts WHERE ac_user_vc=?';
