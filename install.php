@@ -7,7 +7,7 @@ echo "</ul><br />";
 echo "<font color=red>This script is offered without liability, use at own risk.</font>";
 echo "Refresh the page if you have edited the settings...<br />";
 
-//sinclude 'lib/db.php';
+include 'lib/db.php';
 include 'lib/functions.php';
 
 //connect to the databse
