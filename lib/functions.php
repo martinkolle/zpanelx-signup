@@ -252,6 +252,7 @@ class zpanelx{
 		if(!is_array(zpanelx::$zerror)){
 			$template = str_replace('{{error}}', "", $template);
 		} else{
+			$errors = "";
 			foreach(zpanelx::$zerror as $key => $error){
 				$errors .= $error."<br />"; 
 			}
