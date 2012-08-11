@@ -11,7 +11,11 @@
 include ('lib/functions.php');
 include ('lib/xmwsclient.class.php');
 
-$id 	= $_GET['id'];
+if(isset($_GET['id'])){
+	$id 	= $_GET['id'];	
+} else{
+	$id = "";
+}
 
 //Are there a id?
 if(empty($id)){
