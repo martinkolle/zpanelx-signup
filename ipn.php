@@ -105,7 +105,7 @@ if ($verified) {
 
     if(!empty(zpanelx::$zerror)){
         zpanelx::sendemail(zpanelx::getConfig('email_paypal_error'),"Invalid payment received", 
-            implode('<br />',zpanelx::$zerror)."<br />".$listener->getTextReport());
+            implode('<br />',zpanelx::$zerror)."<br /><div style=\"white-space: pre;\">".$listener->getTextReport()."</div>".);
     }
 
 } else {
