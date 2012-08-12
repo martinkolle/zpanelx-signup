@@ -12,7 +12,7 @@ include ('lib/functions.php');
 include ('lib/xmwsclient.class.php');
 
 $head = null;
-$token = $_GET['id'];
+$token = isset($_GET['id']) ? $_GET['id'] : "";
 
 //Are there a id
 if(empty($token)){
