@@ -17,6 +17,8 @@ if(isset($_GET['id'])){
 	$id = "";
 }
 
+$head = null;
+
 //Are there a id?
 if(empty($id)){
 	zpanelx::error('No package selected');
@@ -30,14 +32,15 @@ else if(!preg_match('/^\d+$/', $id)){
 	die();
 }
 
-if (isset($_POST['submit'])) {
-	$username 	= filter_var($_POST["username"],FILTER_SANITIZE_STRING);
-	$email 		= filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
-	$fullname 	= filter_var($_POST["fullname"],FILTER_SANITIZE_STRING);
-	$adress 	= filter_var($_POST["address"], FILTER_SANITIZE_STRING);
-	$transfer	= filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING);
-	$website	= filter_var($_POST["website"], FILTER_SANITIZE_STRING);
-	
+if (isset($_POST['submit'])) {	
+	$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
+	$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
+	$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
+	$adress 	= (isset($_POST["adress"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
+	$transfer_help 	= (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
+	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
+
+
 	$postcode 	= ($_POST["postcode"]);
 	$telephone 	= ($_POST["telephone"]);
 	//TODO: IS THE IN$formATIONS RIGHT
