@@ -41,11 +41,10 @@ if (isset($_POST['submit'])) {
 	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
 
-	$postcode 	= ($_POST["postcode"]);
-	$telephone 	= ($_POST["telephone"]);
-	//TODO: IS THE IN$formATIONS RIGHT
-	$payperiod 	= ($_POST['payperiod']);
-	$packageid 	= ($_POST['packageid']);
+	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] ? "";
+	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] ? "";
+	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] ? "";
+	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] ? "";
 
 		//start by checking for missing inputs
 	if (empty($username)) {
@@ -150,5 +149,5 @@ else{
 }
 	//Echo the template
 	echo zpanelx::template($title, $head, $template);
-	print_r(zpanelx::$zerror);
+	//print_r(zpanelx::$zerror);
 ?>
