@@ -41,10 +41,10 @@ if (isset($_POST['submit'])) {
 	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
 
-	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] ? "";
-	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] ? "";
-	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] ? "";
-	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] ? "";
+	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
+	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
+	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
+	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
 
 		//start by checking for missing inputs
 	if (empty($username)) {
