@@ -32,21 +32,21 @@ else if(!preg_match('/^\d+$/', $id)){
 	die();
 }
 
+$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
+$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
+$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
+$adress 	= (isset($_POST["adress"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
+$transfer_help 	= (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
+$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
+
+$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
+$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
+$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
+$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
+
 if (isset($_POST['submit'])) {	
-	$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
-	$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
-	$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
-	$adress 	= (isset($_POST["adress"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
-	$transfer_help 	= (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
-	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
-
-	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
-	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
-	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
-	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
-
-		//start by checking for missing inputs
+	//start by checking for missing inputs
 	if (empty($username)) {
 		zpanelx::error("Username missing");
 	}
