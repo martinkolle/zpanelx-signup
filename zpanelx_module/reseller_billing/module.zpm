@@ -227,7 +227,7 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><: Id :></td>
 					<td><: Name :></td>
 					<td><: reseller :></td>
-					<td><: Price @ mounth :></td>
+					<td><: Price @ month :></td>
 					<td><: Price @ quater :></td>
 					<td><: Price @ year :></td>
 				</tr>
