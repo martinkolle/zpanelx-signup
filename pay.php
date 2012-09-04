@@ -52,7 +52,6 @@ elseif($inv_status == "1"){
 
 $data = "<profile_id>".$inv_user."</profile_id><account_id>".$inv_user."</account_id><payment>1</payment>";
 $account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zpanel_url"), zpanelx::getConfig("api"));
-
      
      if (!empty($account['xmws']['content']['account']['id'])) {
           $user_alias      = $account['xmws']['content']['account']['alias'];
@@ -89,7 +88,7 @@ $form = file_get_contents('templates/pay.html');
 $form = str_replace('{{payment}}',$paymethods,$form);
 $form = str_replace('{{pay}}', zpanelx::getConfig('cs') ." ". $inv_amount, $form);
 $form = str_replace('{{package_name}}', $package_name , $form);
-$form = str_replace('{{period}}', zpanelx::packagePrice($user_payperiod) , $form);
+$form = str_replace('{{period}}', $user_payperiod , $form);
 
 $action = (zpanelx::getConfig('test')) ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
 $form = str_replace('{{action}}', $action, $form);
@@ -98,7 +97,7 @@ $form = str_replace('{{invoice}}', $token, $form);
 $form = str_replace('{{email}}', $user_email, $form);
 $form = str_replace('{{return_url}}', zpanelx::getConfig('return_url'), $form);
 $form = str_replace('{{business}}', zpanelx::getConfig('email_paypal'), $form);
-$form = str_replace('{{item_name}}', "Webhosting", $form);//will have the oackage name and period in next release
+$form = str_replace('{{item_name}}', $package_name." - ".$user_payperiod." month", $form);//will have the oackage name and period in next release
 $form = str_replace('{{country}}', zpanelx::getConfig('country_code'), $form);
 $form = str_replace('{{amount}}', $inv_amount, $form);
 $form = str_replace('{{logo}}', zpanelx::getConfig('logo'), $form);

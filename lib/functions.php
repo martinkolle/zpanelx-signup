@@ -103,21 +103,6 @@ class zpanelx{
 		return $token;
 	}
 
-	function packagePrice($period){
-		switch($period){
-				case '1':
-					$time 	= "3";
-				break;
-				case '2':
-					$time 	= "6";
-				break;
-				case '3';
-					$time 	= "12";
-				break;
-			}
-		return $time;
-	}
-
 	/**
 	* Create the client through XMWS
 	* @author Martinkolle
