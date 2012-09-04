@@ -11,6 +11,27 @@
 
 class webservice extends ws_xmws {
 
+    public function PackageList(){
+        $response="";
+		$row = module_controller::getPackages();
+        foreach($row as &$value) {
+            if($value['hosting']) {
+                $response .= ws_xmws::NewXMLTag('package', 	
+                ws_xmws::NewXMLTag('name',$value['name']).
+                ws_xmws::NewXMLTag('id', $value['id']).
+                ws_xmws::NewXMLTag('reseller', $value['reseller']).
+                ws_xmws::NewXMLTag('domain', $value['domain']).
+                ws_xmws::NewXMLTag('hosting', $value['hosting'])
+                );
+            }
+        }
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', $response);
+		return $dataobject->getDataObject();
+    }
+
 	/**
 	* Create the invoice
 	* @return 1: succes
@@ -26,16 +47,17 @@ class webservice extends ws_xmws {
 		
 		if(module_controller::ExecuteCreateInvoice( 
 			ws_generic::GetTagValue('user_id', $request_data['content']), 
-			ws_generic::GetTagValue('price', $request_data['content']),
-			ws_generic::GetTagValue('token', $request_data['content']),
-			ws_generic::GetTagValue('invoice_nextdue', $request_data['content']),
-			ws_generic::GetTagValue('invoice_period', $request_data['content'])
+			ws_generic::GetTagValue('amount', $request_data['content']),
+			ws_generic::GetTagValue('type', $request_data['content']),
+			ws_generic::GetTagValue('desc', $request_data['content']),
+			ws_generic::GetTagValue('token', $request_data['content'])
 			)){
 			if(module_controller::ExecuteCreateAccountInvoice(
-				ws_generic::GetTagValue('price', $request_data['content']),
-				ws_generic::GetTagValue('invoice_nextdue', $request_data['content']),
-				ws_generic::GetTagValue('invoice_period', $request_data['content']),
-				ws_generic::GetTagValue('user_id', $request_data['content'])
+				ws_generic::GetTagValue('user_id', $request_data['content']),
+				ws_generic::GetTagValue('amount', $request_data['content']),
+				ws_generic::GetTagValue('type', $request_data['content']),
+				ws_generic::GetTagValue('desc', $request_data['content']),
+				ws_generic::GetTagValue('token', $request_data['content'])
 				)){
 				$response = "1";
 			} else{
@@ -99,9 +121,8 @@ class webservice extends ws_xmws {
 		$response = ws_xmws::NewXMLTag('package', 	
 			ws_xmws::NewXMLTag('name',$row['pk_name_vc']).
 			ws_xmws::NewXMLTag('id', $row['pk_id_pk']).
-			ws_xmws::NewXMLTag('pm', $row['pk_price_pm']).
-			ws_xmws::NewXMLTag('pq', $row['pk_price_pq']).
-			ws_xmws::NewXMLTag('py', $row['pk_price_py'])
+			ws_xmws::NewXMLTag('domain', $row['pkp_domain']).
+			ws_xmws::NewXMLTag('hosting', $row['pkp_hosting'])
 		);
 
 		$dataobject = new runtime_dataobject();
@@ -126,9 +147,9 @@ class webservice extends ws_xmws {
 			$response = ws_xmws::NewXMLTag('code','1');
 			$response .= ws_xmws::NewXMLTag('invoice', 	
 				ws_xmws::NewXMLTag('user',$row['inv_user']).
-				ws_xmws::NewXMLTag('amount', $row['inv_amount']).
+				ws_xmws::NewXMLTag('desc', $row['inv_desc']).
 				ws_xmws::NewXMLTag('id', $row['inv_id']).
-				ws_xmws::NewXMLTag('payment_id', $row['inv_payment_id'])
+				ws_xmws::NewXMLTag('status', $row['inv_status'])
 			);
 		} else{
 			$response = ws_xmws::NewXMLTag('code','0');
@@ -151,14 +172,12 @@ class webservice extends ws_xmws {
 			$response .= ws_xmws::NewXMLTag('account', 	
 				ws_xmws::NewXMLTag('alias',$row['ac_user_vc']).
 				ws_xmws::NewXMLTag('id', $row['ac_id_pk']).
-				ws_xmws::NewXMLTag('email', $row['ac_email_vc']).
-				ws_xmws::NewXMLTag('package_id', $row['ac_package_fk']).
-				ws_xmws::NewXMLTag('payperiod', $row['ac_invoice_period'])
+				ws_xmws::NewXMLTag('email', $row['email'])
 			);
 		}
 
 		if(ws_generic::GetTagValue('payment', $request_data['content'])){
-			$rows = module_controller::ApiPayment_method(ws_generic::GetTagValue('payment', $request_data['content']));
+			$rows = module_controller::ApiPaymentMethods(ws_generic::GetTagValue('payment', $request_data['content']));
 			$payment_method = null;
 
 			foreach ($rows as $row){
@@ -190,6 +209,7 @@ class webservice extends ws_xmws {
 		$response 		= null;
 		
 		$response = module_controller::ApiPayment(
+			ws_generic::GetTagValue('method', $request_data['content']),
 			ws_generic::GetTagValue('user_id', $request_data['content']),
 			ws_generic::GetTagValue('txn_id', $request_data['content']),
 			ws_generic::GetTagValue('token', $request_data['content'])
@@ -199,5 +219,39 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('code',$response));
 		return $dataobject->getDataObject();
+    }
+
+    /**
+     * Lets create the user
+     * @return 0: User creation fail
+     * @return 1: User created
+    */
+
+    public function CreateClient() {
+        $request_data = $this->RawXMWSToArray($this->wsdata);
+        $response_xml = "";
+        if(!module_controller::ApiCreateClient(
+        	ws_generic::GetTagValue('resellerid', $request_data['content']), 
+        	ws_generic::GetTagValue('username', $request_data['content']), 
+        	ws_generic::GetTagValue('packageid', $request_data['content']), 
+        	ws_generic::GetTagValue('groupid', $request_data['content']), 
+        	ws_generic::GetTagValue('fullname', $request_data['content']), 
+        	ws_generic::GetTagValue('email', $request_data['content']), 
+        	ws_generic::GetTagValue('address', $request_data['content']), 
+        	ws_generic::GetTagValue('postcode', $request_data['content']), 
+        	ws_generic::GetTagValue('phone', $request_data['content']), 
+        	ws_generic::GetTagValue('password', $request_data['content'])
+        	)
+        ){
+
+            $response_xml = ws_xmws::NewXMLTag('code', '0');
+        } else {
+            $response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUserId(ws_generic::GetTagValue('username', $request_data['content'])));
+            $response_xml .= ws_xmws::NewXMLTag('code', '1');
+        }
+        $dataobject = new runtime_dataobject();
+        $dataobject->addItemValue('response', '');
+        $dataobject->addItemValue('content', $response_xml);
+        return $dataobject->getDataObject();
     }
 }
