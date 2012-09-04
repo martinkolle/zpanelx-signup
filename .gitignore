@@ -10,3 +10,5 @@ zpanelx_module/.DS_Store
 .DS_Store
 
 zpanelx_module/reseller_billing/reseller_billing.zpp
+
+zpanelx_module/reseller_billing/deploy/install.run
