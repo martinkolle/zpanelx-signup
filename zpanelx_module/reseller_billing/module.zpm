@@ -6,17 +6,17 @@ div.module{float:left;width:110px;height:80px;border:1px solid;border-radius: 3p
 div.module:hover{opacity:0.7;}
 div.module-inner{margin:0 auto;width:110px;text-align: center}
 input.id, input.act{width:20px;}
-input.date{width:80px;}
-input.payment_method{width:80px;}
+input.user, input.status{width:20px;}
+input.date, input.type{width:70px;}
+input.payment, input.payment_id{width:80px;}
 input.amount{width:50px;}
-
 #newData{width:300px;height:250px;}
 </style>
 
 <script type="text/javascript">
 function deleteInvoice(id){
 	var deleteInv = confirm ("<: Want to delete invoice: :> " + id);
-	if (deleteInv){window.location="./?module=reseller_billing&view=invoice&action=DeleteBilling&deleteId=" + id;}
+	if (deleteInv){window.location="./?module=reseller_billing&view=invoice&action=DeleteInvoice&deleteId=" + id;}
 	else {return;}
 }
 function deletePayment(id){
@@ -27,10 +27,20 @@ function deletePayment(id){
 function deletePackage(id){
 	alert('<: Please delete through the Package manager :>');
 }
-function editPackage(id, name, price_pm, price_pq, price_py){
+function editPackage(id, name, hosting, domain){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
-    $('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py+" #zannounce");
-    alert("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py);
+    $('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
+    console.log("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
+}
+function editInvoice(id, user, amount, type, date, payment, payment_id, desc, status, token){
+	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
+    $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token+" #zannounce");
+    console.log("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token);
+}
+function editPayment(id, name, data, active){
+	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
+    $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active)+" #zannounce");
+    console.log("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active));
 }
 
 if(document.URL.indexOf("CreatePayment") >= 0){ 
@@ -39,7 +49,7 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 </script>
 
 <@ Result @>
-
+<div id="billing-message"></div>
 <div id="top" style="width:100%;height:100px;">
 	<div id="top-inner">
 		<a href="./?module=reseller_billing&view=invoice">
@@ -70,7 +80,7 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 </div>
 
 <% if ViewInvoice %>
-	<% if Billings %>
+	<% if Invoices %>
 		<div class="zform_wrapper">
 		<h2><: Reseller invoice :></h2>
 			<table>
@@ -79,29 +89,41 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><: Id :></td>
 					<td><: User id :></td>
 					<td><: Amount :></td>
-					<td><: Descripton :></td>
-					<td><: Due date :></td>
-					<td><: Created date :></td>
-					<td><: Payment method :></td>
-					<td><: Payment id :></td>
-					<td><: Act :></td>
+					<td><: Type :></td>
+					<td><: Date :></td>
+					<td><: Pay method :></td>
+					<td><: Pay id :></td>
+					<td><: Desc :></td>
+					<td><: Status :></td>
 					<td><: Token :></td>
 				</tr>
 				</thead>
 				<tbody>
-				<% loop Billings %>
+				<% loop Invoices %>
 				<tr valign="top">
 					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="id" /> </td>
-					<td><input disabled="disabled" class="id" type="text" value="<& user_id &>" name="inv_id" /> </td>
+					<td><input type="text" class="user" value="<& user_id &>" name="user" /> </td>
 					<td><input type="text" class="amount" value="<& amount &>" name="amount" /> </td>
-					<td><input type="text" value="<& description &>" name="description" /> </td>
-					<td><input type="text" class="date" value="<& due_date &>" name="due_date" /> </td>
-					<td><input type="text" class="date" value="<& createddate &>" name="creadteddate" /> </td>
-					<td><input type="text" class="payment_method" value="<& payment_method &>" name="payment_method" /> </td>
-					<td><input type="text" value="<& payment_id &>" name="payment_id" /> </td>
-					<td><input type="text" class="act" value="<& act &>" name="act" /> </td>
-					<td><input type="text" value="<& token &>" name="token" /> </td>
-					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="deleteInvoice(<& id &>)"><: Delete :></button></td>
+					<td><input type="text" class="type" value="<& type &>" name="type"  /> </td>
+					<td><input type="text" class="date" value="<& date &>" name="date" /> </td>
+					<td><input type="text" class="payment" value="<& payment &>" name="payment" /> </td>
+					<td><input type="text" class="payment_id" value="<& payment_id &>" name="payment_id" /> </td>
+					<td><textarea class="desc" name="desc"> <& desc &> </textarea> </td>
+					<td><select class="status" name="status"><& select &></select></td>
+					<td><input type="text" class="token" value="<& token &>" name="token" /> </td>
+					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editInvoice(
+						$(this).closest('tr').find('input.id').val(),
+						$(this).closest('tr').find('input.user').val(),
+						$(this).closest('tr').find('input.amount').val(),
+						$(this).closest('tr').find('input.type').val(),
+						$(this).closest('tr').find('input.date').val(),
+						$(this).closest('tr').find('input.payment').val(),
+						$(this).closest('tr').find('input.payment_id').val(),
+						$(this).closest('tr').find('textarea.desc').val(),
+						$(this).closest('tr').find('select.status').val(),
+						$(this).closest('tr').find('input.token').val()
+						);"><: Edit :></button>
+						<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="deleteInvoice(<& id &>)"><: Delete :></button></td>
 				</tr>
 				<% endloop %>
 				</tbody>
@@ -113,35 +135,6 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 <% endif %>
 
 <% if ViewPayment %>
-
-	<% if EditPayment %>
-	<div class="zgrid_wrapper">
-	        <h2><: Edit payment :></h2>
-	        <form action="./?module=reseller_billing&action=EditPayment" method="post">
-		        <table class="zform">
-			        <tr>
-				        <th><: Name :>:</th>
-				        <td><input type="text" name="name" id="name" value="<@ EditPaymentName @>" /></td>
-			        </tr>
-			        <tr>
-				        <th><: Active :>:</th>
-				        <td><input type="text" name="active" id="active" value="<@ EditPaymentActive @>" /></td>
-			        </tr>
-			        <tr>
-				        <th><: Data :>:</th>
-				        <td><textarea name="data" id="data" cols="45" rows="5"><@ EditPaymentData @></textarea></td>
-			        </tr>
-			        <tr>
-				        <th><input type="hidden" name="id" value="<@ EditPaymentID @>" /></th>
-				        <td>
-						<button class="fg-button ui-state-default ui-corner-all" type="submit" id="button" name="inSubmit" value="Save"><: Save :></button>
-						<button class="fg-button ui-state-default ui-corner-all type="button" onclick="window.location.href='./?module=reseller_billing&view=payment_method';return false;"><: Cancel :></button>
-						</td>
-			        </tr>
-		        </table>
-	        </form>
-		</div>
-	<% endif %>
 
 	<% if Payments %>
 	<div class="zform_wrapper">
@@ -159,11 +152,16 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 				<tbody>
 			<% loop Payments %>
 				<tr valign="top">
-						<td><input disabled="disabled" class="id" type="text" value="<& pm_id &>" name="pm_id" /> </td>
-						<td><input type="text" class="name" value="<& name &>" name="pm_name" /> </td>
-						<td><textarea name="pm_data"><& data &></textarea> </td>
-						<td><input type="text" class="active" value="<& active &>" name="pm_active" /> </td>
-						<td style="width:150px;"><button class="fg-button ui-state-default ui-corner-all type="button" onclick="window.location.href='./?module=reseller_billing&view=payment_method&show=Edit&other=<& pm_id &> ';return false;"><: Edit :></button>
+						<td><input class="id" type="text" disabled="disabled"  value="<& pm_id &>" name="id" /> </td>
+						<td><input class="name" type="text" value="<& name &>" name="name" /> </td>
+						<td><textarea class="data" name="data" ><& data &></textarea> </td>
+						<td><select class="active" name="active"><& select &></select>
+						<td style="width:150px;">
+							<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPayment(
+						$(this).closest('tr').find('input.id').val(),
+						$(this).closest('tr').find('input.name').val(),
+						$(this).closest('tr').find('textarea.data').val(),
+						$(this).closest('tr').find('select.active').val());"><: Edit :></button>
 						 <button class="fg-button ui-state-default ui-corner-all" onclick="deletePayment(<& pm_id &>)"><: Delete :></button>
 						</td>
 				</tr>
@@ -218,7 +216,6 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 
 <% if ViewPackage %>
 	<% if Packages %>
-		<div id="billing-message"></div>
 		<div class="zform_wrapper">
 		<h2><: Packages :></h2>
 			<table>
@@ -227,9 +224,8 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><: Id :></td>
 					<td><: Name :></td>
 					<td><: reseller :></td>
-					<td><: Price @ month :></td>
-					<td><: Price @ quater :></td>
-					<td><: Price @ year :></td>
+					<td><: Hosting :></td>
+					<td><: Domain :></td>
 				</tr>
 				</thead>
 				<tbody>
@@ -238,14 +234,13 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="<& id &>" /> </td>
 					<td><input type="text" class="name" value="<& name &>" name="name" /> </td>
 					<td><input type="text" class="reseller" value="<& reseller &>" name="reseller" /> </td>
-					<td><input type="text" class="price_pm" value="<& price_pm &>" name="price_pm" /> </td>
-					<td><input type="text" class="price_pq"value="<& price_pq &>" name="price_pq" /> </td>
-					<td><input type="text" class="price_py" value="<& price_py &>" name="price_py" /> </td>
-					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPackage($(this).closest('tr').find('input.id').val(),
-																													$(this).closest('tr').find('input.name').val(),
-																													$(this).closest('tr').find('input.price_pm').val(),
-																													$(this).closest('tr').find('input.price_pq').val(),
-																													$(this).closest('tr').find('input.price_py').val());"><: Edit :></button></td>
+					<td><textarea type="text" class="hosting" name="hosting"><& hosting &></textarea> </td>
+					<td><textarea type="text" class="domain" name="domain" disabled="disabled"><& domain &></textarea> </td>
+					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPackage(
+										$(this).closest('tr').find('input.id').val(),
+										$(this).closest('tr').find('input.name').val(),
+										$(this).closest('tr').find('textarea.hosting').val(),
+										$(this).closest('tr').find('textarea.domain').val());"><: Edit :></button></td>
 				</tr>
 				<% endloop %>
 				</tbody>
@@ -258,8 +253,8 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% if Packages %>
 	<div class="zform_wrapper">
 	<h2><: Package help :></h2>
-	<p>Add the price for the packages. </p>
-	<p>If you leave the input with a "0", will it not be possible to pay for that period</p>
+	<p>Add the price for the packages in this format (disable: leave hosting and domain empty):</p>
+	<p>{"month": "12",  "price": "499"},{"month": "6",  "price": "100"}</p>
 	</div>
 	<% endif %>
 
