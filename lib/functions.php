@@ -123,32 +123,24 @@ class zpanelx{
 	* @author Martinkolle
 	* @return redirect on success else add error
 	*/
-	function addUser($payPeriod, $packageId, $token, $password, $username, $email, $fullname, $address, $postcode, $telephone){
+	function addUser($payPeriod, $packageId, $token, $password, $username, $email, $fullname, $address, $postcode, $telephone, $website, $website_help){
 
 		$data = "<pk_id>".$packageId."</pk_id>";
 		$package = self::api("reseller_billing", "Package", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
 
-		if (!empty($package['xmws']['content']['package']['id'])) {
-			
-			switch($payPeriod){
-				case '1':
-					$packagePrice 	= $package['xmws']['content']['package']['pm'];
-					$hostingTime 	= "3";
-				break;
-				case '2':
-					$packagePrice 	= $package['xmws']['content']['package']['pq'];
-					$hostingTime 	= "6";
-				break;
-				case '3';
-					$packagePrice 	= $package['xmws']['content']['package']['py'];
-					$hostingTime 	= "12";
-				break;
-			}
+		if (!empty($package['xmws']['content']['package']['id'])) {	
 
 			$package_name 	= $package['xmws']['content']['package']['name'];
-			$price_pm 		= $package['xmws']['content']['package']['pm'];
-			$price_pq 		= $package['xmws']['content']['package']['pq'];
-			$price_py 		= $package['xmws']['content']['package']['py'];
+			$hosting 		= $package['xmws']['content']['package']['hosting'];
+			$domain 		= $package['xmws']['content']['package']['domain'];
+
+			$json = json_decode($hosting, true);
+			$packagePrice = null;
+			foreach($json['hosting'] as $key=>$host){
+				if($host['month'] == $payPeriod){
+					$packagePrice = $host['price'];
+				}
+			}
 		}
 		else {
 			self::error("Error getting package data: function addUser", true);
@@ -165,60 +157,47 @@ class zpanelx{
 	        <postcode>'.$postcode.'</postcode>
 	        <address>'.$address.'</address>
 	        <phone>'.$telephone.'</phone>
-	        <password>'.$password.'</password>
-	        <sendemail>0</sendemail>
-	        <emailsubject>0</emailsubject>
-	        <emailbody>0</emailbody>';
+	        <password>'.$password.'</password>';
 
-		$addUser = self::api("manage_clients", "CreateClient", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
+		$addUser 		= self::api("reseller_billing", "CreateClient", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
 
 		if($addUser['xmws']['content']['code'] == "1"){
-			$userId = $addUser['xmws']['content']['uid'];
-			$todaydate = date("Y-m-d");// current date
-			$newdate = strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
-			$newdate = date('Y-m-d', $newdate);
+			
+			$userId 	= $addUser['xmws']['content']['uid'];
+			$todaydate 	= date("Y-m-d");// current date
+			$newdate 	= strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
+			$newdate 	= date('Y-m-d', $newdate);
+			
+			$desc = array('pk_name'=>$package_name, 'price'=>$packagePrice, 'period'=>$payPeriod, 'domain'=>$website, 'web_help'=>$website_help);
+			$desc = json_decode($desc);
+			$data = "<user_id>".$userId."</user_id>
+					<amount>".$packagePrice."</amount>
+					<type>Initial Signup</type>
+					<desc>".$desc."</desc>
+					<token>".$token."</token>";
+			$addInvoice = self::api("reseller_billing", "CreateInvoice", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
 
-			$data = "<uid>".$userId."</uid>";
-			$disableUser = self::api("manage_clients", "DisableClient", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
-
-			if($disableUser['xmws']['content']['disabled'] == "true"){
+			if($addInvoice['xmws']['content']['code'] == "1"){
+				$emailtext = file_get_contents("templates/emails/user_reg.html");
+				$emailtext = str_replace('$fullname',$fullname,$emailtext);
+				$emailtext = str_replace('$pathto',self::getConfig('billing_url'),$emailtext);
+				$emailtext = str_replace('$invid',$token,$emailtext);
+				$emailtext = str_replace('$userid',$username,$emailtext);
+				$emailtext = str_replace('$password',$password,$emailtext);
 				
-				$data = "<user_id>".$userId."</user_id>
-						<selectedpackageprice>".$packagePrice."</selectedpackageprice>
-						<token>".$token."</token>
-						<price>".$packagePrice."</price>
-						<invoice_nextdue>".$newdate."</invoice_nextdue>
-						<invoice_period>".$payPeriod."</invoice_period>";
-				$addInvoice = self::api("reseller_billing", "CreateInvoice", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
+				//send a email to the user that they have been created.
+				self::sendemail($email, "New Account Created", $emailtext);
 
-				if($addInvoice['xmws']['content']['code'] == "1"){
-					$emailtext = file_get_contents("templates/emails/user_reg.html");
-					$emailtext = str_replace('$fullname',$fullname,$emailtext);
-					$emailtext = str_replace('$pathto',self::getConfig('billing_url'),$emailtext);
-					$emailtext = str_replace('$invid',$token,$emailtext);
-					$emailtext = str_replace('$userid',$username,$emailtext);
-					$emailtext = str_replace('$password',$password,$emailtext);
-
-					self::sendemail($email, "New Account Created", $emailtext);
-
-					//send a email to the user that they have been created.
-					header('Location: pay.php?id='.$token);
-				} else{
-					zpanelx::error("Error creating invoice");
-					self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "The invoice have not been created for user: ".$username );
-				}
+				header('Location: pay.php?id='.$token);
 			} else{
-				zpanelx::error("Error disabling account");
-				self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "A new account have been created but not disabled. The invoice have for this reason not been created and the user cannot pay. User: ".$username);
-				
+				zpanelx::error("Error creating invoice");
+				self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "The invoice have not been created for user: ".$username );
 			}
 		} else{
 			zpanelx::error("Error creating account");
-			self::sendemail(self::getConfig('email_paypal_error'), "Error creating account", "A new account have tried to be created, but failed");
-				
+			self::sendemail(self::getConfig('email_paypal_error'), "Error creating account", "A new account have tried to be created, but failed");	
 		}
 	}
-
 
 	/**
 	 * Get the config values

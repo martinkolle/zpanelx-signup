@@ -1,8 +1,8 @@
 <?php
 
 
-include ('../config/functions.php');
-include('../db.php');
+include ('../lib/functions.php');
+include('../lib/db.php');
 
 $db = db::getConnection();
 

@@ -4,7 +4,7 @@
  *  Pay-page for zpanelx Auto-sign-up
  *  
  *  @package    Zpanelx Auto-sign-up
- *  @author     Tony Maclennan & Martin Kollerup
+ *  @author     Martin Kollerup
  *  @license    http://opensource.org/licenses/gpl-3.0.html
  */
 
@@ -29,23 +29,24 @@ $invoice  = zpanelx::api("reseller_billing", "Invoice", $data, zpanelx::getConfi
 if($invoice['xmws']['content']['code'] == "0"){
      zpanelx::error("Invoice id was not found",false,true);
 } 
+
 elseif($invoice['xmws']['content']['code'] == "1"){
      $inv_user      = $invoice['xmws']['content']['invoice']['user'];
-     $inv_amount    = $invoice['xmws']['content']['invoice']['amount'];
-     $inv_paid      = $invoice['xmws']['content']['invoice']['payment_id'];
+     $desc          = $invoice['xmws']['content']['invoice']['desc'];
+     $obj           = json_decode($desc);
+     $inv_amount    = $obj->{'price'};
+     $user_payperiod= $obj->{'period'};
+     $package_id    = $obj->{'pk_id'};
+     $inv_status    = $invoice['xmws']['content']['invoice']['status'];
      $inv_id        = $invoice['xmws']['content']['invoice']['id'];
 }
 else{
      zpanelx::error('Invoice data could not be loaded',false,true);
 }
-
 if(!$inv_user){
-     //Forcing to show the error
      zpanelx::error("Invoice id was not found in the system",false,true);
- 
 } 
- elseif($inv_paid != "no"){
-     //FOrcing to show the error
+elseif($inv_status == "1"){
      zpanelx::error("This invoice has already been paid.",false,true);
 }
 
@@ -57,12 +58,7 @@ $account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zp
           $user_alias      = $account['xmws']['content']['account']['alias'];
           $user_id         = $account['xmws']['content']['account']['id'];
           $user_email      = $account['xmws']['content']['account']['email'];
-          $user_payperiod  = $account['xmws']['content']['account']['payperiod'];
-          $package_id      = $account['xmws']['content']['account']['package_id'];
-
-
-          $payments        = $account['xmws']['content']['payments']['payment'];
-
+          $payments        = $account['xmws']['content']['payments'];
           $profile_fullname= $account['xmws']['content']['profile']['fullname'];
      } 
      else{
@@ -84,7 +80,7 @@ if (!empty($package['xmws']['content']['package']['name'])) {
      $package_name    = $package['xmws']['content']['package']['name'];
 } 
 else{
-     zpanelx::error("Error getting package data",false,true);
+     zpanelx::error("Error getting package data".$data,false,true);
 }
 
 $form = file_get_contents('templates/pay.html');

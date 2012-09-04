@@ -93,14 +93,19 @@ if ($verified) {
         zpanelx::error("INVALID PAYMENT: ".$invoice." (invoice number) - ".$payment_amount." (payment received) - ".$inv_amount." (invoice amount)");  
     }
 
-    $data = "<user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
+    $data = "<method>Paypal</method><user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
     $invoice = zpanelx::api("reseller_billing", "Payment", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
 
-    if($invoice['xmws']['content']['code'] == "2"){
-        zpanelx::error("PAYMENT ERROR: Could not create invoice");
-    }
-    elseif($invoice['xmws']['content']['code'] == "3"){
-        zpanelx::error("PAYMENT ERROR: Could not fetch account data");
+    switch($invoice['xmws']['content']['code']){
+        case "1":
+            zpanelx::sendWelcomeMail($inv_user);
+        break;
+        case "2":
+            zpanelx::error("PAYMENT ERROR: Could not create invoice");
+        break;
+        case "3":
+            zpanelx::error("PAYMENT ERROR: Could not select inv_desc");
+        break;
     }
 
     if(!empty(zpanelx::$zerror)){

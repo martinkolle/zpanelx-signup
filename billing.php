@@ -11,12 +11,7 @@
 include ('lib/functions.php');
 include ('lib/xmwsclient.class.php');
 
-if(isset($_GET['id'])){
-	$id 	= $_GET['id'];	
-} else{
-	$id = "";
-}
-
+$id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $head = null;
 
 //Are there a id?
@@ -32,6 +27,7 @@ else if(!preg_match('/^\d+$/', $id)){
 	die();
 }
 
+<<<<<<< HEAD
 $username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
 $email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
 $fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
@@ -46,6 +42,21 @@ $packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
 
 if (isset($_POST['submit'])) {	
 
+=======
+if (isset($_POST['submit'])) {	
+	$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
+	$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
+	$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
+	$address 	= (isset($_POST["address"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
+	$website_help= (isset($_POST["website_help"])) ? filter_var($_POST["website_help"], FILTER_SANITIZE_STRING) : "";
+	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
+	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
+	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
+
+	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
+	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
+
+>>>>>>> Database edited
 	//start by checking for missing inputs
 	if (empty($username)) {
 		zpanelx::error("Username missing");
@@ -82,7 +93,7 @@ if (isset($_POST['submit'])) {
 		zpanelx::error("Payperiod is missing");
 	} else {
 		if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i",$payperiod)){
-			zpanelx::error("Telephone is not valid");
+			zpanelx::error("Payperiod is not valid");
 		}
 	}
 
@@ -94,7 +105,7 @@ if (isset($_POST['submit'])) {
 		zpanelx::error($usernameExits['xmws']['content']['human']);
 	}
 	if(empty(zpanelx::$zerror)){
-		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone);
+		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone, $website, $website_help);
 	}
 }//end submit
 
@@ -103,30 +114,20 @@ $data = "<pk_id>".$id."</pk_id>";
 $package = zpanelx::api("reseller_billing", "Package", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
 if (!empty($package['xmws']['content']['package']['id'])) {
 	$package_name 	= $package['xmws']['content']['package']['name'];
-	$price_pm 		= $package['xmws']['content']['package']['pm'];
-	$price_pq 		= $package['xmws']['content']['package']['pq'];
-	$price_py 		= $package['xmws']['content']['package']['py'];
+	$hosting 		= $package['xmws']['content']['package']['hosting'];
+	$domain 		= $package['xmws']['content']['package']['domain'];
 }
 else {
-	zpanelx::error("Error getting package data:", true);
+	zpanelx::error("Error getting package data", true);
 }
 
 //Adding the price from xmws to input fields
 if(!empty($package_name)){
-	$payoptions = array();
-	
-	if($price_pm != "0"){
-		array_push($payoptions, '<input type="radio" name="payperiod" selected value="1">Monthly @ '.zpanelx::getConfig('cs')." ".$price_pm .'</input><br />');
-	}
-	if($price_pq != "0"){
-		array_push($payoptions, "<input type=\"radio\" name=\"payperiod\" value=\"2\">Quarterly @ ".zpanelx::getConfig('cs')." ".$price_pq."</input><br />");
-	}
-	if($price_py != "0"){
-		array_push($payoptions, "<input type=\"radio\" name=\"payperiod\" value=\"3\">Yearly @ ".zpanelx::getConfig('cs')." ".$price_py."</input><br />");
-	}
-	//need to have them as string
-	foreach($payoptions as $key => $option){
-		$payoption .= $option; 
+
+	$payoptions = json_decode($hosting, true);
+
+	foreach($payoptions['hosting'] as $option){
+		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".zpanelx::getConfig('cs')." ".$option['price']."</input><br />";
 	}
 	//inserting the values to a template
 	$template = file_get_contents('templates/billing.html');
@@ -140,9 +141,11 @@ if(!empty($package_name)){
 	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "Username", $template));
 	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "Email", $template));
 	$template = ($fullname ? str_replace('{{fullname}}', $fullname, $template) : str_replace('{{fullname}}', "Full name", $template));
-	$template = ($adress ? str_replace('{{adress}}', $adress, $template) : str_replace('{{adress}}', "Adress", $template));
+	$template = ($address ? str_replace('{{address}}', $address, $template) : str_replace('{{address}}', "Address", $template));
 	$template = ($postcode ? str_replace('{{postcode}}', $postcode, $template) : str_replace('{{postcode}}', "Post code", $template));
 	$template = ($telephone ? str_replace('{{telephone}}', $telephone, $template) : str_replace('{{telephone}}', "Telephone", $template));
+	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "Website", $template));
+
 }
 else{
 	zpanelx::error("Invalid package selected");

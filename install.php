@@ -1,7 +1,7 @@
 <?php
 
 echo "<h1>Install zpanel x SignUp</h1>";
-echo "Please follow these guides.:";
+echo "Please follow these guidelines.:";
 echo "<ul><li>Edit your database settings in the config.php</li>";
 echo "</ul><br />";
 echo "<font color=red>This script is offered without liability, use at own risk.</font>";
