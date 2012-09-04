@@ -71,7 +71,7 @@ if ($verified) {
     elseif($invoice['xmws']['content']['code'] == "1"){
         $inv_user      = $invoice['xmws']['content']['invoice']['user'];
         $inv_amount    = $invoice['xmws']['content']['invoice']['amount'];
-        $inv_paid      = $invoice['xmws']['content']['invoice']['payment_id'];
+        $inv_paid      = $invoice['xmws']['content']['invoice']['status'];
         $inv_id        = $invoice['xmws']['content']['invoice']['id'];
     }
     else{
@@ -82,7 +82,7 @@ if ($verified) {
         //Forcing to show the error
         zpanelx::error("Invoice id was not found in the system");
     } 
-    elseif($inv_paid != "no"){
+    elseif($status == "1"){
         //FOrcing to show the error
         zpanelx::error("This invoice has already been paid.");
     }
