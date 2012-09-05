@@ -153,8 +153,8 @@ class zpanelx{
 			$newdate 	= strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
 			$newdate 	= date('Y-m-d', $newdate);
 			
-			$desc = array('pk_name'=>$package_name, 'price'=>$packagePrice, 'period'=>$payPeriod, 'domain'=>$website, 'web_help'=>$website_help);
-			$desc = json_decode($desc);
+			$desc = array('pk_id'=>$packageId, 'price'=>$packagePrice, 'period'=>$payPeriod, 'domain'=>$website, 'web_help'=>$website_help);
+			$desc = json_encode($desc);
 			$data = "<user_id>".$userId."</user_id>
 					<amount>".$packagePrice."</amount>
 					<type>Initial Signup</type>
