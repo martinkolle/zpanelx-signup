@@ -141,13 +141,14 @@ class webservice extends ws_xmws {
 
     	$request_data 	= $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
-
-		$row = module_controller::ApiInvoice($contenttags['token']);
+		$response 		= null;
+		$row = module_controller::ApiInvoice(ws_generic::GetTagValue('token', $request_data['content']));
 		if ($row != false){
 			$response = ws_xmws::NewXMLTag('code','1');
 			$response .= ws_xmws::NewXMLTag('invoice', 	
 				ws_xmws::NewXMLTag('user',$row['inv_user']).
 				ws_xmws::NewXMLTag('desc', $row['inv_desc']).
+				ws_xmws::NewXMLTag('amount', $row['inv_amount']).
 				ws_xmws::NewXMLTag('id', $row['inv_id']).
 				ws_xmws::NewXMLTag('status', $row['inv_status'])
 			);
