@@ -32,6 +32,11 @@ function editPackage(id, name, hosting, domain){
     $('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
     console.log("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
 }
+function savePackage(id, name, hosting, domain){
+	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
+    $('#billing-message').load("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
+    console.log("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
+}
 function editInvoice(id, user, amount, type, date, payment, payment_id, desc, status, token){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
     $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token+" #zannounce");
@@ -240,7 +245,12 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 										$(this).closest('tr').find('input.id').val(),
 										$(this).closest('tr').find('input.name').val(),
 										$(this).closest('tr').find('textarea.hosting').val(),
-										$(this).closest('tr').find('textarea.domain').val());"><: Edit :></button></td>
+										$(this).closest('tr').find('textarea.domain').val());"><: Edit :></button>
+						<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="savePackage(
+										$(this).closest('tr').find('input.id').val(),
+										$(this).closest('tr').find('input.name').val(),
+										$(this).closest('tr').find('textarea.hosting').val(),
+										$(this).closest('tr').find('textarea.domain').val());"><: Save :></button><- only use the first time!</td>
 				</tr>
 				<% endloop %>
 				</tbody>
