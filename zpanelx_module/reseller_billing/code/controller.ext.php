@@ -29,16 +29,16 @@ class module_controller {
     *At the end optional fields, but required
     */
     static function getModuleName(){
-    	return ui_module::GetModuleName();
+        return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-    	return ui_language::translate(ui_module::GetModuleDescription());
+        return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-	static function getModuleIcon() {
-		global $controller;
-		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+    static function getModuleIcon() {
+        global $controller;
+        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
@@ -853,7 +853,7 @@ class module_controller {
         }
 
         $query = $zdbh->prepare("INSERT INTO `x_rb_price` (`pkp_id`, `pk_id`, `pkp_domain`, `pkp_hosting`) VALUES
-(1, '4', NULL, '{"hosting":[{"month":12,"price":499},{"month":6,"price":200}]}');");
+(1, '4', NULL, '{\"hosting\":[{\"month\":12,\"price\":499},{\"month\":6,\"price\":200}]}');");
         
         if($query->execute()){
             $html .= "Insert into x_rb_payment";
