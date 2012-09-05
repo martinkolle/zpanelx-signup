@@ -383,6 +383,32 @@ class module_controller {
             return false;
         }
     }
+        static function doSavePackage() {
+        global $controller;
+        $url = $controller->GetAllControllerRequests('URL');
+
+        $id         = (isset($url['id'])) ? $url['id'] : null;
+        $name       = (isset($url['name'])) ? urldecode($url['name']) : null;
+        $reseller       = (isset($url['reseller'])) ? $url['reseller'] : null;
+
+        $domain   = (isset($url['domain'])) ? $url['domain'] : null;
+        $hosting   = (isset($url['hosting'])) ? $url['hosting'] : null;
+
+        if ((!empty($id)) && (!empty($name))) {
+            if (self::ExecuteSavePackage($id, $name, $domain, $hosting)){
+                self::$editedPackage = true;
+                return true;
+            }
+            else{
+                self::$editPackage = true;
+                return false;
+            }
+        }
+        else{
+            self::$editPackageNeedid = true;
+            return false;
+        }
+    }
     static function ExecuteEditPackage($id, $name, $domain, $hosting){
         global $zdbh;
         // Check for errors before we continue...
@@ -393,12 +419,36 @@ class module_controller {
         $query = array(':id'=>$id, ':name'=>$name);
         $sql->execute($query);
 
-        $smtp = $zdbh->prepare("UPDATE x_rb_price SET 
+        $stmt = $zdbh->prepare("UPDATE x_rb_price SET 
             pkp_domain = :domain, 
             pkp_hosting = :hosting 
             WHERE pk_id = :id");
         $query2 = array(':id'=>$id, ':domain'=>$domain, ':hosting'=>$hosting);
-        $smtp->execute($esd);
+        $stmt->execute($query2);
+
+        return true;
+    }
+
+    static function ExecuteSavePackage($id, $name, $domain, $hosting){
+        global $zdbh;
+        // Check for errors before we continue...
+        if (fs_director::CheckForEmptyValue($id)) {
+            return false;
+        }
+
+        $stmt = $zdbh->prepare("
+            INSERT INTO x_rb_price(
+                pkp_domain, 
+                pkp_hosting,
+                pk_id) 
+            VALUES (
+                :domain,
+                :hosting,
+                :pk_id
+            )");
+
+        $query = array(':pk_id'=>$id, ':domain'=>$domain, ':hosting'=>$hosting);
+        $stmt->execute($query);
 
         return true;
     }
@@ -451,7 +501,7 @@ class module_controller {
                 :remind,
                 :desc
             )");
-        $query = array(':user'=>$user, ':duedate'=>$duedate, ':invoice'=>$invoice, ':remind'=>$date, ':desc'=>$desc);
+        $query = array(':user'=>$user, ':duedate'=>$duedate, ':invoice'=>$invoice, ':remind'=>$remind, ':desc'=>$desc);
 
         if(!$stmt->execute($query)){
             return false;
@@ -563,9 +613,10 @@ class module_controller {
         return $stmt->fetch();
     }
 
-    static function ApiPayment($method, $txn_id, $token, $user_id){
+    static function ApiPayment($method, $user_id, $txn_id, $token){
         global $zdbh;
-        $response = "1";
+        $response   = "1";
+        $desc       = null;
 
         // Set that we have received the payment from paypal
         $stmt = $zdbh->prepare("UPDATE x_rb_invoice SET inv_payment = :method, inv_payment_id = :txn_id, inv_status = :status WHERE inv_token = :token");
@@ -581,24 +632,28 @@ class module_controller {
         $stmt = $zdbh->prepare("SELECT inv_desc FROM x_rb_invoice WHERE inv_token = ?");
 
         if($stmt->execute(array($token))){
-           $obj = json_decode($stmt->fetchColumn());   
-           $period = $obj->{'month'};
+            $desc = $stmt->fetchColumn();
+            $obj = json_decode($desc);   
+            $period = $obj->{'period'};
         }
         else{
             $response = "3";
         }
 
-        $date       = date('Y-m-d');
-        $nextdue    = strtotime( $period." month", strtotime($date));
-        $nextdue    = date('Y-m-d', $nextdue);
+        $date           = date('Y-m-d');
+        $remind_date    = strtotime( $period." month", strtotime($date));
+        $remind_date    = date('Y-m-d', $remind_date);
 
-        $remind_date= strtotime("2 days", strtotime($date));
-        $remind_date= date('Y-m-d', $remind_date);
-
-        $desc = null;
         //activate the account
-        $stmt = $zdbh->prepare("UPDATE x_accounts SET ac_enabled_in = '1',  WHERE ac_id_pk = :user_id");
-        $stmt .= $zdbh->prepare("
+        $stmt = $zdbh->prepare("UPDATE x_accounts SET ac_enabled_in = '1' WHERE ac_id_pk = :user_id LIMIT 1");
+        $query = array(':user_id'=>$user_id);
+
+        if(!$stmt->execute($query))
+        {
+           $response = "4";
+        }
+
+        $stmt = $zdbh->prepare("
             INSERT INTO x_rb_billing(
                 blg_user,
                 blg_inv_id,
@@ -613,7 +668,7 @@ class module_controller {
 
         if(!$stmt->execute($query))
         {
-           $response = "4";
+           $response = "5 ";
         }
         return $response;
     }
@@ -661,7 +716,7 @@ class module_controller {
                                         ud_postcode_vc,
                                         ud_phone_vc,
                                         ud_created_ts) VALUES (
-                                         " . $client['ac_id_pk'] . ",
+                                         ". $client['ac_id_pk'] . ",
                                         '" . $fullname . "',
                                         '" . $packageid . "',
                                         '" . $groupid . "',
