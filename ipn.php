@@ -70,9 +70,11 @@ if ($verified) {
     } 
     elseif($invoice['xmws']['content']['code'] == "1"){
         $inv_user      = $invoice['xmws']['content']['invoice']['user'];
+        $inv_desc      = $invoice['xmws']['content']['invoice']['desc'];
         $inv_amount    = $invoice['xmws']['content']['invoice']['amount'];
-        $inv_paid      = $invoice['xmws']['content']['invoice']['status'];
         $inv_id        = $invoice['xmws']['content']['invoice']['id'];
+        $inv_status    = $invoice['xmws']['content']['invoice']['status'];
+
     }
     else{
         zpanelx::error("Invoice data could not be loaded");
@@ -106,11 +108,17 @@ if ($verified) {
         case "3":
             zpanelx::error("PAYMENT ERROR: Could not select inv_desc");
         break;
+        case "4":
+            zpanelx::error("PAYMENT ERROR: Could not activate user");
+        break;
+        case "5":
+            zpanelx::error("PAYMENT ERROR: Could notadd to x_rb_billing");
+        break;
     }
 
     if(!empty(zpanelx::$zerror)){
         zpanelx::sendemail(zpanelx::getConfig('email_paypal_error'),"Invalid payment received", 
-            implode('<br />',zpanelx::$zerror)."<br /><div style=\"white-space: pre;\">".$listener->getTextReport()."</div>".);
+            implode('<br />',zpanelx::$zerror)."<br /><div style=\"white-space: pre;\">".$listener->getTextReport()."</div>");
     }
 
 } else {
