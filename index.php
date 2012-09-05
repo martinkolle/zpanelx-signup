@@ -15,7 +15,15 @@ $head = null;
 
 	$listPackages = zpanelx::api("reseller_billing", "PackageList", "", zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
 
-     foreach($listPackages['xmws']['content'] as $row){
+    foreach($listPackages['xmws']['content'] as $row){
+
+        $json = json_decode($row['hosting'], true);
+        $price = array();
+        foreach($json['hosting'] as $host){
+            array_push($price, $host['price']);
+        }
+        $price = min($price);
+
           $packetlist = file_get_contents('templates/packagelist.html');
           if(preg_match('/^\d+$/', $_GET['id']) && $_GET['id'] == $row['id']){
             $packetlist = str_replace('{{selectedpackage}}'," checked",$packetlist);
@@ -24,7 +32,7 @@ $head = null;
           }
           $packetlist = str_replace('{{packagename}}',$row['name'],$packetlist);
           $packetlist = str_replace('{{packageid}}',$row['id'],$packetlist);
-          //$packetlist = str_replace('{{desc}}',"Prices beginning from " . $row['pm'],$packetlist);
+          $packetlist = str_replace('{{desc}}',"Prices beginning from " . $price,$packetlist);
           $listPackage .= $packetlist;
      }
 
