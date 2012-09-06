@@ -4,7 +4,7 @@
  *  Main page zpanelx Auto-sign-up
  *  
  *  @package    Zpanelx Auto-sign-up
- *  @author     Martin Kollerup
+ *  @author     MaouKami
  *  @license    http://opensource.org/licenses/gpl-3.0.html
  */
 
