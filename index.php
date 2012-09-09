@@ -14,7 +14,7 @@ include ('lib/xmwsclient.class.php');
 $head = null;
 
 	$listPackages = zpanelx::api("reseller_billing", "PackageList", "", zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
-    print_r($listPackages);
+    //print_r($listPackages);
     $listPackages = (is_array($listPackages['xmws']['content']['package'][0])) ? $listPackages['xmws']['content']['package'] : $listPackages['xmws']['content'];
     foreach($listPackages as $row){
 
