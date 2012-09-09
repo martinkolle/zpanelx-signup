@@ -63,6 +63,9 @@ $account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zp
      else{
           zpanelx::error("Error getting account data",false,true);
      }
+     //Check if we have more then one payment method Different arrays
+     $payments = (is_array($payments['payment'][0])) ? $payments['payment'] : $payments;
+     print_r($payments);
 
      foreach($payments as $row){
           $paymethod = file_get_contents('templates/paymethod.html');
