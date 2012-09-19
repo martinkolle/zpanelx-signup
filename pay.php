@@ -1,11 +1,12 @@
 <?php
 
 /**
- *  Pay-page for zpanelx Auto-sign-up
- *  
- *  @package    Zpanelx Auto-sign-up
- *  @author     Martin Kollerup
- *  @license    http://opensource.org/licenses/gpl-3.0.html
+ * Pay page for ZPX billing API integration 
+ *
+ * @author Martin Kollerup
+ * @copyright martinkole
+ * @link http://www.kmweb.dk/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
 include ('lib/functions.php');
