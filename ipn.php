@@ -1,22 +1,20 @@
 <?php
+
 /**
- * This a simple ipn for paypal
+ * PAYPAL ipn integration
  *
- *  @package    Zpanelx Auto-sign-up
- *  @author     Martin Kollerup
- *  @license    http://opensource.org/licenses/gpl-3.0.html
- *  @link       build on http://www.micahcarrick.com/paypal-ipn-with-php.html
+ * @author Martin Kollerup
+ * @copyright martinkole
+ * @link http://www.kmweb.dk/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
  
 error_reporting(E_ALL);
 ini_set('log_errors', true);
 ini_set('error_log', dirname(__FILE__).'/log/ipn_errors.log');
 
-
-include('lib/db.php');
 include('lib/functions.php');
 include('lib/ipnlistener.php');
-include('lib/xmwsclient.class.php');
 $listener = new IpnListener();
 $listener->use_sandbox = zpanelx::getConfig('test');
 
@@ -112,7 +110,7 @@ if ($verified) {
             zpanelx::error("PAYMENT ERROR: Could not activate user");
         break;
         case "5":
-            zpanelx::error("PAYMENT ERROR: Could notadd to x_rb_billing");
+            zpanelx::error("PAYMENT ERROR: Could not add to x_rb_billing");
         break;
     }
 
