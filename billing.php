@@ -1,15 +1,15 @@
 <?php
 
 /**
- *  Main page zpanelx Auto-sign-up
- *  
- *  @package    Zpanelx Auto-sign-up
- *  @author     Martin Kollerup
- *  @license    http://opensource.org/licenses/gpl-3.0.html
+ * Create user page for ZPX billing API integration 
+ *
+ * @author Martin Kollerup
+ * @copyright martinkole
+ * @link http://www.kmweb.dk/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
 include ('lib/functions.php');
-include ('lib/xmwsclient.class.php');
 
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $head = null;
@@ -20,44 +20,32 @@ if(empty($id)){
 	echo zpanelx::template("Error","","");
 	die();
 } 
-//And is it in digits only?
+//Only digits?
 else if(!preg_match('/^\d+$/', $id)){
-	zpanelx::error('Package id invalid');
+	zpanelx::error('Invalid package id');
 	echo zpanelx::template("Error","","");
 	die();
 }
 
-
-$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
-$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
-$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
-$adress 	= (isset($_POST["address"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
+$username 		= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
+$email	 		= (isset($_POST["email"])) ? $_POST["email"] : "";
+$fullname 		= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
+$address 		= (isset($_POST["address"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
 $transfer_help 	= (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
-$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
+$website 		= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
-$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
-$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
-$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
-$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
+$postcode 		= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
+$telephone 		= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
+$payperiod 		= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
+$packageid 		= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
 
 if (isset($_POST['submit'])) {	
-	$username 	= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
-	$email	 	= (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
-	$fullname 	= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
-	$address 	= (isset($_POST["address"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
-	$website_help= (isset($_POST["website_help"])) ? filter_var($_POST["website_help"], FILTER_SANITIZE_STRING) : "";
-	$website 	= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
-	$postcode 	= (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
-	$telephone 	= (isset($_POST['telephone'])) ? $_POST["telephone"] : "";
 
-	$payperiod 	= (isset($_POST['payperiod'])) ? $_POST["payperiod"] : "";
-	$packageid 	= (isset($_POST['packageid'])) ? $_POST["packageid"] : "";
-
-	//start by checking for missing inputs
-	if (empty($username)) {
+	//start by checking for missing inputs and check if they are lega!
+	if (empty($username) || $username == "Username") {
 		zpanelx::error("Username missing");
 	}
-	if (empty($email)) {
+	if (empty($email) || $email == "Email") {
 		zpanelx::error("Email address missing");
 	}
 	else{
@@ -65,20 +53,20 @@ if (isset($_POST['submit'])) {
 			zpanelx::error("Email is not true");
 		}
 	}
-	if (empty($fullname)) {
+	if (empty($fullname) || $fullname == "Full name") {
 		zpanelx::error("Full name missing");
 	}
-	if (empty($adress)) {
+	if (empty($address) || $address == "Address") {
 		zpanelx::error("Address missing");
 	}
-	if (empty($postcode)) {
+	if (empty($postcode) || $postcode == "Post code") {
 		zpanelx::error("Postcode missing");
 	} else {
 		if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i",$postcode)){
 			zpanelx::error("Telephone is not valid");
 		}
 	}
-	if (empty($telephone)) {
+	if (empty($telephone) || $telephone == "Telephone") {
 		zpanelx::error("Telephone number missing");
 	} else {
 		if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i",$telephone)){
@@ -100,6 +88,7 @@ if (isset($_POST['submit'])) {
 	if($usernameExits['xmws']['content']['code'] != "3"){
 		zpanelx::error($usernameExits['xmws']['content']['human']);
 	}
+	//If no error have been added create the user
 	if(empty(zpanelx::$zerror)){
 		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone, $website, $website_help);
 	}
@@ -125,7 +114,7 @@ if(!empty($package_name)){
 	foreach($payoptions['hosting'] as $option){
 		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".zpanelx::getConfig('cs')." ".$option['price']."</input><br />";
 	}
-	//inserting the values to a template
+	//Insert values to template
 	$template = file_get_contents('templates/billing.html');
 	$template = str_replace('{{action}}', htmlspecialchars($_SERVER['SCRIPT_NAME'] .'?'. $_SERVER['QUERY_STRING']), $template);
 	$template = str_replace('{{packagename}}', htmlentities($packagename, ENT_QUOTES), $template);
@@ -133,7 +122,7 @@ if(!empty($package_name)){
 	$template = str_replace('{{pid}}', $id, $template);
 	$title 	  = "Buy hosting";
 
-	//if post use the entered value, else enter the field name
+	//if post use the entered value, else enter the default values
 	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "Username", $template));
 	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "Email", $template));
 	$template = ($fullname ? str_replace('{{fullname}}', $fullname, $template) : str_replace('{{fullname}}', "Full name", $template));
