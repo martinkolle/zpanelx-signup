@@ -1,11 +1,12 @@
 <?php
 
 /**
- *  Functions for zpanelx Auto-sign-up
- *  
- *  @package    Zpanelx Auto-sign-up
- *  @author     Tony Maclennan & Martin Kollerup
- *  @license    http://opensource.org/licenses/gpl-3.0.html
+ * Functions for reseller_billing API itegration
+ *
+ * @author Martin Kollerup
+ * @copyright martinkole
+ * @link http://www.kmweb.dk/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
 class zpanelx{
@@ -31,35 +32,6 @@ class zpanelx{
 
 		return ($send) ? true : false;
 	} 
-
-	/**
-		* Send email when we have accepted the payment.
-		* TODO: add it to the code (ipn)
-		* @author Tony
-		* @return true or false 
-	*/
-
-	function sendWelcomeMail($id){
-
-		$db = $db->getConnection();
-		$stmt = $db->prepare("SELECT * FROM x_accounts WHERE ac_id_pk=?");
-		$stmt->execute(array($id));
-		$row = $stmt->fetch();
-
-		$body = file_get_contents('../templates/emails/user_welcome-email.html');
-		$body = str_replace('$username',$row['ac_user_vc'],$body);
-		$body = str_replace('$cpurl',self::getCongfig('zpanel_url'),$body);
-		$body = str_replace('$ns1',self::getConfig('ns1'),$body);				
-		$body = str_replace('$ns2',self::getConfig('ns2'),$body);
-		$toemail = $row['ac_email_vc'];
-		
-		if(self::sendemail($toemail,"Welcome",$body)){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
 
 	/**
 	    * Generate a password for the payer.
@@ -163,20 +135,10 @@ class zpanelx{
 			$addInvoice = self::api("reseller_billing", "CreateInvoice", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
 
 			if($addInvoice['xmws']['content']['code'] == "1"){
-				$emailtext = file_get_contents("templates/emails/user_reg.html");
-				$emailtext = str_replace('$fullname',$fullname,$emailtext);
-				$emailtext = str_replace('$pathto',self::getConfig('billing_url'),$emailtext);
-				$emailtext = str_replace('$invid',$token,$emailtext);
-				$emailtext = str_replace('$userid',$username,$emailtext);
-				$emailtext = str_replace('$password',$password,$emailtext);
-				
-				//send a email to the user that they have been created.
-				self::sendemail($email, "New Account Created", $emailtext);
-
 				header('Location: pay.php?id='.$token);
 			} else{
 				zpanelx::error("Error creating invoice");
-				self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "The invoice have not been created for user: ".$username );
+				self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "The invoice have not been created for user: ".$username."(".$userId.")" );
 			}
 		} else{
 			zpanelx::error("Error creating account");
@@ -238,6 +200,9 @@ class zpanelx{
 	*/
 	function api($module, $function, $data, $url, $api, $user = "", $pass =""){
 
+		if(!class_exists('xmwsclient')){
+			require_once('xmwsclient.class.php');
+		}
 		$xmws = new xmwsclient();
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
