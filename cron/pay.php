@@ -1,8 +1,9 @@
 <?php
 
-
-include ('../lib/functions.php');
-include('../lib/db.php');
+require_once '/etc/zpanel/panel/dryden/loader.inc.php';
+require_once 'cnf/db.php';
+require_once 'inc/dbc.inc.php';
+require_once 'dryden/ctrl/options.class.php'; 
 
 $db = db::getConnection();
 
@@ -134,5 +135,3 @@ if(!empty($rows)){
 }
 
 $db = null;
-
-
