@@ -29,16 +29,16 @@ class module_controller {
     *At the end optional fields, but required
     */
     static function getModuleName(){
-        return ui_module::GetModuleName();
+    	return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-        return ui_language::translate(ui_module::GetModuleDescription());
+    	return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-    static function getModuleIcon() {
-        global $controller;
-        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+	static function getModuleIcon() {
+		global $controller;
+		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
