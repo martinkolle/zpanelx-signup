@@ -103,11 +103,11 @@ class xmwsclient {
         $ctx = stream_context_create($params);
         $fp = @fopen($url, 'rb', false, $ctx);
         if (!$fp) {
-            die("Problem reading data from " . $url . "");
+            zpanelx::error("Problem reading data from " . $url . "",false,true);
         }
         $response = @stream_get_contents($fp);
         if ($response == false) {
-            die("Problem reading data from " . $url . "");
+            zpanelx::error("Problem reading data from " . $url . "",false,true);
         }
         return $response;
     }
