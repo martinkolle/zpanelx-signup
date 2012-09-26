@@ -83,7 +83,7 @@ if (isset($_POST['submit'])) {
 
 	//is the username already used?
 	$data = "<username>".$username."</username>";
-	$usernameExits = zpanelx::api("reseller_billing", "UsernameExits", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+	$usernameExits = zpanelx::api("reseller_billing", "UsernameExits", $data);
 
 	if($usernameExits['xmws']['content']['code'] != "3"){
 		zpanelx::error($usernameExits['xmws']['content']['human']);
@@ -96,7 +96,7 @@ if (isset($_POST['submit'])) {
 
 //Request for the package prices
 $data = "<pk_id>".$id."</pk_id>";
-$package = zpanelx::api("reseller_billing", "Package", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+$package = zpanelx::api("reseller_billing", "Package", $data);
 if (!empty($package['xmws']['content']['package']['id'])) {
 	$package_name 	= $package['xmws']['content']['package']['name'];
 	$hosting 		= $package['xmws']['content']['package']['hosting'];
@@ -135,7 +135,7 @@ if(!empty($package_name)){
 else{
 	zpanelx::error("Invalid package selected");
 }
-	//Echo the template
+	//return template to browser
 	echo zpanelx::template($title, $head, $template);
 	//print_r(zpanelx::$zerror);
 ?>
