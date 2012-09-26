@@ -61,7 +61,7 @@ if ($verified) {
 
     //Check if the invoice id exits or have been paid
     $data     = "<token>".$invoice."</token>";
-    $invoice  = zpanelx::api("reseller_billing", "Invoice", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+    $invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
 
     if($invoice['xmws']['content']['code'] == "0"){
         zpanelx::error("Invoice id was not found");
@@ -94,11 +94,11 @@ if ($verified) {
     }
 
     $data = "<method>Paypal</method><user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
-    $invoice = zpanelx::api("reseller_billing", "Payment", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+    $invoice = zpanelx::api("reseller_billing", "Payment", $data);
 
     switch($invoice['xmws']['content']['code']){
         case "1":
-            zpanelx::sendWelcomeMail($inv_user);
+            //Really going to do nothing!
         break;
         case "2":
             zpanelx::error("PAYMENT ERROR: Could not create invoice");
@@ -115,12 +115,12 @@ if ($verified) {
     }
 
     if(!empty(zpanelx::$zerror)){
-        zpanelx::sendemail(zpanelx::getConfig('email_paypal_error'),"Invalid payment received", 
+        zpanelx::sendemail(zpanelx::getConfig('error_email'),"Invalid payment received", 
             implode('<br />',zpanelx::$zerror)."<br /><div style=\"white-space: pre;\">".$listener->getTextReport()."</div>");
     }
 
 } else {
     //there have been some problem with the Payment.. There have been sent a report to the admin.
-    zpanelx::sendmail(zpanelx::getConfig('email_paypal_error'), 'Invalid IPN', $listener->getTextReport());
+    zpanelx::sendmail(zpanelx::getConfig('error_email'), 'Invalid IPN', $listener->getTextReport());
 }
 ?>

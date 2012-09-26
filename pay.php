@@ -25,7 +25,7 @@ else if(!preg_match("/^[a-zA-Z0-9]+$/", $token)){
 }
 
 $data     = "<token>".$token."</token>";
-$invoice  = zpanelx::api("reseller_billing", "Invoice", $data, zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+$invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
 
 if($invoice['xmws']['content']['code'] == "0"){
      zpanelx::error("Invoice id was not found",false,true);
@@ -52,7 +52,7 @@ elseif($inv_status == "1"){
 }
 
 $data = "<profile_id>".$inv_user."</profile_id><account_id>".$inv_user."</account_id><payment>1</payment>";
-$account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zpanel_url"), zpanelx::getConfig("api"));
+$account = zpanelx::api("reseller_billing", "Pay", $data);
      
      if (!empty($account['xmws']['content']['account']['id'])) {
           $user_alias      = $account['xmws']['content']['account']['alias'];
@@ -64,9 +64,9 @@ $account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zp
      else{
           zpanelx::error("Error getting account data",false,true);
      }
-     //Check if we have more then one payment method Different arrays
+     
+     //Check if we have more than one payment method we have different arrays
      $payments = (is_array($payments['payment'][0])) ? $payments['payment'] : $payments;
-     //print_r($payments);
 
      foreach($payments as $row){
           $paymethod = file_get_contents('templates/paymethod.html');
@@ -75,9 +75,10 @@ $account = zpanelx::api("reseller_billing", "Pay", $data, zpanelx::getConfig("zp
           $paymethod = str_replace('{{payname}}',$row['name'],$paymethod);
           $paymethods .= $paymethod;
      }
+
 //get the package name
 $data = "<pk_id>".$package_id."</pk_id>";
-$package = zpanelx::api("reseller_billing", "Package", $data, zpanelx::getConfig("zpanel_url"), zpanelx::getConfig("api"));
+$package = zpanelx::api("reseller_billing", "Package", $data);
 
 if (!empty($package['xmws']['content']['package']['name'])) {
      $package_name    = $package['xmws']['content']['package']['name'];
@@ -90,7 +91,7 @@ $form = file_get_contents('templates/pay.html');
     
 //Add the paymethods, price and title
 $form = str_replace('{{payment}}',$paymethods,$form);
-$form = str_replace('{{pay}}', zpanelx::getConfig('cs') ." ". $inv_amount, $form);
+$form = str_replace('{{pay}}', $inv_amount, $form); //Maybe add currency.. but this means one more request to db...
 $form = str_replace('{{package_name}}', $package_name , $form);
 $form = str_replace('{{period}}', $user_payperiod , $form);
 
@@ -99,14 +100,8 @@ $form = str_replace('{{action}}', $action, $form);
 $form = str_replace('{{user_firstname}}', $user['ud_fullname_vc'], $form);
 $form = str_replace('{{invoice}}', $token, $form);
 $form = str_replace('{{email}}', $user_email, $form);
-$form = str_replace('{{return_url}}', zpanelx::getConfig('return_url'), $form);
-$form = str_replace('{{business}}', zpanelx::getConfig('email_paypal'), $form);
-$form = str_replace('{{item_name}}', $package_name." - ".$user_payperiod." month", $form);//will have the oackage name and period in next release
-$form = str_replace('{{country}}', zpanelx::getConfig('country_code'), $form);
+$form = str_replace('{{item_name}}', $package_name." - ".$user_payperiod." month", $form);
 $form = str_replace('{{amount}}', $inv_amount, $form);
-$form = str_replace('{{logo}}', zpanelx::getConfig('logo'), $form);
-$form = str_replace('{{notify_url}}', zpanelx::getConfig('notify_url'), $form);
-$form = str_replace('{{cs}}', zpanelx::getConfig('cs'), $form);
 
 $title = "Pay for hosting";
 echo zpanelx::template($title, $head, $form);

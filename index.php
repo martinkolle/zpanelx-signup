@@ -13,7 +13,7 @@ include ('lib/functions.php');
 $head = null;
 
     //Get packages from zpanelx
-	$listPackages = zpanelx::api("reseller_billing", "PackageList", "", zpanelx::getConfig('zpanel_url'), zpanelx::getConfig('api'));
+	$listPackages = zpanelx::api("reseller_billing", "PackageList", "");
 
     //We need to check that the array is the right. xmws.class is gennerating different arrays based on the number of packages. 
     $listPackages = (is_array($listPackages['xmws']['content']['package'][0])) ? $listPackages['xmws']['content']['package'] : $listPackages['xmws']['content'];
@@ -39,14 +39,14 @@ $head = null;
         $packetlist = str_replace('{{packageid}}',$row['id'],$packetlist);
         $packetlist = str_replace('{{desc}}',"Prices beginning from " . $price,$packetlist);
         $listPackage .= $packetlist;
-     }
+    }
 
 	$template = file_get_contents('templates/index.html');
     $template = str_replace('{{packageList}}', $listPackage, $template);
 	$template = str_replace('{{action}}', "./billing.php", $template);
 	$title 	  = "Buy hosting";
 
-	//Echo the template
+	//return template
 	echo zpanelx::template($title, $head, $template);
 	//print_r(zpanelx::$zerror);
 ?>
