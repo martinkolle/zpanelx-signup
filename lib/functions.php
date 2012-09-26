@@ -21,8 +21,8 @@ class zpanelx{
 	*/
 	function sendemail($emailto, $emailsubject, $emailbody) {
 
-		$fromEmail = self::getConfig('fromemail');
-		$fromEmailName = self::getConfig('fromEmailName');
+		$fromEmail = self::getConfig('error_email');
+		$fromEmailName = self::getConfig('error_emailName');
 		$message = $emailbody;
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
@@ -83,7 +83,7 @@ class zpanelx{
 	function addUser($payPeriod, $packageId, $token, $password, $username, $email, $fullname, $address, $postcode, $telephone, $website, $website_help){
 
 		$data = "<pk_id>".$packageId."</pk_id>";
-		$package = self::api("reseller_billing", "Package", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
+		$package = self::api("reseller_billing", "Package", $data);
 
 		if (!empty($package['xmws']['content']['package']['id'])) {	
 
@@ -108,7 +108,7 @@ class zpanelx{
 			<resellerid>'.self::getConfig('reseller_id').'</resellerid>
 	        <username>'.$username.'</username>
 	        <packageid>'.$packageId.'</packageid>
-	        <groupid>'.self::getConfig('groupid').'</groupid>
+	        <groupid>'.self::getConfig('group_id').'</groupid>
 	        <fullname>'.$fullname.'</fullname>
 	        <email>'.$email.'</email>
 	        <postcode>'.$postcode.'</postcode>
@@ -116,8 +116,8 @@ class zpanelx{
 	        <phone>'.$telephone.'</phone>
 	        <password>'.$password.'</password>';
 
-		$addUser 		= self::api("reseller_billing", "CreateClient", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
-
+		$addUser 		= self::api("reseller_billing", "CreateClient", $data);
+		print_r($adduser);
 		if($addUser['xmws']['content']['code'] == "1"){
 			
 			$userId 	= $addUser['xmws']['content']['uid'];
@@ -194,11 +194,17 @@ class zpanelx{
 	}
 
 	/**
-	* Connection to the API. Simple function for minimising the code.
+	* Connection to the API using xmws
 	* @author Martinkolle
-	* @return array
+	* @return array Mysql
 	*/
-	function api($module, $function, $data, $url, $api, $user = "", $pass =""){
+	function api($module, $function, $data, $url ="", $api ="", $user = "", $pass =""){
+		if(empty($url)){
+			$url = self::getConfig("zpanel_url");
+		}
+		if(empty($api)){
+			$api = self::getConfig("zpanel_api");
+		}
 
 		if(!class_exists('xmwsclient')){
 			require_once('xmwsclient.class.php');
