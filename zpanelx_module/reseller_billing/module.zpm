@@ -81,6 +81,16 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 				</div>
 			</div>
 		</a>
+		<% if ShouldInstall %>
+		<a href="./?module=reseller_billing&action=installDatabase">
+			<div class="module" style="background:red;">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/install.png" class="menu" />
+				<span style="color:white;float:left;">Install Database</span>
+				</div>
+			</div>
+		</a>
+		<% endif %>
 	</div>
 </div>
 
@@ -241,16 +251,11 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><input type="text" class="reseller" value="<& reseller &>" name="reseller" /> </td>
 					<td><textarea type="text" class="hosting" name="hosting"><& hosting &></textarea> </td>
 					<td><textarea type="text" class="domain" name="domain" disabled="disabled"><& domain &></textarea> </td>
-					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPackage(
+					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="savePackage(
 										$(this).closest('tr').find('input.id').val(),
 										$(this).closest('tr').find('input.name').val(),
 										$(this).closest('tr').find('textarea.hosting').val(),
-										$(this).closest('tr').find('textarea.domain').val());"><: Edit :></button>
-						<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="savePackage(
-										$(this).closest('tr').find('input.id').val(),
-										$(this).closest('tr').find('input.name').val(),
-										$(this).closest('tr').find('textarea.hosting').val(),
-										$(this).closest('tr').find('textarea.domain').val());"><: Save :></button><- only use the first time!</td>
+										$(this).closest('tr').find('textarea.domain').val());"><: Save :></button></td>
 				</tr>
 				<% endloop %>
 				</tbody>
@@ -264,7 +269,7 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<div class="zform_wrapper">
 	<h2><: Package help :></h2>
 	<p>Add the price for the packages in this format (disable: leave hosting and domain empty):</p>
-	<p>{"month": "12",  "price": "499"},{"month": "6",  "price": "100"}</p>
+	<p>{"hosting":[{"month":12,"price":300},{"month":6,"price":100}]}</p>
 	</div>
 	<% endif %>
 
