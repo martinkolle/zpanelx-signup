@@ -1,12 +1,14 @@
 <?php
 
 /**
- *
- * Firewall Configuration Module for ZPX
- * Version : 200
- * Author :  Mudasir Mirza
- * Email : mudasirmirza@gmail.com
+ * @package zpanelx
+ * @subpackage modules->reseller_billing
+ * @author Martin Kollerup
+ * @copyright martinkole
+ * @link http://www.kmweb.dk/
+ * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
+
 class module_controller {
 
     static $delete;
@@ -19,14 +21,18 @@ class module_controller {
     static $editPaymentBad;
     static $editPaymentNoId;
     static $editedPackage;
+    static $SavedPackage;
     static $editPackage;
     static $editPackageNeedid;
     static $editInvoiceGood;
     static $editInvoiceBad;
     static $editInvoiceNoId;
+    static $dbInstall;
+    static $username;
+    static $allreadyexists; //maybe remove?!
 
     /**
-    *At the end optional fields, but required
+    * Yeah, "must have" functions for the module.
     */
     static function getModuleName(){
     	return ui_module::GetModuleName();
@@ -46,8 +52,9 @@ class module_controller {
         $name = $controller->GetControllerRequest('URL', 'module');
         return "/modules/".$name;
     }
+
     /**
-    * I want to have different views
+    * LET ME SAY... DIFFERENT VIEWS IN MODULES! BUUUUH JAH!!
     */
     function getView(){
         global $controller;
@@ -67,10 +74,20 @@ class module_controller {
         $url = self::getView();
         return ($url == 'package') ? true : false;
     }
+    function getViewSetting(){
+        $url = self::getView();
+        return ($url == 'setting') ? true : false;
+    }
+    function getViewEmail(){
+        $url = self::getView();
+        return ($url == 'email') ? true : false;
+    }
 
-    /*PAYMENT FUNCTIONS*/
+/******
+* PAYMENT
+******/
 
-    function getPayments(){
+    static function getPayments(){
         global $zdbh;
         $sql = "SELECT * FROM x_rb_payment";
         $numrows = $zdbh->query($sql);
@@ -187,8 +204,6 @@ class module_controller {
         return true;
     }
 
-    /**END PAYMENT*/
-
     /**
     * Get the form values on post
     */
@@ -208,21 +223,11 @@ class module_controller {
         }
         return;
     }
-    /* USING THE ZPANEL WAY = a lot of reloads because of views
-    static function doDeletePayment() {
-        global $controller;
 
-        $formvars = $controller->GetAllControllerRequests('FORM');
-        if (self::ExecuteDeletePayment($formvars['deleteId'])) {
-            self::$deletedPaymentMethod = true;
-            return true;
-        } else {
-            return false;
-        }
-    }
-    */
+/*****
+* START INVOICES
+*****/
 
-    /** BILLINGS ***/
     function getInvoices() {
         global $zdbh;
         $sql = "SELECT * FROM x_rb_invoice WHERE inv_user IS NOT NULL";
@@ -248,8 +253,6 @@ class module_controller {
                     'status' => $row['inv_status'],
                     'token' => $row['inv_token'],
                     'select' =>'<option value="1" '.$accepted.'>Accepted</option><option value="2" '.$pending.'>Pending</option><option value="0" '.$disable.'>Disabled</option>'
-
-
                 ));
             }
             return $res;
@@ -323,7 +326,7 @@ class module_controller {
         /*if (fs_director::CheckForEmptyValue($id, $amount, $token)) {
           return false;
         } */
-        $sql = $zdbh->prepare("UPDATE x_rb_invoice SET inv_user = :inv_user, inv_amount = :amount, inv_type = :type, inv_date = :date, inv_payment = :payment, inv_payment_id = :payment_id, inv_desc = :desc, inv_status = :status, inv_token = :token  WHERE inv_id = :id");
+        $sql = $zdbh->prepare("UPDATE x_rb_invoice SET inv_user = :inv_user, inv_amount = :amount, inv_type = :type, inv_date = :date, inv_payment = :payment, inv_payment_id = :payment_id, inv_desc = :desc, inv_status = :status, inv_token = :token  WHERE inv_id = :id LIMIT 1");
         
         $query = array(':id'=>$id, ':inv_user'=>$user, ':amount'=>$amount, ':type'=>urldecode($type), ':date'=>$date, ':payment'=>urldecode($payment), ':payment_id'=>$payment_id, ':desc'=>urldecode($desc), ':status'=>$status, ':token'=>$token);
         
@@ -331,12 +334,11 @@ class module_controller {
         return true;
     }
 
-    /*** PACKAGE ***/
-
+/******
+* PACKAGES
+******/
     function getPackages(){
         global $zdbh;
-        //$sql = "SELECT * FROM x_packages WHERE x_packages.pk_deleted_ts IS NULL LEFT JOIN x_rb_price ON x_packages.pk_id_pk = x_rb_price.pk_id";
-
         $sql = "SELECT * FROM x_packages LEFT JOIN x_rb_price ON x_packages.pk_id_pk = x_rb_price.pk_id WHERE x_packages.pk_deleted_ts IS NULL";
         $numrows = $zdbh->query($sql);
         if ($numrows->fetchColumn() <> 0) {
@@ -383,28 +385,47 @@ class module_controller {
             return false;
         }
     }
-        static function doSavePackage() {
+    static function doSavePackage() {
         global $controller;
+        global $zdbh;
+
         $url = $controller->GetAllControllerRequests('URL');
 
         $id         = (isset($url['id'])) ? $url['id'] : null;
         $name       = (isset($url['name'])) ? urldecode($url['name']) : null;
-        $reseller       = (isset($url['reseller'])) ? $url['reseller'] : null;
+        $reseller   = (isset($url['reseller'])) ? $url['reseller'] : null;
 
-        $domain   = (isset($url['domain'])) ? $url['domain'] : null;
-        $hosting   = (isset($url['hosting'])) ? $url['hosting'] : null;
+        $domain     = (isset($url['domain'])) ? $url['domain'] : null;
+        $hosting    = (isset($url['hosting'])) ? $url['hosting'] : null;
+
+        $stmt = $zdbh->prepare('SELECT pkp_id FROM x_rb_price WHERE pk_id=?');
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ((!empty($id)) && (!empty($name))) {
-            if (self::ExecuteSavePackage($id, $name, $domain, $hosting)){
-                self::$editedPackage = true;
-                return true;
+
+            if(!$row)
+            {
+                if (self::ExecuteSavePackage($id, $name, $domain, $hosting)){
+                    self::$SavedPackage = true;
+                    return true;
+                }else{
+                    self::$editPackage = true;
+                    return false;
+                }
             }
             else{
-                self::$editPackage = true;
-                return false;
+                if (self::ExecuteEditPackage($id, $name, $domain, $hosting)){
+                    self::$editedPackage = true;
+                    return true;
+                }else{
+                    self::$editPackage = true;
+                    return false;
+                }
             }
-        }
-        else{
+
+        }else{
             self::$editPackageNeedid = true;
             return false;
         }
@@ -415,7 +436,7 @@ class module_controller {
         if (fs_director::CheckForEmptyValue($id, $name)) {
             return false;
         }
-        $sql = $zdbh->prepare("UPDATE x_packages SET pk_name_vc = :name WHERE pk_id_pk = :id");
+        $sql = $zdbh->prepare("UPDATE x_packages SET pk_name_vc = :name WHERE pk_id_pk = :id LIMIT 1");
         $query = array(':id'=>$id, ':name'=>$name);
         $sql->execute($query);
 
@@ -453,11 +474,76 @@ class module_controller {
         return true;
     }
 
-    /**
-    * API CONNECTIONS
-    */
+/******
+* ALL AROUND FUNCTONS
+******/
 
-    static function ExecuteCreateInvoice($user, $amount, $type, $desc, $token){
+    static function getMail($name){
+        global $zdbh;
+
+        $stmt = $zdbh->prepare('SELECT * FROM x_rb_mail WHERE name=? LIMIT 1');
+        $stmt->execute(array($name));
+        $row = $stmt->fetch();
+
+        return $row;
+    }
+    static function getUserEmail($id){
+        global $zdbh;
+        $stmt = $zdbh->prepare('SELECT ac_email_vc FROM x_accounts WHERE ac_id_pk=? LIMIT 1');
+        $stmt->execute(array($id));
+        $row = $stmt->fetchColumn();
+
+        return $row;
+    }
+
+    /**
+    * PHP mail function to send mail in UTF-8.
+    * @author Martinkolle
+    * @return true on success and false on fail
+    */
+    static function sendemail($emailto, $emailsubject, $emailbody) {
+
+        $fromEmail = self::getConfig('email_from');
+        $fromEmailName = self::getConfig('email_fromname');
+        $headers  = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
+        $headers .= "From: ". $fromEmailName ." <". $fromEmail .">\r\n";
+
+        $send = mail($emailto,$emailsubject,$emailbody,$headers);
+
+        return ($send) ? true : false;
+    }
+
+    static function getConfig($name){
+        global $zdbh;
+        $stmt = $zdbh->prepare('SELECT value FROM x_rb_settings WHERE name=? LIMIT 1');
+        $stmt->execute(array($name));
+        $row = $stmt->fetchColumn();
+
+        return $row;
+    }
+    /**
+        * Generate the token the payment should be specified with.
+        * @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
+        * @return token
+    */
+    static function generateToken($length = 24) {
+        $characters = '0123456789';
+        $characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; 
+        $charactersLength = strlen($characters)-1;
+        $token = '';
+        //select some random characters
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $characters[mt_rand(0, $charactersLength)];
+        }        
+        return $token;
+    }
+
+/*****
+* API CONNECTIONS
+*****/
+
+    static function ExecuteCreateInvoice($user, $amount, $type, $desc, $token, $email = true){
         global $zdbh;
         $date = date("Y-m-d");// current date
 
@@ -481,31 +567,30 @@ class module_controller {
         if(!$stmt->execute($query)){
             return false;
         } else{
-            return true;
-        }
-    }
-    static function ExecuteCreateAccountInvoice($user, $duedate, $invoice, $remind, $desc){
-        global $zdbh;
-        
-        $stmt = $zdbh->prepare("
-            INSERT INTO x_rb_billing(
-                blg_user, 
-                blg_duedate, 
-                blg_inv_id, 
-                blg_remind, 
-                blg_desc
-            ) VALUES (
-                :user,
-                :duedate,
-                :invoice,
-                :remind,
-                :desc
-            )");
-        $query = array(':user'=>$user, ':duedate'=>$duedate, ':invoice'=>$invoice, ':remind'=>$remind, ':desc'=>$desc);
+            if($email){
+                $profile = self::ApiProfile($user);
+                $email = self::getMail("user_payment");
+                $emailtext = $email['message'];
+                $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
+                $emailtext = str_replace('{{billing_url}}',self::getConfig('url_billing'),$emailtext);
+                $emailtext = str_replace('{{token}}',$token,$emailtext);
+                $emailtext = str_replace('{{firm}}',self::getConfig('firm'),$emailtext);
+            
+                self::sendemail(self::getUserEmail($user), $email['subject'], $emailtext);
+            }
+            else{
+                $profile = self::ApiProfile($user);
+                $email = self::getMail("user_expire");
+                $emailtext = $email['message'];
+                $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
+                $emailtext = str_replace('{{billing_url}}',self::getConfig('url_billing'),$emailtext);
+                $emailtext = str_replace('{{days}}',self::getConfig('user_expireDays'),$emailtext);
+                $emailtext = str_replace('{{token}}',$token,$emailtext);
+                $emailtext = str_replace('{{firm}}',self::getConfig('firm'),$emailtext);
+            
+                self::sendemail(self::getUserEmail($user), $email['subject'], $emailtext);
+            }
 
-        if(!$stmt->execute($query)){
-            return false;
-        } else{
             return true;
         }
     }
@@ -550,6 +635,10 @@ class module_controller {
             return 4;
         }
     }
+
+/******
+* API FUNCTONS
+******/
 
     /**
     * Get the package informations
@@ -619,7 +708,7 @@ class module_controller {
         $desc       = null;
 
         // Set that we have received the payment from paypal
-        $stmt = $zdbh->prepare("UPDATE x_rb_invoice SET inv_payment = :method, inv_payment_id = :txn_id, inv_status = :status WHERE inv_token = :token");
+        $stmt = $zdbh->prepare("UPDATE x_rb_invoice SET inv_payment = :method, inv_payment_id = :txn_id, inv_status = :status WHERE inv_token = :token LIMIT 1");
 
         $query = array(':method'=>$method, ':txn_id'=>$txn_id, ':token'=>$token, ':status'=>"1");
 
@@ -657,14 +746,18 @@ class module_controller {
             INSERT INTO x_rb_billing(
                 blg_user,
                 blg_inv_id,
+                blg_duedate,
                 blg_remind,
+                blg_create,
                 blg_desc)
             VALUES(
                 :user_id,
                 :inv_id,
+                :duedate,
                 :remind,
+                :create,
                 :desc)");
-        $query = array(':user_id'=>$user_id, ':inv_id'=>$token, ':remind'=>$remind_date, ':desc'=>$desc);
+        $query = array(':user_id'=>$user_id, ':inv_id'=>$token, ':duedate' =>$remind_date, ':remind'=>$remind_date, ':create'=>$date, ':desc'=>$desc);
 
         if(!$stmt->execute($query))
         {
@@ -673,11 +766,19 @@ class module_controller {
         return $response;
     }
 
-    static function ApiCreateClient($uid, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
+    static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
         global $zdbh;
         // Check for spaces and remove if found...
         $username = strtolower(str_replace(' ', '', $username));
-        $reseller = ctrl_users::GetUserDetail($uid);
+        
+        if(empty($reseller_id)){
+            $reseller_id = self::getConfig("user.reseller_id");
+        }
+
+        if(empty($groupid)){
+            $groupid = self::getConfig("user.group_id");
+        }
+        $reseller = ctrl_users::GetUserDetail($reseller_id);
         // Check for errors before we continue...
         if (fs_director::CheckForEmptyValue(self::ApiCreateClientCheckError($username, $packageid, $groupid, $email, $password))) {
             return false;
@@ -702,7 +803,7 @@ class module_controller {
                                         '" . $groupid . "',
                                         '" . $reseller['usertheme'] . "',
                                         '" . $reseller['usercss'] . "',
-                                        " . $uid . ",
+                                        " . $reseller_id . ",
                                         '0',
                                         " . time() . ")");
         $sql->execute();
@@ -730,12 +831,12 @@ class module_controller {
         $sql->execute();
         // Lets create the client diectories
         fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username);
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username, 0777);
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username, 0755);
         fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/public_html");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/public_html", 0777);
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/public_html", 0755);
         fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/backups");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/backups", 0777);
-
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/backups", 0755);        
+        self::$username = $username;
         runtime_hook::Execute('OnAfterCreateClient');
         return true;
     }
@@ -748,7 +849,7 @@ class module_controller {
             $sql = "SELECT COUNT(*) FROM x_accounts WHERE UPPER(ac_user_vc)='" . strtoupper($username) . "' AND ac_deleted_ts IS NULL";
             if ($numrows = $zdbh->query($sql)) {
                 if ($numrows->fetchColumn() <> 0) {
-                    self::$alreadyexists = true;
+                    self::$allreadyexists = true;
                     return false;
                 }
             }
@@ -800,7 +901,7 @@ class module_controller {
         return true;
     }
 
-    static function getUserId($username){
+    static function getUsernameId($username){
         global $zdbh;
         $sql='SELECT ac_id_pk FROM x_accounts WHERE ac_user_vc=?';
         $sql = $zdbh->prepare($sql);
@@ -810,8 +911,18 @@ class module_controller {
         return $result;
     }
 
+    static function getShouldInstall(){
+        global $zdbh;
+        $result = $zdbh->query("show tables like 'x_rb_%'")->fetch(PDO::FETCH_NUM);
+        if (array_search('x_rb_billing',$result) !== false){
+            return false;
+        } else{
+            return true;
+        }
+    }
     static function DoinstallDatabase(){
     global $zdbh;
+    $html = null;
 
         $query = $zdbh->prepare("CREATE TABLE IF NOT EXISTS `x_rb_invoice` (
                 `inv_id` int(9) NOT NULL AUTO_INCREMENT,
@@ -825,20 +936,17 @@ class module_controller {
                 `inv_token` varchar(255) NOT NULL,
                 `inv_status` int(9) NOT NULL DEFAULT '2',PRIMARY KEY (`inv_id`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
         if($query->execute()){
-            $html .= "Created x_rb_invoice";
+            $html .= "Created x_rb_invoice <br/>";
         } else{
-            $html .= "Error x_rb_invoice";
+            $html .= "Error x_rb_invoice<br/>";
         }
 
-        $query = $zdbh->prepare("INSERT INTO `x_rb_invoice` (`inv_id`, `inv_user`, `inv_amount`, `inv_type`, `inv_date`, `inv_payment`, `inv_payment_id`, `inv_desc`, `inv_token`, `inv_status`) VALUES
-(1, '69', '488', 'Initial signup', '2012-08-28', 'paypal', '', '  {\"pk_id\":4, \"price\":480, \"period\":12}     ', '7834ur9hoiu3rkewol', 2);
-
-");
+        $query = $zdbh->prepare("INSERT INTO `x_rb_invoice` (`inv_id`, `inv_user`, `inv_amount`, `inv_type`, `inv_date`, `inv_payment`, `inv_payment_id`, `inv_desc`, `inv_token`, `inv_status`) VALUES(1, '69', '488', 'Initial signup', '2012-08-28', 'paypal','','{\"pk_id\":4, \"price\":480, \"period\":12}', '7834ur9hoiu3rkewol', 2);");
         
         if($query->execute()){
-            $html .= "Insert into x_rb_invoice";
+            $html .= "Insert into x_rb_invoice<br/>";
         } else{
-            $html .= "Insert into error x_rb_invoice";
+            $html .= "Insert into error x_rb_invoice<br/>";
         }
 
         $query = $zdbh->prepare("CREATE TABLE IF NOT EXISTS `x_rb_billing` (
@@ -852,9 +960,9 @@ class module_controller {
             ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
         
         if($query->execute()){
-            $html .= "Created x_rb_billing";
+            $html .= "Created x_rb_billing<br/>";
         } else{
-            $html .= "Error x_rb_billing";
+            $html .= "Error x_rb_billing<br/>";
         }
 
         $query = $zdbh->prepare("INSERT INTO `x_rb_billing` (`blg_id`, `blg_user`, `blg_duedate`, `blg_inv_id`, `blg_remind`, `blg_desc`) VALUES
@@ -862,9 +970,9 @@ class module_controller {
 ");
         
         if($query->execute()){
-            $html .= "Insert into x_rb_billing";
+            $html .= "Insert into x_rb_billing<br/>";
         } else{
-            $html .= "Insert into error x_rb_billing";
+            $html .= "Insert into error x_rb_billing<br/>";
         }
 
 
@@ -877,9 +985,9 @@ class module_controller {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
         
         if($query->execute()){
-            $html .= "Created x_rb_payment";
+            $html .= "Created x_rb_payment<br/>";
         } else{
-            $html .= "Error x_rb_payment";
+            $html .= "Error x_rb_payment<br/>";
         }
 
         $query = $zdbh->prepare("INSERT INTO `x_rb_payment` (`pm_id`, `pm_name`, `pm_data`, `pm_active`) VALUES
@@ -887,9 +995,9 @@ class module_controller {
 ");
         
         if($query->execute()){
-            $html .= "Insert into x_rb_payment";
+            $html .= "Insert into x_rb_payment<br/>";
         } else{
-            $html .= "Insert into error x_rb_payment";
+            $html .= "Insert into error x_rb_payment<br/>";
         }
 
 
@@ -902,22 +1010,29 @@ class module_controller {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
         
         if($query->execute()){
-            $html .= "Created x_rb_payment";
+            $html .= "Created x_rb_payment<br/>";
         } else{
-            $html .= "Error x_rb_payment";
+            $html .= "Error x_rb_payment<br/>";
         }
 
         $query = $zdbh->prepare("INSERT INTO `x_rb_price` (`pkp_id`, `pk_id`, `pkp_domain`, `pkp_hosting`) VALUES
 (1, '4', NULL, '{\"hosting\":[{\"month\":12,\"price\":499},{\"month\":6,\"price\":200}]}');");
         
         if($query->execute()){
-            $html .= "Insert into x_rb_payment";
+            $html .= "Insert into x_rb_payment<br/>";
         } else{
-            $html .= "Insert into error x_rb_payment";
+            $html .= "Insert into error x_rb_payment<br/>";
         }
-        
-
-
+        self::$dbInstall = $html;
+/*
+        CREATE TABLE IF NOT EXISTS `x_rb_mail` (
+  `id` int(9) NOT NULL AUTO_INCREMENT,
+  `name` varchar(350) NOT NULL,
+  `subject` varchar(350) NOT NULL,
+  `message` text NOT NULL,
+  `header` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; */
 
     }
 
@@ -943,6 +1058,10 @@ class module_controller {
         if(!fs_director::CheckForEmptyValue(self::$editedPackage)){
             return ui_sysmessage::shout(ui_language::translate("Package have been edited"), "zannounceok");
         }
+        if(!fs_director::CheckForEmptyValue(self::$SavedPackage)){
+            return ui_sysmessage::shout(ui_language::translate("Package have been saved"), "zannounceok");
+        }
+
         if(!fs_director::CheckForEmptyValue(self::$editPackage)){
             return ui_sysmessage::shout(ui_language::translate("Failed editing package"), "zannounceerror");
         }
@@ -958,7 +1077,6 @@ class module_controller {
         if(!fs_director::CheckForEmptyValue(self::$editInvoiceNoId)){
             return ui_sysmessage::shout(ui_language::translate("Invoice id or user have not been specified"), "zannounceerror");
         }
-
         if(!fs_director::CheckForEmptyValue(self::$editPaymentGood)){
             return ui_sysmessage::shout(ui_language::translate("Payment have been edited"), "zannounceok");
         }
@@ -967,6 +1085,9 @@ class module_controller {
         }
         if(!fs_director::CheckForEmptyValue(self::$editPaymentGood)){
             return ui_sysmessage::shout(ui_language::translate("Payment id have not been specified"), "zannounceerror");
+        }
+        if(!fs_director::CheckForEmptyValue(self::$dbInstall)){
+            return ui_sysmessage::shout(self::$dbInstall, "zannounceok");
         }
     }
 }
