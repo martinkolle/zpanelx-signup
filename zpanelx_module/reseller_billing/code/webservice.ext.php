@@ -2,10 +2,10 @@
 
 /**
  * @package zpanelx
- * @subpackage modules
+ * @subpackage modules->reseller_billing
  * @author Martin Kollerup
  * @copyright martinkole
- * @link http://www.zpanelcp.com/
+ * @link http://www.kmweb.dk/
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
@@ -52,17 +52,7 @@ class webservice extends ws_xmws {
 			ws_generic::GetTagValue('desc', $request_data['content']),
 			ws_generic::GetTagValue('token', $request_data['content'])
 			)){
-			if(module_controller::ExecuteCreateAccountInvoice(
-				ws_generic::GetTagValue('user_id', $request_data['content']),
-				ws_generic::GetTagValue('amount', $request_data['content']),
-				ws_generic::GetTagValue('type', $request_data['content']),
-				ws_generic::GetTagValue('desc', $request_data['content']),
-				ws_generic::GetTagValue('token', $request_data['content'])
-				)){
 				$response = "1";
-			} else{
-				$response = "2";
-			}
 		} else{
 			$response = "0";
 		}
@@ -182,6 +172,14 @@ class webservice extends ws_xmws {
 			$payment_method = null;
 
 			foreach ($rows as $row){
+
+				$row['pm_data'] = str_replace('{{business}}', module_controller::getConfig('payment.email_paypal'), $row['pm_data']);
+				$row['pm_data'] = str_replace('{{country}}', module_controller::getConfig('payment.country'), $row['pm_data']);
+				$row['pm_data'] = str_replace('{{logo}}', module_controller::getConfig('payment.logo'), $row['pm_data']);
+				$row['pm_data'] = str_replace('{{notify_url}}', module_controller::getConfig('payment.notify_url'), $row['pm_data']);
+				$row['pm_data'] = str_replace('{{cs}}', module_controller::getConfig('payment.cs'), $row['pm_data']);
+				$row['pm_data'] = str_replace('{{return_url}}', module_controller::getConfig('payment.return_url'), $row['pm_data']);
+
 				$payment_method .= ws_xmws::NewXMLTag('payment',
 					ws_xmws::NewXMLTag('id',$row['pm_id']).
 					ws_xmws::NewXMLTag('name',$row['pm_name']).
@@ -230,7 +228,9 @@ class webservice extends ws_xmws {
 
     public function CreateClient() {
         $request_data = $this->RawXMWSToArray($this->wsdata);
-        $response_xml = "";
+        $contenttags 	= $this->XMLDataToArray($request_data['content']);
+        $response_xml = null;
+
         if(!module_controller::ApiCreateClient(
         	ws_generic::GetTagValue('resellerid', $request_data['content']), 
         	ws_generic::GetTagValue('username', $request_data['content']), 
@@ -247,7 +247,7 @@ class webservice extends ws_xmws {
 
             $response_xml = ws_xmws::NewXMLTag('code', '0');
         } else {
-            $response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUserId(ws_generic::GetTagValue('username', $request_data['content'])));
+            $response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
             $response_xml .= ws_xmws::NewXMLTag('code', '1');
         }
         $dataobject = new runtime_dataobject();
