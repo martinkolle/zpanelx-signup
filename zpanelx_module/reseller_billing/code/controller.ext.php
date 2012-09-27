@@ -35,16 +35,16 @@ class module_controller {
     * Yeah, "must have" functions for the module.
     */
     static function getModuleName(){
-    	return ui_module::GetModuleName();
+        return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-    	return ui_language::translate(ui_module::GetModuleDescription());
+        return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-	static function getModuleIcon() {
-		global $controller;
-		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+    static function getModuleIcon() {
+        global $controller;
+        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
@@ -949,15 +949,17 @@ class module_controller {
             $html .= "Insert into error x_rb_invoice<br/>";
         }
 
-        $query = $zdbh->prepare("CREATE TABLE IF NOT EXISTS `x_rb_billing` (
-              `blg_id` int(9) NOT NULL AUTO_INCREMENT,
-              `blg_user` varchar(100) NOT NULL,
-              `blg_duedate` date NOT NULL COMMENT 'due date',
-              `blg_inv_id` varchar(255) NOT NULL COMMENT 'invoice id',
-              `blg_remind` varchar(100) NOT NULL,
-              `blg_desc` text NOT NULL,
-              PRIMARY KEY (`blg_id`)
-            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
+        $query = $zdbh->prepare("
+CREATE TABLE IF NOT EXISTS `x_rb_billing` (
+  `blg_id` int(9) NOT NULL AUTO_INCREMENT,
+  `blg_user` varchar(100) NOT NULL,
+  `blg_create` date NOT NULL,
+  `blg_duedate` date NOT NULL COMMENT 'due date',
+  `blg_inv_id` varchar(255) NOT NULL COMMENT 'invoice id',
+  `blg_remind` varchar(100) NOT NULL,
+  `blg_desc` text NOT NULL,
+  PRIMARY KEY (`blg_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8");
         
         if($query->execute()){
             $html .= "Created x_rb_billing<br/>";
@@ -965,8 +967,8 @@ class module_controller {
             $html .= "Error x_rb_billing<br/>";
         }
 
-        $query = $zdbh->prepare("INSERT INTO `x_rb_billing` (`blg_id`, `blg_user`, `blg_duedate`, `blg_inv_id`, `blg_remind`, `blg_desc`) VALUES
-(1, '68 ', '0000-00-00', '1', '', '{\"hosting\":web49, \"price\":488, \"period\":12, \"domain\":http://kmweb.dk}');
+        $query = $zdbh->prepare("INSERT INTO `x_rb_billing` (`blg_id`, `blg_user`, `blg_create`, `blg_duedate`, `blg_inv_id`, `blg_remind`, `blg_desc`) VALUES
+(1, '88', '0000-00-00', '2012-09-19', '1', '', '{\"pk_id\":\"4\", \"price\":\"488\", \"period\":\"12\", \"domain\":\"http://kmweb.dk\"}');
 ");
         
         if($query->execute()){
@@ -974,6 +976,34 @@ class module_controller {
         } else{
             $html .= "Insert into error x_rb_billing<br/>";
         }
+
+        $query = $zdbh->prepare("CREATE TABLE IF NOT EXISTS `x_rb_mail` (
+  `id` int(9) NOT NULL AUTO_INCREMENT,
+  `name` varchar(350) NOT NULL,
+  `subject` varchar(350) NOT NULL,
+  `message` text NOT NULL,
+  `header` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5;");
+
+        if($query->execute()){
+            $html .= "Create x_rb_mail";
+        } else{
+             $html .= "Error x_rb_mail";
+        }
+
+        $query->prepare("INSERT INTO `x_rb_mail` (`id`, `name`, `subject`, `message`, `header`) VALUES
+(1, 'user_payment', 'Pay for hosting', '<p>{{fullname}}, we''re very pleased you''ve created an account with us.</p>\r\n<p>If for some reason you was unable to complete your order, please follow the \r\nfollowing link:</p>\r\n<p><a href=\"{{billing_url}}/pay.php?id={{token}}\">{{billing_url}}/pay.php?id={{token}}</a></p>\r\n<p>Once your payment is accepted, we will send your login credentails.</p>\r\n\r\nRegards, {{firm}}', ''),
+(2, 'user_welcome', 'Welcome at {{firm}}', '<p><b>Welcome, {{username}}!</b></p>\r\n<p>Thank you for choosing us for your web hosting services. This email contains \r\nall the information you need to get started.</p>\r\n<p><b>Your control panel:</b></p>\r\n<p>{{zpanel_url}}<br>\r\nUsername: {{username}}<br>\r\npassword: {{password}}<br />\r\n</p>\r\n<p><b>Adding your domain name:</b></p>\r\n<p>This should be the first thing you do.</p>\r\n<ul>\r\n <li>Login to your control panel</li>\r\n    <li>Click ''Domains''</li>\r\n  <li>This page allows you to add new domain names</li>\r\n   <li>Then go to Advanced --&gt; DNS Settings --&gt; Select your domain name --&gt; \r\n  Click ''add default records''</li>\r\n</ul>\r\n<p>The last thing to do is change the name server settings with your domain \r\nregistrar to the following:</p>\r\n<p>{{ns1}}<br>\r\n{{ns2}}</p>\r\n<p>Domain names should resolve to our service within 1 hour, however can take up \r\nto 48 hours.</p>\r\n<p><b>FTP:</b></p>\r\n<ul>\r\n  <li>Login to your control panel</li>\r\n    <li>Click ''FTP Accounts''</li>\r\n <li>Create a username and password</li>\r\n</ul>\r\n<p>FTP can then be accessed using a range of free programs (we recommend \r\nFileZilla) with the address line:</p>\r\n<p>ftp.[your-domain-name].[ext] <br /> \r\nor {{ftp}}</p>\r\n\r\nRegards, {{firm}}', ''),
+(3, 'user_expire', 'Account is going to be disabled', 'Dear {{fullname}}<br />\r\n\r\n<b>Your account at {{firm}} will expire in {{days}} days.</b>\r\n<br />\r\nIf you want to renew, please follow the link below. \r\n<br />\r\n{{billing_url}}/pay.php?id={{token}}\r\n<br />\r\nIf you don''t want, we will say thanks for the partnership. \r\n</br>\r\nRegards, {{firm}}', ''),
+(4, 'user_disabled', '{{firm}}: {{username}} have been disabled', 'Dear {{fullname}},\r\n\r\nYour hosting account at {{firm}} have been disabled because you do not have  paid. \r\n\r\nIf you want to reactivate your account, please contact us at {{contact_mail}} <br /><br />\r\n\r\nRegards, {{firm}}', '');
+");
+
+        if($query->execute()){
+            $html .= "Insert into x_rb_mail";
+        } else{
+             $html .= "Insert into error x_rb_mail";
+        }  
 
 
         $query = $zdbh->prepare("CREATE TABLE IF NOT EXISTS `x_rb_payment` (
@@ -1024,16 +1054,6 @@ class module_controller {
             $html .= "Insert into error x_rb_payment<br/>";
         }
         self::$dbInstall = $html;
-/*
-        CREATE TABLE IF NOT EXISTS `x_rb_mail` (
-  `id` int(9) NOT NULL AUTO_INCREMENT,
-  `name` varchar(350) NOT NULL,
-  `subject` varchar(350) NOT NULL,
-  `message` text NOT NULL,
-  `header` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; */
-
     }
 
     /**
