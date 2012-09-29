@@ -808,7 +808,7 @@ class module_controller {
                                         " . time() . ")");
         $sql->execute();
         // Now lets pull back the client ID so that we can add their personal address details etc...
-        $client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk=" . $uid . " ORDER BY ac_id_pk DESC")->Fetch();
+        $client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk='" . $reseller_id . "' ORDER BY ac_id_pk DESC")->Fetch();
         $sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk,
                                         ud_fullname_vc,
                                         ud_group_fk,
