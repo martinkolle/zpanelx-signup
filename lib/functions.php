@@ -117,7 +117,6 @@ class zpanelx{
 	        <password>'.$password.'</password>';
 
 		$addUser 		= self::api("reseller_billing", "CreateClient", $data);
-		print_r($adduser);
 		if($addUser['xmws']['content']['code'] == "1"){
 			
 			$userId 	= $addUser['xmws']['content']['uid'];
@@ -133,16 +132,15 @@ class zpanelx{
 					<desc>".$desc."</desc>
 					<token>".$token."</token>";
 			$addInvoice = self::api("reseller_billing", "CreateInvoice", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
-
 			if($addInvoice['xmws']['content']['code'] == "1"){
 				header('Location: pay.php?id='.$token);
 			} else{
 				zpanelx::error("Error creating invoice");
-				self::sendemail(self::getConfig('email_paypal_error'), "Error creating invoice", "The invoice have not been created for user: ".$username."(".$userId.")" );
+				self::sendemail(self::getConfig('error_email'), "Error creating invoice", "The invoice have not been created for user: ".$username."(".$userId.")" );
 			}
 		} else{
 			zpanelx::error("Error creating account");
-			self::sendemail(self::getConfig('email_paypal_error'), "Error creating account", "A new account have tried to be created, but failed");	
+			self::sendemail(self::getConfig('error_email'), "Error creating account", "A new account have tried to be created, but failed");	
 		}
 	}
 
