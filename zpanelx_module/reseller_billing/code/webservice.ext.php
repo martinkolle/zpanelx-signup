@@ -230,12 +230,26 @@ class webservice extends ws_xmws {
         $request_data = $this->RawXMWSToArray($this->wsdata);
         $contenttags 	= $this->XMLDataToArray($request_data['content']);
         $response_xml = null;
+        
+        //Check that a reseller have been set else use get from settings
+        if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){
+        	$reseller_id = module_controller::getConfig("user.reseller_id");
+        } else {
+        	$reseller_id = ws_generic::GetTagValue('resellerid', $request_data['content']);
+        }
+        
+        //Check that a group id have been set else use get from settings
+        if (ws_generic::GetTagValue('groupid', $request_data['content']) == "0"){
+        	$group_id = module_controller::getConfig("user.group_id");
+        } else {
+        	$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
+        }
 
         if(!module_controller::ApiCreateClient(
-        	ws_generic::GetTagValue('resellerid', $request_data['content']), 
+        	$reseller_id, 
         	ws_generic::GetTagValue('username', $request_data['content']), 
         	ws_generic::GetTagValue('packageid', $request_data['content']), 
-        	ws_generic::GetTagValue('groupid', $request_data['content']), 
+        	$group_id, 
         	ws_generic::GetTagValue('fullname', $request_data['content']), 
         	ws_generic::GetTagValue('email', $request_data['content']), 
         	ws_generic::GetTagValue('address', $request_data['content']), 
