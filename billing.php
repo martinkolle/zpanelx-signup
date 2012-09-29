@@ -30,7 +30,7 @@ else if(!preg_match('/^\d+$/', $id)){
 $username 		= (isset($_POST["username"])) ? filter_var($_POST["username"],FILTER_SANITIZE_STRING) : "";
 $email	 		= (isset($_POST["email"])) ? $_POST["email"] : "";
 $fullname 		= (isset($_POST["fullname"])) ? filter_var($_POST["fullname"],FILTER_SANITIZE_STRING) : "";
-$address 		= (isset($_POST["address"])) ? filter_var($_POST["address"], FILTER_SANITIZE_STRING) : "";
+$address 		= (isset($_POST["address"])) ? ($_POST["address"]) : "";
 $transfer_help 	= (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
 $website 		= (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
@@ -90,7 +90,7 @@ if (isset($_POST['submit'])) {
 	}
 	//If no error have been added create the user
 	if(empty(zpanelx::$zerror)){
-		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $adress, $postcode, $telephone, $website, $website_help);
+		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $address, $postcode, $telephone, $website, $website_help);
 	}
 }//end submit
 
