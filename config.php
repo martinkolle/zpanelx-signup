@@ -18,10 +18,10 @@ class zConfig {
 	public $DEBUG = true; //false disable
 
 	//Enter your api key! Find with gatekeeper, or in the zpanel_core.x_settings
-	public $zpanel_api = 'ee8795c8c53bfdb3b2cc595186b68912';
+	public $zpanel_api = 'ee8795c8221fdsdb3b2cc595186b68912';
 
 	//enter url to your zpanel panel
-	public $zpanel_url = 'http://panel.kmweb.dk';
+	public $zpanel_url = 'http://zpanel.kagemand.dk';
 
 	//Email settings
 	public $error_email = '';
