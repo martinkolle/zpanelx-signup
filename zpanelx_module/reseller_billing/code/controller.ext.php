@@ -35,16 +35,16 @@ class module_controller {
     * Yeah, "must have" functions for the module.
     */
     static function getModuleName(){
-        return ui_module::GetModuleName();
+    	return ui_module::GetModuleName();
     }
 
     static function getModuleDesc(){
-        return ui_language::translate(ui_module::GetModuleDescription());
+    	return ui_language::translate(ui_module::GetModuleDescription());
     }
 
-    static function getModuleIcon() {
-        global $controller;
-        $module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
+	static function getModuleIcon() {
+		global $controller;
+		$module_icon = "modules/" . $controller->GetControllerRequest('URL', 'module') . "/assets/icon.png";
         return $module_icon;
     }
     static function getModuleDir(){
@@ -503,8 +503,8 @@ class module_controller {
     */
     static function sendemail($emailto, $emailsubject, $emailbody) {
 
-        $fromEmail = self::getConfig('email_from');
-        $fromEmailName = self::getConfig('email_fromname');
+        $fromEmail = self::getConfig('email.from');
+        $fromEmailName = self::getConfig('email.fromname');
         $headers  = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
         $headers .= "From: ". $fromEmailName ." <". $fromEmail .">\r\n";
@@ -572,7 +572,7 @@ class module_controller {
                 $email = self::getMail("user_payment");
                 $emailtext = $email['message'];
                 $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
-                $emailtext = str_replace('{{billing_url}}',self::getConfig('url_billing'),$emailtext);
+                $emailtext = str_replace('{{billing_url}}',self::getConfig('system.url_billing'),$emailtext);
                 $emailtext = str_replace('{{token}}',$token,$emailtext);
                 $emailtext = str_replace('{{firm}}',self::getConfig('firm'),$emailtext);
             
@@ -583,7 +583,7 @@ class module_controller {
                 $email = self::getMail("user_expire");
                 $emailtext = $email['message'];
                 $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
-                $emailtext = str_replace('{{billing_url}}',self::getConfig('url_billing'),$emailtext);
+                $emailtext = str_replace('{{billing_url}}',self::getConfig('system.url_billing'),$emailtext);
                 $emailtext = str_replace('{{days}}',self::getConfig('user_expireDays'),$emailtext);
                 $emailtext = str_replace('{{token}}',$token,$emailtext);
                 $emailtext = str_replace('{{firm}}',self::getConfig('firm'),$emailtext);
