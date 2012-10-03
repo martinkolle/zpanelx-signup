@@ -5,12 +5,105 @@ img.menu{height:70px;}
 div.module{float:left;width:110px;height:80px;border:1px solid;border-radius: 3px; -moz-border-radius:3px; -webkit-border-radius:3px;padding:6px;margin-right:10px;}
 div.module:hover{opacity:0.7;}
 div.module-inner{margin:0 auto;width:110px;text-align: center}
-input.id, input.act{width:20px;}
-input.user, input.status{width:20px;}
-input.date, input.type{width:70px;}
-input.payment, input.payment_id{width:80px;}
-input.amount{width:50px;}
 #newData{width:300px;height:250px;}
+
+/*Table design*/
+table#reseller{width:100%;padding-right:20px;}
+table#reseller tbody tr:nth-child(odd) {
+	border-top: 1px solid rgba(255,255,255,0.2);
+	background: #ffffff;
+	background: -moz-linear-gradient(top,#ffffff 0%,#ededed 100%);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#ffffff),color-stop(100%,#ededed));
+	background: -webkit-linear-gradient(top,#ffffff 0%,#ededed 100%);
+	background: -o-linear-gradient(top,#ffffff 0%,#ededed 100%);
+	background: -ms-linear-gradient(top,#ffffff 0%,#ededed 100%);
+	background: linear-gradient(top,#ffffff 0%,#ededed 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff',endColorstr='#ededed',GradientType=0);
+}
+table#reseller tbody td{padding:10px 5px 10px 5px!important;border-spacing:0;}
+table#reseller tbody tr{padding:0!important;}
+table#reseller tbody input{height:30px;border:0!important;font-size:13px;background: transparent !important;width:100%;}
+table#reseller tbody input:hover{border:1px solid #DDD!important;}
+table#reseller tbody input:focus{border:1px solid #DDD!important;}
+table#reseller tbody textarea{width:100%;}
+
+table#reseller thead tr {
+	background-color: #184a7d;
+	background-image: -moz-linear-gradient(top,#17568c,#1a3867);
+	background-image: -webkit-gradient(linear,0 0,0 100%,from(#17568c),to(#1a3867));
+	background-image: -webkit-linear-gradient(top,#17568c,#1a3867);
+	background-image: -o-linear-gradient(top,#17568c,#1a3867);
+	background-image: linear-gradient(to bottom,#17568c,#1a3867);
+	background-repeat: repeat-x;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff17568c', endColorstr='#ff1a3867', GradientType=0);
+	color: white;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	font-size:13px;
+	margin-bottom: 10px;
+	height:30px;padding:8px;
+	margin-bottom: 8px;
+	padding-bottom:20px;
+}
+table#reseller thead td{padding:8px;margin-bottom:30px;}
+table#reseller tbody textarea{font-size:12px!important;}
+
+
+/*Table design for different views*/
+table#reseller.invoice thead{padding-bottom: 20px;}
+table#reseller.invoice td.id{width:3%;}
+table#reseller.invoice td.user{width:4%}
+table#reseller.invoice td.amount{width:4%}
+table#reseller.invoice td.type{width:10%;}
+table#reseller.invoice td.date{width:8%;}
+table#reseller.invoice td.method{width:8%;}
+table#reseller.invoice td.pay{width:10%;}
+table#reseller.invoice td.desc{width:15%;}
+table#reseller.invoice td.status{width:6%;}
+table#reseller.invoice td.token{width:19%;}
+
+table#reseller.payment td.id{width:10%;}
+table#reseller.payment td.name{width:15%;}
+table#reseller.payment td.date{width:30%;}
+table#reseller.payment td.status{width:10%;}
+table#reseller.payment td.action{width:8%;}
+
+table#reseller.package td.id{width:5%;}
+table#reseller.package td.name{width:12%;}
+table#reseller.package td.reseller{width:8%;}
+table#reseller.package td.hosting{width:40%;}
+table#reseller.package td.domain{width:30%;opacity: 0.3;}
+table#reseller.package td.action{width:8%;}
+
+/*Buttons*/
+.btn{
+	display: inline-block;
+	padding: 3px 9px;
+	font-size: 11px;
+	line-height: 16px;
+	background-color: #f5f5f5;
+	background-image: -moz-linear-gradient(top,#fff,#e6e6e6);
+	background-image: -webkit-gradient(linear,0 0,0 100%,from(#fff),to(#e6e6e6));
+	background-image: -webkit-linear-gradient(top,#fff,#e6e6e6);
+	background-image: -o-linear-gradient(top,#fff,#e6e6e6);
+	background-image: linear-gradient(to bottom,#fff,#e6e6e6);
+	background-repeat: repeat-x;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe5e5e5', GradientType=0);
+	border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+	border-color: rgba(0,0,0,0.1) rgba(0,0,0,0.1) rgba(0,0,0,0.25);
+	*background-color: #e6e6e6;
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+	border: 1px solid #bbb;
+	border-bottom-color: #a2a2a2;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+	-moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+}
+i.delete{background-image: url("<@ ModuleDir @>/assets/delete.png"); background-repeat:no-repeat;width:14px;height:14px;display: inline-block;line-height: 16px;}
+i.save{background-image: url("<@ ModuleDir @>/assets/save.png"); background-repeat:no-repeat;width:14px;height:14px;display: inline-block;line-height: 16px;}
+
 </style>
 
 <script type="text/javascript">
@@ -47,7 +140,7 @@ function editPayment(id, name, data, active){
     $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active)+" #zannounce");
     console.log("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active));
 }
-
+//tired of non ayax methods.. I will build
 if(document.URL.indexOf("CreatePayment") >= 0){ 
 	window.location = "./?module=reseller_billing&view=payment_method";
 }
@@ -98,27 +191,28 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% if Invoices %>
 		<div class="zform_wrapper">
 		<h2><: Reseller invoice :></h2>
-			<table>
+			<table id="reseller" class="invoice">
 				<thead>
 				<tr valign="top">
-					<td><: Id :></td>
-					<td><: User id :></td>
-					<td><: Amount :></td>
-					<td><: Type :></td>
-					<td><: Date :></td>
-					<td><: Pay method :></td>
-					<td><: Pay id :></td>
-					<td><: Desc :></td>
-					<td><: Status :></td>
-					<td><: Token :></td>
+					<td class="id">#</td>
+					<td class="user"><: User :></td>
+					<td class="amount"><: Amount :></td>
+					<td class="type"><: Type :></td>
+					<td class="date"><: Date :></td>
+					<td class="method"><: Method :></td>
+					<td class="pay"><: Pay :> #</td>
+					<td class="desc"><: Description :></td>
+					<td class="status"><: Status :></td>
+					<td class="token"><: Token :></td>
+					<td></td>
 				</tr>
 				</thead>
 				<tbody>
 				<% loop Invoices %>
 				<tr valign="top">
-					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="id" /> </td>
+					<td><input type="text" class="id" value="<& id &>" name="id" /></td>
 					<td><input type="text" class="user" value="<& user_id &>" name="user" /> </td>
-					<td><input type="text" class="amount" value="<& amount &>" name="amount" /> </td>
+					<td class="amount"><input type="text" class="amount" value="<& amount &>" name="amount" /> </td>
 					<td><input type="text" class="type" value="<& type &>" name="type"  /> </td>
 					<td><input type="text" class="date" value="<& date &>" name="date" /> </td>
 					<td><input type="text" class="payment" value="<& payment &>" name="payment" /> </td>
@@ -126,7 +220,7 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 					<td><textarea class="desc" name="desc"> <& desc &> </textarea> </td>
 					<td><select class="status" name="status"><& select &></select></td>
 					<td><input type="text" class="token" value="<& token &>" name="token" /> </td>
-					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editInvoice(
+					<td><button class="btn" type="button" onclick="editInvoice(
 						$(this).closest('tr').find('input.id').val(),
 						$(this).closest('tr').find('input.user').val(),
 						$(this).closest('tr').find('input.amount').val(),
@@ -137,8 +231,8 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 						$(this).closest('tr').find('textarea.desc').val(),
 						$(this).closest('tr').find('select.status').val(),
 						$(this).closest('tr').find('input.token').val()
-						);"><: Edit :></button>
-						<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="deleteInvoice(<& id &>)"><: Delete :></button></td>
+						);"><i class="save"></i></button>
+						<button class="btn" type="button" onclick="deleteInvoice(<& id &>)"><i class="delete"></i></button></td>
 				</tr>
 				<% endloop %>
 				</tbody>
@@ -154,30 +248,30 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% if Payments %>
 	<div class="zform_wrapper">
 		<h2><: Payment methods :></h2>
-			<table>
+			<table id="reseller" class="payment">
 				<thead>
 				<tr valign="top">
-					<td><: Id :></td>
-					<td><: Name :></td>
-					<td><: Data :></td>
-					<td><: Active :></td>
-					<td> <: Action :></td>
+					<td class="id">#</td>
+					<td class="name"><: Name :></td>
+					<td class="data"><: Data :></td>
+					<td class="active"><: Active :></td>
+					<td class="action"></td>
 				</tr>
 				</thead>
 				<tbody>
 			<% loop Payments %>
 				<tr valign="top">
-						<td><input class="id" type="text" disabled="disabled"  value="<& pm_id &>" name="id" /> </td>
-						<td><input class="name" type="text" value="<& name &>" name="name" /> </td>
-						<td><textarea class="data" name="data" ><& data &></textarea> </td>
-						<td><select class="active" name="active"><& select &></select>
-						<td style="width:150px;">
-							<button class="fg-button ui-state-default ui-corner-all" type="button" onclick="editPayment(
+						<td class="id"><input class="id" type="text" disabled="disabled"  value="<& pm_id &>" name="id" /> </td>
+						<td class="name"><input class="name" type="text" value="<& name &>" name="name" /> </td>
+						<td class="data"><textarea class="data" name="data" ><& data &></textarea> </td>
+						<td class="status"><select class="active" name="active"><& select &></select>
+						<td class="action">
+							<button class="btn" type="button" onclick="editPayment(
 						$(this).closest('tr').find('input.id').val(),
 						$(this).closest('tr').find('input.name').val(),
 						$(this).closest('tr').find('textarea.data').val(),
-						$(this).closest('tr').find('select.active').val());"><: Edit :></button>
-						 <button class="fg-button ui-state-default ui-corner-all" onclick="deletePayment(<& pm_id &>)"><: Delete :></button>
+						$(this).closest('tr').find('select.active').val());"><i class="save"></i></button>
+						 <button class="btn" onclick="deletePayment(<& pm_id &>)"><i class="delete"></i></button>
 						</td>
 				</tr>
 			<% endloop %>
@@ -188,19 +282,19 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<div class="zform_wrapper">
 				<div style="float:right;width:40%;posiion:absolute; margin-top:0;margin-right:10px;">
         <h2><: Help to add package :></h2>
-        You can use the variables: <br />
-	     <b>{{action}}</b>: The post url to paypal <br />
-	     <b>{{user_firstname}}</b>. The first name - the fullname is added here<br />
-	     <b>{{invoice}}</b>: Invoice id to identify the payer. Also know as token<br />
-	     <b>{{email}}</b>The email for the payer<br />
+        You can use these variables: <br />
+	     <b>{{action}}</b> The post url to paypal.  <br />
+	     <b>{{user_firstname}}</b> Fullname is added here<br />
+	     <b>{{invoice}}</b> Invoice id to identify the payer. Also know as token in the code<br />
+	     <b>{{email}}</b> The email to the payer<br />
 	     <b>{{return_url}}</b>: The thanks page<br />
 	     <b>{{business}}</b>: Your business paypal email! VERY IMPORTANT!<br />
 	     <b>{{item_name}}</b>: Package and month<br />
 	     <b>{{country}}</b>: Country code<br />
 	     <b>{{amount}}</b> The total price<br />
-	     <b>{{logo}}</b>a url to your logo <br /> 
-	     <b>{{notify_url}}</b>: Paypal will send a notifikation to this url, and will accept the payment. IMPORTANT!
-	     <b>{{cs}}</b>: Currency. Eg. DKK
+	     <b>{{logo}}</b> Url to your logo <br /> 
+	     <b>{{notify_url}}</b> Paypal will send a notification to this url, and will accept the payment. IMPORTANT!<br />
+	     <b>{{cs}}</b> Currency - eg. DKK. Please see paypal for right currency code
    	 	</div>
 		<h2><: New payment method :></h2>
 		<form action="./?module=reseller_billing&action=CreatePayment" method="post">
@@ -233,29 +327,30 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% if Packages %>
 		<div class="zform_wrapper">
 		<h2><: Packages :></h2>
-			<table>
-				<thead>
+			<table id="reseller" class="package">
+				<thead id="reseller">
 				<tr valign="top">
-					<td><: Id :></td>
-					<td><: Name :></td>
-					<td><: reseller :></td>
-					<td><: Hosting :></td>
-					<td><: Domain :></td>
+					<td class="id"><: Id :></td>
+					<td class="name"><: Name :></td>
+					<td class="reseller"><: reseller :></td>
+					<td class="hosting"><: Hosting :></td>
+					<td class="domain"><: Domain :></td>
+					<td></td>
 				</tr>
 				</thead>
 				<tbody>
 				<% loop Packages %>
 				<tr valign="top" class="<& id &>">
-					<td><input disabled="disabled" class="id" type="text" value="<& id &>" name="<& id &>" /> </td>
-					<td><input type="text" class="name" value="<& name &>" name="name" /> </td>
-					<td><input type="text" class="reseller" value="<& reseller &>" name="reseller" /> </td>
-					<td><textarea type="text" class="hosting" name="hosting"><& hosting &></textarea> </td>
-					<td><textarea type="text" class="domain" name="domain" disabled="disabled"><& domain &></textarea> </td>
-					<td><button class="fg-button ui-state-default ui-corner-all" type="button" onclick="savePackage(
+					<td class="id"><input disabled="disabled" class="id" type="text" value="<& id &>" name="<& id &>" /> </td>
+					<td class="name"><input type="text" class="name" value="<& name &>" name="name" /> </td>
+					<td class="reseller"><input type="text" class="reseller" value="<& reseller &>" name="reseller" /> </td>
+					<td class="hosting"><textarea type="text" class="hosting" name="hosting"><& hosting &></textarea> </td>
+					<td class="domain"><textarea type="text" class="domain" name="domain" disabled="disabled"><& domain &></textarea> </td>
+					<td class="action"><button class="btn" type="button" onclick="savePackage(
 										$(this).closest('tr').find('input.id').val(),
 										$(this).closest('tr').find('input.name').val(),
 										$(this).closest('tr').find('textarea.hosting').val(),
-										$(this).closest('tr').find('textarea.domain').val());"><: Save :></button></td>
+										$(this).closest('tr').find('textarea.domain').val());"><i class="save"></i></button></td>
 				</tr>
 				<% endloop %>
 				</tbody>
