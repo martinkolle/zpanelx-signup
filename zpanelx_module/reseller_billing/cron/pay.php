@@ -31,7 +31,7 @@ class rb_cron {
 
           //todays date and minus/plus with the settings expire days
           $date = date('Y-m-d');
-          $duedate = strtotime ( module_controller::getConfig('user_expireDays')." days" , strtotime ( $date ) ) ;
+          $duedate = strtotime ( module_controller::getConfig('user.expire_days')." days" , strtotime ( $date ) ) ;
           $duedate = date ( 'Y-m-d' , $duedate );
           echo $duedate;
 
@@ -73,7 +73,7 @@ class rb_cron {
      static function AccountDisable(){
           global $zdbh;
           $date = date('Y-m-d');
-          $disabledate = strtotime ( "-".module_controller::getConfig('user_disableDays')." days" , strtotime ( $date ) ) ;
+          $disabledate = strtotime ( "-".module_controller::getConfig('user.disable_days')." days" , strtotime ( $date ) ) ;
           $disabledate = date ( 'Y-m-d' , $disabledate );
           echo $disabledate;
 
@@ -90,8 +90,8 @@ class rb_cron {
                          $email     = module_controller::getMail("user_disabled");
                          $emailtext = $email['message'];
                          $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
-                         $emailtext = str_replace('{{contact_email}}',module_controller::getConfig('contact_email'),$emailtext);
-                         $emailtext = str_replace('{{firm}}',module_controller::getConfig('firm'),$emailtext);
+                         $emailtext = str_replace('{{contact_email}}',module_controller::getConfig('email.contact_email'),$emailtext);
+                         $emailtext = str_replace('{{firm}}',module_controller::getConfig('system.firm'),$emailtext);
             
                          module_controller::sendemail(module_controller::getUserEmail($user), $email['subject'], $emailtext);
 
@@ -101,7 +101,44 @@ class rb_cron {
           }
 
      }
+     /**
+     * Notification for non paid invoices
+     */
+     
+     static function InvoiceRemind(){
+          global $zdbh;
+          $date = date('Y-m-d');
+          $notify = strtotime (module_controller::getConfig('invoice.notify')." days" , strtotime ( $date ) ) ;
+          $notify = date ( 'Y-m-d' , $notify );
+          echo $notify;
+     
+          $stmt = $zdbh->prepare("SELECT * FROM x_rb_invoice WHERE inv_date = ?");
+          $stmt->execute(array($notify));
+          $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+          //print_r($rows);
+          if(!empty($rows)){
+               foreach($rows as $row){
+                    $user = ctrl_users::GetUserDetail($row['inv_user']);                    
+                   
+                    if($user){
+                         $email     = module_controller::getMail("invoice_notify");
+                         $emailtext = $email['message'];
+                         $emailtext = str_replace('{{fullname}}',$user['fullname'],$emailtext);
+                         $link      = module_controller::getConfig('system.url_billing')."pay.php?id=".$row['inv_token'];
+                         $emailtext = str_replace('{{link}}',$link,$emailtext);
+                         $emailtext = str_replace('{{firm}}',module_controller::getConfig('system.firm'),$emailtext);
+            
+                         module_controller::sendemail($user['email'], $email['subject'], $emailtext);
+     
+                         echo "Disabled user ".$row['blg_user']."<br />";
+                    }
+               }
+          }
+     
+     }
+
 }
 
-//rb_cron::AccountExpire();
+rb_cron::InvoiceRemind();
+rb_cron::AccountExpire();
 rb_cron::AccountDisable();
