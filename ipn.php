@@ -15,8 +15,14 @@ ini_set('error_log', dirname(__FILE__).'/log/ipn_errors.log');
 
 include('lib/functions.php');
 include('lib/ipnlistener.php');
+
+//Get the setting
+$data     = "<settings><setting>system.test</setting><setting>payment.email_paypal</setting><setting>payment.cs</setting><setting>payment.email_error</setting></settings>";
+$setting  = zpanelx::api("reseller_billing", "setting", $data);
+$setting  = $setting['xmws']['content']['settings'];
+
 $listener = new IpnListener();
-$listener->use_sandbox = zpanelx::getConfig('test');
+$listener->use_sandbox = $setting['system.test'];
 
 /*
 To post over standard HTTP connection, use:
@@ -52,10 +58,10 @@ if ($verified) {
     $business = $_POST['business'];
     $payer_email = $_POST['payer_email'];
 
-    if($business != zpanelx::getConfig('email_paypal')){
+    if($business != $setting['payment.email_paypal']){
         zpanelx::error("INVALID PAYMENT: A wrong paypal email have been used: ".$business." and invoice id: ".$invoice);  
     }
-    if($payment_currency != zpanelx::getConfig('cs')){
+    if($payment_currency != $setting['payment.cs']){
         zpanelx::error("INVALID PAYMENT: Paypal returned a wrong currency(".$payment_currency.") relative to the settings. Invice id: ".$invoice);  
     }
 
@@ -115,12 +121,12 @@ if ($verified) {
     }
 
     if(!empty(zpanelx::$zerror)){
-        zpanelx::sendemail(zpanelx::getConfig('error_email'),"Invalid payment received", 
+        zpanelx::sendemail($setting['payment.email_error'],"Invalid payment received", 
             implode('<br />',zpanelx::$zerror)."<br /><div style=\"white-space: pre;\">".$listener->getTextReport()."</div>");
     }
 
 } else {
     //there have been some problem with the Payment.. There have been sent a report to the admin.
-    zpanelx::sendmail(zpanelx::getConfig('error_email'), 'Invalid IPN', $listener->getTextReport());
+    zpanelx::sendmail($setting['payment.email_error'], 'Invalid IPN', $listener->getTextReport());
 }
 ?>
