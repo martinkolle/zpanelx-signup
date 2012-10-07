@@ -11,26 +11,26 @@
 
 class webservice extends ws_xmws {
 
-    public function PackageList(){
-        $response="";
+	public function PackageList(){
+		$response="";
 		$row = module_controller::getPackages();
-        foreach($row as &$value) {
-            if($value['hosting']) {
-                $response .= ws_xmws::NewXMLTag('package', 	
-                ws_xmws::NewXMLTag('name',$value['name']).
-                ws_xmws::NewXMLTag('id', $value['id']).
-                ws_xmws::NewXMLTag('reseller', $value['reseller']).
-                ws_xmws::NewXMLTag('domain', $value['domain']).
-                ws_xmws::NewXMLTag('hosting', $value['hosting'])
-                );
-            }
-        }
+		foreach($row as &$value) {
+			if($value['hosting']) {
+				$response .= ws_xmws::NewXMLTag('package', 	
+				ws_xmws::NewXMLTag('name',$value['name']).
+				ws_xmws::NewXMLTag('id', $value['id']).
+				ws_xmws::NewXMLTag('reseller', $value['reseller']).
+				ws_xmws::NewXMLTag('domain', $value['domain']).
+				ws_xmws::NewXMLTag('hosting', $value['hosting'])
+				);
+			}
+		}
 
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response);
 		return $dataobject->getDataObject();
-    }
+	}
 
 	/**
 	* Create the invoice
@@ -42,9 +42,9 @@ class webservice extends ws_xmws {
 	public function CreateInvoice(){
 
 		$response = null;
-	    $request_data = $this->RawXMWSToArray($this->wsdata);
+		$request_data = $this->RawXMWSToArray($this->wsdata);
 		$contenttags = $this->XMLDataToArray($request_data['content']);
-		
+
 		if(module_controller::ExecuteCreateInvoice( 
 			ws_generic::GetTagValue('user_id', $request_data['content']), 
 			ws_generic::GetTagValue('amount', $request_data['content']),
@@ -62,46 +62,102 @@ class webservice extends ws_xmws {
 		return $dataobject->getDataObject();
 	}
 
+	/**
+	* Get the invoice informations
+	* @return amount - id - payment id - user_id
+	*/
+
+	public function Invoice(){
+
+		$request_data 	= $this->RawXMWSToArray($this->wsdata);
+		$contenttags 	= $this->XMLDataToArray($request_data['content']);
+		$response 		= null;
+		$row = module_controller::ApiInvoice(ws_generic::GetTagValue('token', $request_data['content']));
+
+		if ($row != false){
+			$response = ws_xmws::NewXMLTag('code','1');
+			$response .= ws_xmws::NewXMLTag('invoice', 	
+				ws_xmws::NewXMLTag('user',$row['inv_user']).
+				ws_xmws::NewXMLTag('desc', $row['inv_desc']).
+				ws_xmws::NewXMLTag('amount', $row['inv_amount']).
+				ws_xmws::NewXMLTag('id', $row['inv_id']).
+				ws_xmws::NewXMLTag('status', $row['inv_status'])
+			);
+		} else{
+			$response = ws_xmws::NewXMLTag('code','0');
+		}
+	  		$dataobject = new runtime_dataobject();
+			$dataobject->addItemValue('response', '');
+			$dataobject->addItemValue('content', $response);
+		return $dataobject->getDataObject();
+	}
+
+
 	//check if the username exits
 	public function UsernameExits() {
 
-        $request_data 	= $this->RawXMWSToArray($this->wsdata);
-        $contenttags 	= $this->XMLDataToArray($request_data['content']);
-        $response 		= null;
-        $human 			= null;
-        $UsernameExits 	= module_controller::getUserExits($contenttags['username']);
+		$request_data 	= $this->RawXMWSToArray($this->wsdata);
+		$contenttags 	= $this->XMLDataToArray($request_data['content']);
+		$response 		= null;
+		$human 			= null;
+		$UsernameExits 	= module_controller::getUserExits($contenttags['username']);
 
-        switch ($UsernameExits) {
-        	case 1:
-        		$human = "Username is not valid";
-        	break;
-        	case 2:
-        		$human = "Username allready exits";
-        	break;
-        	case 3: 
-        		$human = "Username is available";
-        	break;
-        	case 4:
-        		$human = "Username is empty";
-        	break;
-        }
+		switch ($UsernameExits) {
+			case 1:
+				$human = "Username is not valid";
+			break;
+			case 2:
+				$human = "Username allready exits";
+			break;
+			case 3: 
+				$human = "Username is available";
+			break;
+			case 4:
+				$human = "Username is empty";
+			break;
+		}
 
-        if(isset($UsernameExits)){
-        	$response = $UsernameExits;
-        } 
+		if(isset($UsernameExits)){
+			$response = $UsernameExits;
+		} 
 
-        $dataobject = new runtime_dataobject();
-        $dataobject->addItemValue('response', '');
-        $dataobject->addItemValue('content', ws_xmws::NewXMLTag('code', $response) . ws_xmws::NewXMLTag('human', $human));
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('code', $response) . ws_xmws::NewXMLTag('human', $human));
 
-        return $dataobject->getDataObject();
-    }
+		return $dataobject->getDataObject();
+	}
+	
+	/**
+	* Get the settings value
+	* @return xml tag
+	*/
 
-    /**
-    * get the package informations and return in xml
-    * @return price - name - id
-    */
-    public function Package(){
+	public function Setting(){
+		
+		$request_data 	= $this->RawXMWSToArray($this->wsdata);
+		$contenttags 	= $this->XMLDataToArray($request_data['content']);
+		$response 		= null;
+		$settings 		= (is_array($contenttags['settings']['setting'])) ? $contenttags['settings']['setting'] : $contenttags['settings'];
+		
+		if(is_array($settings)){
+			foreach($settings as $key => $setting){
+				$response .= ws_xmws::NewXMLTag($setting, module_controller::getConfig($setting));
+			}
+		}
+
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('settings',$response));
+	return $dataobject->getDataObject();
+	}
+
+
+	/**
+	* get the package informations and return in xml
+	* @return price - name - id
+	*/
+	public function Package(){
 
 		$request_data 	= $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
@@ -120,41 +176,11 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('content', $response);
 		return $dataobject->getDataObject();
 
-    }
+	}
 
-    /**
-    * Get the invoice informations
-    * @return amount - id - payment id - user_id
-    */
+	public function Pay(){
 
-    public function Invoice(){
-
-    	$request_data 	= $this->RawXMWSToArray($this->wsdata);
-		$contenttags 	= $this->XMLDataToArray($request_data['content']);
-		$response 		= null;
-		$row = module_controller::ApiInvoice(ws_generic::GetTagValue('token', $request_data['content']));
-		if ($row != false){
-			$response = ws_xmws::NewXMLTag('code','1');
-			$response .= ws_xmws::NewXMLTag('invoice', 	
-				ws_xmws::NewXMLTag('user',$row['inv_user']).
-				ws_xmws::NewXMLTag('desc', $row['inv_desc']).
-				ws_xmws::NewXMLTag('amount', $row['inv_amount']).
-				ws_xmws::NewXMLTag('id', $row['inv_id']).
-				ws_xmws::NewXMLTag('status', $row['inv_status'])
-			);
-		} else{
-			$response = ws_xmws::NewXMLTag('code','0');
-		}
-
-		$dataobject = new runtime_dataobject();
-		$dataobject->addItemValue('response', '');
-		$dataobject->addItemValue('content', $response);
-		return $dataobject->getDataObject();
-    }
-
-    public function Pay(){
-
-    	$request_data 	= $this->RawXMWSToArray($this->wsdata);
+		$request_data 	= $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
 		$response 		= null;
 
@@ -200,13 +226,13 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response);
 		return $dataobject->getDataObject();
-    }
+	}
 
-    public function Payment(){
+	public function Payment(){
 		$request_data 	= $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
 		$response 		= null;
-		
+
 		$response = module_controller::ApiPayment(
 			ws_generic::GetTagValue('method', $request_data['content']),
 			ws_generic::GetTagValue('user_id', $request_data['content']),
@@ -218,55 +244,55 @@ class webservice extends ws_xmws {
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', ws_xmws::NewXMLTag('code',$response));
 		return $dataobject->getDataObject();
-    }
+	}
 
-    /**
-     * Lets create the user
-     * @return 0: User creation fail
-     * @return 1: User created
-    */
+	/**
+	 * Lets create the user
+	 * @return 0: User creation fail
+	 * @return 1: User created
+	*/
 
-    public function CreateClient() {
-        $request_data = $this->RawXMWSToArray($this->wsdata);
-        $contenttags 	= $this->XMLDataToArray($request_data['content']);
-        $response_xml = null;
-        
-        //Check that a reseller have been set else use get from settings
-        if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){
-        	$reseller_id = module_controller::getConfig("user.reseller_id");
-        } else {
-        	$reseller_id = ws_generic::GetTagValue('resellerid', $request_data['content']);
-        }
-        
-        //Check that a group id have been set else use get from settings
-        if (ws_generic::GetTagValue('groupid', $request_data['content']) == "0"){
-        	$group_id = module_controller::getConfig("user.group_id");
-        } else {
-        	$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
-        }
+	public function CreateClient() {
+		$request_data = $this->RawXMWSToArray($this->wsdata);
+		$contenttags 	= $this->XMLDataToArray($request_data['content']);
+		$response_xml = null;
 
-        if(!module_controller::ApiCreateClient(
-        	$reseller_id, 
-        	ws_generic::GetTagValue('username', $request_data['content']), 
-        	ws_generic::GetTagValue('packageid', $request_data['content']), 
-        	$group_id, 
-        	ws_generic::GetTagValue('fullname', $request_data['content']), 
-        	ws_generic::GetTagValue('email', $request_data['content']), 
-        	ws_generic::GetTagValue('address', $request_data['content']), 
-        	ws_generic::GetTagValue('postcode', $request_data['content']), 
-        	ws_generic::GetTagValue('phone', $request_data['content']), 
-        	ws_generic::GetTagValue('password', $request_data['content'])
-        	)
-        ){
+		//Check that a reseller have been set else use get from settings
+		if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){
+			$reseller_id = module_controller::getConfig("user.reseller_id");
+		} else {
+			$reseller_id = ws_generic::GetTagValue('resellerid', $request_data['content']);
+		}
 
-            $response_xml = ws_xmws::NewXMLTag('code', '0');
-        } else {
-            $response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
-            $response_xml .= ws_xmws::NewXMLTag('code', '1');
-        }
-        $dataobject = new runtime_dataobject();
-        $dataobject->addItemValue('response', '');
-        $dataobject->addItemValue('content', $response_xml);
-        return $dataobject->getDataObject();
-    }
+		//Check that a group id have been set else use get from settings
+		if (ws_generic::GetTagValue('groupid', $request_data['content']) == "0"){
+			$group_id = module_controller::getConfig("user.group_id");
+		} else {
+			$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
+		}
+
+		if(!module_controller::ApiCreateClient(
+			$reseller_id, 
+			ws_generic::GetTagValue('username', $request_data['content']), 
+			ws_generic::GetTagValue('packageid', $request_data['content']), 
+			$group_id, 
+			ws_generic::GetTagValue('fullname', $request_data['content']), 
+			ws_generic::GetTagValue('email', $request_data['content']), 
+			ws_generic::GetTagValue('address', $request_data['content']), 
+			ws_generic::GetTagValue('postcode', $request_data['content']), 
+			ws_generic::GetTagValue('phone', $request_data['content']), 
+			ws_generic::GetTagValue('password', $request_data['content'])
+			)
+		){
+
+			$response_xml = ws_xmws::NewXMLTag('code', '0');
+		} else {
+			$response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
+			$response_xml .= ws_xmws::NewXMLTag('code', '1');
+		}
+		$dataobject = new runtime_dataobject();
+		$dataobject->addItemValue('response', '');
+		$dataobject->addItemValue('content', $response_xml);
+		return $dataobject->getDataObject();
+	}
 }
