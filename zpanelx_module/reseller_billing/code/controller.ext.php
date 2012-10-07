@@ -30,6 +30,9 @@ class module_controller {
     static $dbInstall;
     static $username;
     static $allreadyexists; //maybe remove?!
+    static $updatedSettings;
+    static $editedEmail;
+    static $editEmail;
 
     /**
     * Yeah, "must have" functions for the module.
@@ -359,32 +362,7 @@ class module_controller {
             return false;
         }
     }
-    static function doEditPackage() {
-        global $controller;
-        $url = $controller->GetAllControllerRequests('URL');
 
-        $id         = (isset($url['id'])) ? $url['id'] : null;
-        $name       = (isset($url['name'])) ? urldecode($url['name']) : null;
-        $reseller       = (isset($url['reseller'])) ? $url['reseller'] : null;
-
-        $domain   = (isset($url['domain'])) ? $url['domain'] : null;
-        $hosting   = (isset($url['hosting'])) ? $url['hosting'] : null;
-
-        if ((!empty($id)) && (!empty($name))) {
-            if (self::ExecuteEditPackage($id, $name, $domain, $hosting)){
-                self::$editedPackage = true;
-                return true;
-            }
-            else{
-                self::$editPackage = true;
-                return false;
-            }
-        }
-        else{
-            self::$editPackageNeedid = true;
-            return false;
-        }
-    }
     static function doSavePackage() {
         global $controller;
         global $zdbh;
@@ -473,6 +451,120 @@ class module_controller {
 
         return true;
     }
+
+/******
+* SETTINGS VIEW
+******/
+
+    static function getConfigs() {
+        global $zdbh;
+        $currentuser = ctrl_users::GetUserDetail();
+        $sql = "SELECT * FROM x_rb_settings ORDER BY title";
+        $numrows = $zdbh->query($sql);
+        if ($numrows->fetchColumn() <> 0) {
+            $sql = $zdbh->prepare($sql);
+            $res = array();
+            $sql->execute();
+            while ($rowsettings = $sql->fetch()) {
+                $fieldhtml = ctrl_options::OutputSettingTextArea(str_replace(".", "_", $rowsettings['name']), $rowsettings['value']);
+                
+                array_push($res, array('cleanname' => ui_language::translate($rowsettings['name']),
+                    'name' => $rowsettings['title'],
+                    'description' => ui_language::translate($rowsettings['desc']),
+                    'value' => $rowsettings['value'],
+                    'fieldhtml' => $fieldhtml));
+            }
+            return $res;
+        } else {
+            return false;
+        }
+    }
+
+    static function doUpdateConfigs() {
+        global $zdbh;
+        global $controller;
+        $sql = "SELECT * FROM x_rb_settings";
+        $numrows = $zdbh->query($sql);
+        if ($numrows->fetchColumn() <> 0) {
+            $sql = $zdbh->prepare($sql);
+            $sql->execute();
+            while ($row = $sql->fetch()) {
+                if (!fs_director::CheckForEmptyValue($controller->GetControllerRequest('FORM', str_replace(".", "_", $row['name'])))) {
+                    $updatesql = $zdbh->prepare("UPDATE x_rb_settings SET value = :value WHERE name = '" . $row['name'] . "'");
+                    $updatesql->bindParam(':value', $controller->GetControllerRequest('FORM', str_replace(".", "_", $row['name'])));
+                    $updatesql->execute();
+                }
+            }
+        }
+        self::$updatedSettings = true;
+    }
+
+
+/******
+* EMAIL VIEW
+******/
+
+static function getEmail() {
+        global $zdbh;
+        $currentuser = ctrl_users::GetUserDetail();
+        $sql = "SELECT * FROM x_rb_mail ORDER BY name";
+        $numrows = $zdbh->query($sql);
+        if ($numrows->fetchColumn() <> 0) {
+            $sql = $zdbh->prepare($sql);
+            $res = array();
+            $sql->execute();
+            while ($row = $sql->fetch()) { 
+            $name       = ctrl_options::OutputSettingTextField("name", $row['name']);
+            $message    = ctrl_options::OutputSettingTextArea("message", $row['message']);
+            $subject    = ctrl_options::OutputSettingTextField("subject", $row['subject']);
+
+                array_push($res, array('id' => $row['id'],
+                    'name' => $name,
+                    'subject' => $subject,
+                    'message' => $message,
+                    'header' => $row['header']));
+            }
+            return $res;
+        } else {
+            return false;
+        }
+    }
+
+    static function doEditEmail() {
+        global $controller;
+        $url = $controller->GetAllControllerRequests('URL');
+    
+        $name         = (isset($url['name'])) ? urldecode($url['name']) : null;
+        $subject     = (isset($url['subject'])) ? $url['subject'] : null;
+    
+        $message       = (isset($url['message'])) ? $url['message'] : null;
+        $header      = (isset($url['header'])) ? $url['header'] : null;
+    
+        if ((!empty($name)) && (!empty($subject)) && (!empty($message))) {
+            if (self::ExecuteEditEmail($name, $subject, $message, $header)){
+                self::$editedEmail = true;
+                return true;
+            }
+            else{
+                self::$editEmail = true;
+                return false;
+            }
+        }
+    }
+    
+    static function ExecuteEditEmail($name, $subject, $message, $header){
+        global $zdbh;
+        // Check for errors before we continue...
+        if (fs_director::CheckForEmptyValue($name, $subject, $message)) {
+            return false;
+        }
+        $sql = $zdbh->prepare("UPDATE x_rb_mail SET subject = :subject, message = :message WHERE name = :name LIMIT 1");
+        $query = array(':subject'=>$subject, ':message'=>$message, ':name' => $name);
+        $sql->execute($query);
+    
+        return true;
+    }
+
 
 /******
 * ALL AROUND FUNCTONS
@@ -914,7 +1006,7 @@ class module_controller {
     static function getShouldInstall(){
         global $zdbh;
         $result = $zdbh->query("show tables like 'x_rb_%'")->fetch(PDO::FETCH_NUM);
-        if (array_search('x_rb_billing',$result) !== false){
+        if (is_array($result)){
             return false;
         } else{
             return true;
@@ -1108,6 +1200,15 @@ CREATE TABLE IF NOT EXISTS `x_rb_billing` (
         }
         if(!fs_director::CheckForEmptyValue(self::$dbInstall)){
             return ui_sysmessage::shout(self::$dbInstall, "zannounceok");
+        }
+        if (!fs_director::CheckForEmptyValue(self::$updatedSettings)) {
+            return ui_sysmessage::shout(ui_language::translate("Changes to your settings have been saved successfully!"),"zannounceok");
+        }
+        if (!fs_director::CheckForEmptyValue(self::$editedEmail)) {
+            return ui_sysmessage::shout(ui_language::translate("Changes to email have been saved successfully!"),"zannounceok");
+        }
+        if (!fs_director::CheckForEmptyValue(self::$editEmail)) {
+            return ui_sysmessage::shout(ui_language::translate("Could not save email"),"zannounceerror");
         }
     }
 }
