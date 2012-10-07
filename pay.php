@@ -97,7 +97,7 @@ $form = str_replace('{{period}}', $user_payperiod , $form);
 
 $action = (zpanelx::getConfig('test')) ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
 $form = str_replace('{{action}}', $action, $form);
-$form = str_replace('{{user_firstname}}', $user['ud_fullname_vc'], $form);
+$form = str_replace('{{user_firstname}}', $profile_fullname, $form);
 $form = str_replace('{{invoice}}', $token, $form);
 $form = str_replace('{{email}}', $user_email, $form);
 $form = str_replace('{{item_name}}', $package_name." - ".$user_payperiod." month", $form);
