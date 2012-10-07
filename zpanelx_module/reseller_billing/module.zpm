@@ -106,6 +106,7 @@ i.save{background-image: url("<@ ModuleDir @>/assets/save.png"); background-repe
 
 </style>
 
+<script type="text/javascript" src="<@ ModuleDir @>/assets/bpopup.js"></script>
 <script type="text/javascript">
 function deleteInvoice(id){
 	var deleteInv = confirm ("<: Want to delete invoice: :> " + id);
@@ -117,33 +118,32 @@ function deletePayment(id){
 	if (deleteInv){window.location="./?module=reseller_billing&view=payment_method&action=DeletePayment&deleteId=" + id;}
 	else {return;}
 }
-function deletePackage(id){
-	alert('<: Please delete through the Package manager :>');
-}
 function editPackage(id, name, hosting, domain){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
-    $('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
-    console.log("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
+	$('#billing-message').load("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
+	console.log("/?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
 }
 function savePackage(id, name, hosting, domain){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
-    $('#billing-message').load("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
-    console.log("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
+	$('#billing-message').load("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+encodeURIComponent(name)+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting)+" #zannounce");
+	console.log("/?module=reseller_billing&view=package&action=SavePackage&id="+id+"&name="+name+"&domain="+encodeURIComponent(domain)+"&hosting="+encodeURIComponent(hosting));
 }
 function editInvoice(id, user, amount, type, date, payment, payment_id, desc, status, token){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
-    $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token+" #zannounce");
-    console.log("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token);
+	$('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token+" #zannounce");
+	console.log("/?module=reseller_billing&view=invoice&action=EditInvoice&id="+id+"&user="+user+"&amount="+amount+"&type="+encodeURIComponent(type)+"&date="+encodeURIComponent(date)+"&payment="+encodeURIComponent(payment)+"&payment_id="+payment_id+"&desc="+encodeURIComponent(desc)+"&status="+status+"&token="+token);
 }
 function editPayment(id, name, data, active){
 	//window.location="./?module=reseller_billing&view=package&action=editPackage&id="+id+"&name="+name+"&price_pm="+price_pm+"&price_pq="+price_pq+"&price_py="+price_py; 
-    $('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active)+" #zannounce");
-    console.log("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active));
+	$('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active)+" #zannounce");
+	console.log("/?module=reseller_billing&view=invoice&action=EditPayment&id="+id+"&name="+encodeURIComponent(name)+"&data="+encodeURIComponent(data)+"&active="+encodeURIComponent(active));
 }
-//tired of non ayax methods.. I will build
-if(document.URL.indexOf("CreatePayment") >= 0){ 
-	window.location = "./?module=reseller_billing&view=payment_method";
+function saveEmail(name, subject, message){
+	$('#billing-message').load("/?module=reseller_billing&view=invoice&action=EditEmail&name="+name+"&subject="+encodeURIComponent(subject)+"&message="+encodeURIComponent(message)+" #zannounce");
+	console.log("/?module=reseller_billing&view=invoice&action=EditEmail&name="+name+"&subject="+encodeURIComponent(subject)+"&message="+encodeURIComponent(message));
 }
+$('installRB').bPopup({ content:'iframe',loadUrl:'./modules/reseller_billing/install/install.php',contentContainer:'.content'});
+
 </script>
 
 <@ Result @>
@@ -174,12 +174,28 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 				</div>
 			</div>
 		</a>
+		<a href="./?module=reseller_billing&view=setting">
+			<div class="module">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/setting.png" class="menu" />
+				<span>Settings</span>
+				</div>
+			</div>
+		</a>
+		<a href="./?module=reseller_billing&view=email">
+			<div class="module">
+				<div class="module-inner">
+				<img src="<@ ModuleDir @>/assets/email.png" class="menu" />
+				<span>Emails</span>
+				</div>
+			</div>
+		</a>
 		<% if ShouldInstall %>
-		<a href="./?module=reseller_billing&action=installDatabase">
+		<a onClick="MyWindow=window.open('<@ ModuleDir @>/install/install.php','Install','toolbar=no,location=no,directories=no,status=no, menubar=no,scrollbars=no,resizable=no,width=600,height=300'); return false;">
 			<div class="module" style="background:red;">
 				<div class="module-inner">
 				<img src="<@ ModuleDir @>/assets/install.png" class="menu" />
-				<span style="color:white;float:left;">Install Database</span>
+				<span style="color:white;float:left;">Installation</span>
 				</div>
 			</div>
 		</a>
@@ -281,45 +297,45 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% endif %>
 	<div class="zform_wrapper">
 				<div style="float:right;width:40%;posiion:absolute; margin-top:0;margin-right:10px;">
-        <h2><: Help to add package :></h2>
-        You can use these variables: <br />
-	     <b>{{action}}</b> The post url to paypal.  <br />
-	     <b>{{user_firstname}}</b> Fullname is added here<br />
-	     <b>{{invoice}}</b> Invoice id to identify the payer. Also know as token in the code<br />
-	     <b>{{email}}</b> The email to the payer<br />
-	     <b>{{return_url}}</b>: The thanks page<br />
-	     <b>{{business}}</b>: Your business paypal email! VERY IMPORTANT!<br />
-	     <b>{{item_name}}</b>: Package and month<br />
-	     <b>{{country}}</b>: Country code<br />
-	     <b>{{amount}}</b> The total price<br />
-	     <b>{{logo}}</b> Url to your logo <br /> 
-	     <b>{{notify_url}}</b> Paypal will send a notification to this url, and will accept the payment. IMPORTANT!<br />
-	     <b>{{cs}}</b> Currency - eg. DKK. Please see paypal for right currency code
+		<h2><: Help to add package :></h2>
+		You can use these variables: <br />
+		 <b>{{action}}</b> The post url to paypal.  <br />
+		 <b>{{user_firstname}}</b> Fullname is added here<br />
+		 <b>{{invoice}}</b> Invoice id to identify the payer. Also know as token in the code<br />
+		 <b>{{email}}</b> The email to the payer<br />
+		 <b>{{return_url}}</b>: The thanks page<br />
+		 <b>{{business}}</b>: Your business paypal email! VERY IMPORTANT!<br />
+		 <b>{{item_name}}</b>: Package and month<br />
+		 <b>{{country}}</b>: Country code<br />
+		 <b>{{amount}}</b> The total price<br />
+		 <b>{{logo}}</b> Url to your logo <br /> 
+		 <b>{{notify_url}}</b> Paypal will send a notification to this url, and will accept the payment. IMPORTANT!<br />
+		 <b>{{cs}}</b> Currency - eg. DKK. Please see paypal for right currency code
    	 	</div>
 		<h2><: New payment method :></h2>
-		<form action="./?module=reseller_billing&action=CreatePayment" method="post">
-        	<table class="zform">
-		        <tr>
-			        <th><: Name :>:</th>
-			        <td><input type="text" name="newName" id="newName" value="<@ formName @>" /></td>
-		        </tr>
-		        <tr>
-			        <th><: Data :>:</th>
-			        <td><textarea name="newData" id="newData"><@ formData @></textarea></td>
-		        </tr>
-		        <tr>
-			        <th><: Activate :>:</th>
-			        <td><select name="newActive">
-			        		<option value="1"><: Activated :></option>
-			        		<option value="0"><: Deactivated :> </option>
-			        	</select>
-		        </tr>
-		        <tr>
-			        <th></th>
-			        <td><button class="fg-button ui-state-default ui-corner-all" type="submit" id="button" name="inSubmit" value="Save"><: Save :></button></td>
-		        </tr>
-	        </table>
-        </form>
+		<form action="./?module=reseller_billing&view=payment&action=CreatePayment" method="post">
+			<table class="zform">
+				<tr>
+					<th><: Name :>:</th>
+					<td><input type="text" name="newName" id="newName" value="<@ formName @>" /></td>
+				</tr>
+				<tr>
+					<th><: Data :>:</th>
+					<td><textarea name="newData" id="newData"><@ formData @></textarea></td>
+				</tr>
+				<tr>
+					<th><: Activate :>:</th>
+					<td><select name="newActive">
+							<option value="1"><: Activated :></option>
+							<option value="0"><: Deactivated :> </option>
+						</select>
+				</tr>
+				<tr>
+					<th></th>
+					<td><button class="fg-button ui-state-default ui-corner-all" type="submit" id="button" name="inSubmit" value="Save"><: Save :></button></td>
+				</tr>
+			</table>
+		</form>
 	</div>
 <% endif %>
 
@@ -369,3 +385,65 @@ if(document.URL.indexOf("CreatePayment") >= 0){
 	<% endif %>
 
 <% endif %>
+
+<% if ViewSetting %>
+<div class="zform_wrapper">
+		<h2><: Reseller billing settings :></h2>
+		<form action="./?module=reseller_billing&view=setting&action=UpdateConfigs" method="post">
+		<table id="reseller" class="setting">
+			<tbody>
+			<% loop Configs %>
+			<tr>
+				<th><& name &></th>
+				<td><& fieldhtml &></td>
+				<td><& description &></td>
+			</tr>
+			<% endloop %>
+			<tr>
+				<th>
+				<button class="btn" type="submit" id="button" name="inSaveSystem"><: Save :></button>
+				</th>
+			</tr>
+			</tbody>
+		</table>
+		</form>
+</div>
+<% endif %>
+
+<% if ViewEmail %>
+<div class="zform_wrapper">
+		<h2><: Reseller billing settings :></h2>
+		Don't edit the name! This will be disabled in a newer version!
+		<form action="./?module=reseller_billing&view=setting&action=UpdateConfigs" method="post">
+		<table id="reseller" class="setting">
+			<thead>
+				<tr>
+					<td><: Name :></td>
+					<td><: Subject :></td>
+					<td><: Message :></td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>
+			<% loop Email %>
+			<tr>
+				<td><& name &></td>
+				<td><& subject &></td>
+				<td><& message &></td>
+				<td><button class="btn" type="button" onclick="saveEmail(
+										$(this).closest('tr').find('input.[name^=name]').val(),
+										$(this).closest('tr').find('input.[name^=subject]').val(),
+										$(this).closest('tr').find('textarea[name^=message]').val());"><i class="save"></i></button></td>
+			</tr>
+			<% endloop %>
+			<tr>
+				<th>
+				<button class="btn" type="submit" id="button" name="inSaveSystem"><: Save :></button>
+				</th>
+			</tr>
+			</tbody>
+		</table>
+		</form>
+</div>
+<% endif %>
+<div class="content"></div>
