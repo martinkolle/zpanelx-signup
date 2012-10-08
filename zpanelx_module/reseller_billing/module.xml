@@ -3,6 +3,7 @@
 <name>Reseller Billing</name>
 <version>1000</version>
 <defaultcat>Reseller</defaultcat>
+<type>Reseller</type>
 <desc>Billing system</desc>
 <authorname>Martin Kollerup</authorname>
 <authoremail>martiinkolle@gmail.com</authoremail>
