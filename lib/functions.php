@@ -34,34 +34,34 @@ class zpanelx{
 	} 
 
 	/**
-	    * Generate a password for the payer.
-	    * There is fallback to mt:rand() if openssl not is supported
-	    * @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
-	    * @return password
+		* Generate a password for the payer.
+		* There is fallback to mt:rand() if openssl not is supported
+		* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
+		* @return password
 	*/
 	function generatePassword($length = 8) {
-	        if(function_exists('openssl_random_pseudo_bytes')) {
-	            $password = base64_encode(openssl_random_pseudo_bytes($length, $strong));
-	            if($strong == TRUE)
-	                return substr($password, 0, $length); //base64 is about 33% longer, so we need to truncate the result
-	        }
-	        //fall back to mt_rand
-	        $characters = '0123456789';
-	        $characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/&'; 
-	        $charactersLength = strlen($characters)-1;
-	        $password = '';
+			if(function_exists('openssl_random_pseudo_bytes')) {
+				$password = base64_encode(openssl_random_pseudo_bytes($length, $strong));
+				if($strong == TRUE)
+					return substr($password, 0, $length); //base64 is about 33% longer, so we need to truncate the result
+			}
+			//fall back to mt_rand
+			$characters = '0123456789';
+			$characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/&'; 
+			$charactersLength = strlen($characters)-1;
+			$password = '';
 
-	        //select some random characters
-	        for ($i = 0; $i < $length; $i++) {
-	            $password .= $characters[mt_rand(0, $charactersLength)];
-	        }        
-	        return $password;
+			//select some random characters
+			for ($i = 0; $i < $length; $i++) {
+				$password .= $characters[mt_rand(0, $charactersLength)];
+			}        
+			return $password;
 	}
 
 	/**
-	    * Generate the token the payment should be specified with.
-	    * @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
-	    * @return token
+		* Generate the token the payment should be specified with.
+		* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
+		* @return token
 	*/
 	function generateToken($length = 24) {
 		$characters = '0123456789';
@@ -106,24 +106,24 @@ class zpanelx{
 
 		$data = '
 			<resellerid>'.self::getConfig('reseller_id').'</resellerid>
-	        <username>'.$username.'</username>
-	        <packageid>'.$packageId.'</packageid>
-	        <groupid>'.self::getConfig('group_id').'</groupid>
-	        <fullname>'.$fullname.'</fullname>
-	        <email>'.$email.'</email>
-	        <postcode>'.$postcode.'</postcode>
-	        <address>'.$address.'</address>
-	        <phone>'.$telephone.'</phone>
-	        <password>'.$password.'</password>';
+			<username>'.$username.'</username>
+			<packageid>'.$packageId.'</packageid>
+			<groupid>'.self::getConfig('group_id').'</groupid>
+			<fullname>'.$fullname.'</fullname>
+			<email>'.$email.'</email>
+			<postcode>'.$postcode.'</postcode>
+			<address>'.$address.'</address>
+			<phone>'.$telephone.'</phone>
+			<password>'.$password.'</password>';
 
 		$addUser 		= self::api("reseller_billing", "CreateClient", $data);
 		if($addUser['xmws']['content']['code'] == "1"){
-			
+
 			$userId 	= $addUser['xmws']['content']['uid'];
 			$todaydate 	= date("Y-m-d");// current date
 			$newdate 	= strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
 			$newdate 	= date('Y-m-d', $newdate);
-			
+
 			$desc = array('pk_id'=>$packageId, 'price'=>$packagePrice, 'period'=>$payPeriod, 'domain'=>$website, 'web_help'=>$website_help);
 			$desc = json_encode($desc);
 			$data = "<user_id>".$userId."</user_id>
@@ -170,7 +170,7 @@ class zpanelx{
 	 * @return template
 	*/
 	function template($title,$head,$body){
-		
+
 		$template = file_get_contents('templates/default.html');
 
 		if(!is_array(zpanelx::$zerror)){
@@ -210,7 +210,12 @@ class zpanelx{
 		$xmws = new xmwsclient();
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
-		return $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+
+		if($xml['xmws']['response'] != "1101"){
+			self::error("Could not connect to server. Wrong response code ".$xml['xmws']['response'],false,true);
+		}
+		return $xml;
 	}
 
 	/**
