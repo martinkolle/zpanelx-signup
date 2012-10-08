@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Create user page for ZPX billing API integration 
  *
