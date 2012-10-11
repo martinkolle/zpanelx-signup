@@ -8,6 +8,8 @@
  * @link http://www.kmweb.dk/
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
+ 
+ error_reporting(E_ALL);
 
 class zpanelx{
 	static $newUserError;
@@ -169,7 +171,7 @@ class zpanelx{
 	 * @author Martinkolle
 	 * @return template
 	*/
-	function template($title,$head,$body){
+	static function template($title,$head,$body){
 
 		$template = file_get_contents('templates/default.html');
 
@@ -196,13 +198,19 @@ class zpanelx{
 	* @author Martinkolle
 	* @return array Mysql
 	*/
-	function api($module, $function, $data, $url ="", $api ="", $user = "", $pass =""){
+	static function api($module, $function, $data, $url ="", $api ="", $user = "", $pass =""){
 		if(empty($url)){
 			$url = self::getConfig("zpanel_url");
 		}
 		if(empty($api)){
 			$api = self::getConfig("zpanel_api");
 		}
+		
+		$parsed = parse_url($url);
+		if (empty($parsed['scheme'])) 
+			$url = "http://$url";
+		//echo $url;
+		//echo $api;
 
 		if(!class_exists('xmwsclient')){
 			require_once('xmwsclient.class.php');
@@ -210,10 +218,10 @@ class zpanelx{
 		$xmws = new xmwsclient();
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
+		//echo $xmws->BuildRequest();
 		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-
 		if($xml['xmws']['response'] != "1101"){
-			self::error("Could not connect to server. Wrong response code ".$xml['xmws']['response'],false,true);
+			self::error("Wrong response code ".$xml['xmws']['response'],false,true);
 		}
 		return $xml;
 	}
@@ -226,7 +234,7 @@ class zpanelx{
 	* @param string Will force the error to show
 	*/
 
-	function error($error, $debug = false, $force = false){
+	static function error($error, $debug = false, $force = false){
 		if(!is_array(zpanelx::$zerror)){
 			zpanelx::$zerror = array();
 		}

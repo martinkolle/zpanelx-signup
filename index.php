@@ -14,7 +14,11 @@ $head = null;
 
     //Get packages from zpanelx
 	$listPackages = zpanelx::api("reseller_billing", "PackageList", "");
+	//print_r($listPackages);
 
+    if(empty($listPackages['xmws']['content'])){
+        zpanelx::error("No packages where found", false, true);
+    }
     //We need to check that the array is the right. xmws.class is gennerating different arrays based on the number of packages. 
     $listPackages = (is_array($listPackages['xmws']['content']['package'][0])) ? $listPackages['xmws']['content']['package'] : $listPackages['xmws']['content'];
     foreach($listPackages as $row){

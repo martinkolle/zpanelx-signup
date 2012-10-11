@@ -96,6 +96,7 @@ if (isset($_POST['submit'])) {
 //Request for the package prices
 $data = "<pk_id>".$id."</pk_id>";
 $package = zpanelx::api("reseller_billing", "Package", $data);
+//print_r($package);
 if (!empty($package['xmws']['content']['package']['id'])) {
 	$package_name 	= $package['xmws']['content']['package']['name'];
 	$hosting 		= $package['xmws']['content']['package']['hosting'];

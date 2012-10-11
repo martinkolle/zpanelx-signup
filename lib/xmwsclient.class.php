@@ -101,7 +101,7 @@ class xmwsclient {
             $params['http']['header'] = $optional_headers;
         }
         $ctx = stream_context_create($params);
-        $fp = @fopen($url, 'rb', false, $ctx);
+        $fp = @fopen($url, 'r', false, $ctx);
         if (!$fp) {
             zpanelx::error("Problem reading data from " . $url . "",false,true);
         }
