@@ -19,7 +19,7 @@ include('lib/ipnlistener.php');
 //Get the setting
 $data     = "<settings><setting>system.test</setting><setting>payment.email_paypal</setting><setting>payment.cs</setting><setting>payment.email_error</setting></settings>";
 $setting  = zpanelx::api("reseller_billing", "setting", $data);
-$setting  = $setting['xmws']['content']['settings'];
+$setting  = $setting['settings'];
 
 $listener = new IpnListener();
 $listener->use_sandbox = $setting['system.test'];
@@ -69,15 +69,15 @@ if ($verified) {
     $data     = "<token>".$invoice."</token>";
     $invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
 
-    if($invoice['xmws']['content']['code'] == "0"){
+    if($invoice['code'] == "0"){
         zpanelx::error("Invoice id was not found");
     } 
-    elseif($invoice['xmws']['content']['code'] == "1"){
-        $inv_user      = $invoice['xmws']['content']['invoice']['user'];
-        $inv_desc      = $invoice['xmws']['content']['invoice']['desc'];
-        $inv_amount    = $invoice['xmws']['content']['invoice']['amount'];
-        $inv_id        = $invoice['xmws']['content']['invoice']['id'];
-        $inv_status    = $invoice['xmws']['content']['invoice']['status'];
+    elseif($invoice['code'] == "1"){
+        $inv_user      = $invoice['invoice']['user'];
+        $inv_desc      = $invoice['invoice']['desc'];
+        $inv_amount    = $invoice['invoice']['amount'];
+        $inv_id        = $invoice['invoice']['id'];
+        $inv_status    = $invoice['invoice']['status'];
 
     }
     else{
@@ -102,7 +102,7 @@ if ($verified) {
     $data = "<method>Paypal</method><user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
     $invoice = zpanelx::api("reseller_billing", "Payment", $data);
 
-    switch($invoice['xmws']['content']['code']){
+    switch($invoice['code']){
         case "1":
             //Really going to do nothing!
         break;
