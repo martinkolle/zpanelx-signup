@@ -164,7 +164,7 @@ class module_controller {
         global $controller;
         $id = $controller->GetAllControllerRequests('URL');
 
-        if (isset($id['deleteId'])) && self::isOnlyDigit($id['deleteId']) {
+        if (isset($id['deleteId']) && self::isOnlyDigit($id['deleteId'])) {
             if (self::ExecuteDeletePayment($id['deleteId'])){
                 self::$deletedPaymentMethod = true;
                 return true;
