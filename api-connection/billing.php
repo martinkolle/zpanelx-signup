@@ -84,12 +84,44 @@ if (isset($_POST['submit'])) {
 	$data = "<username>".$username."</username>";
 	$usernameExits = zpanelx::api("reseller_billing", "UsernameExits", $data);
 
-	if($usernameExits['xmws']['content']['code'] != "3"){
-		zpanelx::error($usernameExits['xmws']['content']['human']);
+	if($usernameExits['code'] != "3"){
+		zpanelx::error($usernameExits['human']);
 	}
 	//If no error have been added create the user
 	if(empty(zpanelx::$zerror)){
-		zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $address, $postcode, $telephone, $website, $website_help);
+		$token = zpanelx::generateToken();
+		
+		$data = '
+		<resellerid>'.zpanelx::getConfig('reseller_id').'</resellerid>
+		<groupid>'.zpanelx::getConfig('group_id').'</groupid>
+		<username>'.$username.'</username>
+		<fullname>'.$fullname.'</fullname>
+		<email>'.$email.'</email>
+		<postcode>'.$postcode.'</postcode>
+		<address>'.$address.' </address>
+		<phone>'.$telephone.'</phone>
+		
+		<packageid>'.$packageid.'</packageid>
+		<period>'.$payperiod.'</period>
+		<type>Initial Signup</type>		
+		<domain>'.$website.'</domain>
+		<web_help>'.$transfer_help.'</web_help>
+		<token>'.$token.'</token>
+		';
+		
+		$createBilling = zpanelx::api("reseller_billing", "CreateBilling", $data);
+		
+		if($createBilling['create_user'] == "1" && $createBilling['create_invoice'] == "1"){
+			header('Location: pay.php?id='.$token);
+		} else{
+			zpanelx::error("Error creating billing");
+			zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: ".$username."(".$email.") Error code:". $createBilling['create_invoice'] );
+		}
+		
+		
+		
+		
+		//zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $address, $postcode, $telephone, $website, $transfer_help);
 	}
 }//end submit
 
@@ -97,10 +129,10 @@ if (isset($_POST['submit'])) {
 $data = "<pk_id>".$id."</pk_id>";
 $package = zpanelx::api("reseller_billing", "Package", $data);
 //print_r($package);
-if (!empty($package['xmws']['content']['package']['id'])) {
-	$package_name 	= $package['xmws']['content']['package']['name'];
-	$hosting 		= $package['xmws']['content']['package']['hosting'];
-	$domain 		= $package['xmws']['content']['package']['domain'];
+if (!empty($package['package']['id'])) {
+	$package_name 	= $package['package']['name'];
+	$hosting 		= $package['package']['hosting'];
+	$domain 		= $package['package']['domain'];
 }
 else {
 	zpanelx::error("Error getting package data", true);
@@ -110,6 +142,7 @@ else {
 if(!empty($package_name)){
 
 	$payoptions = json_decode($hosting, true);
+	$payoption 	= null;
 
 	foreach($payoptions['hosting'] as $option){
 		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".zpanelx::getConfig('cs')." ".$option['price']."</input><br />";
@@ -117,7 +150,7 @@ if(!empty($package_name)){
 	//Insert values to template
 	$template = file_get_contents('templates/billing.html');
 	$template = str_replace('{{action}}', htmlspecialchars($_SERVER['SCRIPT_NAME'] .'?'. $_SERVER['QUERY_STRING']), $template);
-	$template = str_replace('{{packagename}}', htmlentities($packagename, ENT_QUOTES), $template);
+	$template = str_replace('{{packagename}}', htmlentities($package_name, ENT_QUOTES), $template);
 	$template = str_replace('{{payoptions}}', $payoption, $template);
 	$template = str_replace('{{pid}}', $id, $template);
 	$title 	  = "Buy hosting";
@@ -131,11 +164,9 @@ if(!empty($package_name)){
 	$template = ($telephone ? str_replace('{{telephone}}', $telephone, $template) : str_replace('{{telephone}}', "Telephone", $template));
 	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "Website", $template));
 
-}
-else{
+} else{
 	zpanelx::error("Invalid package selected");
 }
-	//return template to browser
-	echo zpanelx::template($title, $head, $template);
-	//print_r(zpanelx::$zerror);
+
+echo zpanelx::template($title, $head, $template);
 ?>
