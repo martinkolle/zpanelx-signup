@@ -56,33 +56,41 @@ class module_controller {
         $name = $controller->GetControllerRequest('URL', 'module');
         return "/modules/".$name;
     }
+    
+    static function isOnlyDigit($value){
+        if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i",$value)){
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
     * LET ME SAY... DIFFERENT VIEWS IN MODULES! BUUUUH JAH!!
     */
-    function getView(){
+    static function getView(){
         global $controller;
         $url = $controller->GetAllControllerRequests('URL');
         $url = (array_key_exists('view', $url)) ? $url['view'] : false;
         return  $url;
     }
-    function getViewInvoice(){
+    static function getViewInvoice(){
         $url = self::getView();
         return ($url == 'invoice') ? true : false;
     }
-    function getViewPayment(){
+    static function getViewPayment(){
         $url = self::getView();
         return ($url == 'payment_method') ? true : false;
     }
-    function getViewPackage(){
+    static function getViewPackage(){
         $url = self::getView();
         return ($url == 'package') ? true : false;
     }
-    function getViewSetting(){
+    static function getViewSetting(){
         $url = self::getView();
         return ($url == 'setting') ? true : false;
     }
-    function getViewEmail(){
+    static function getViewEmail(){
         $url = self::getView();
         return ($url == 'email') ? true : false;
     }
@@ -136,7 +144,7 @@ class module_controller {
         $data   = (isset($url['data'])) ? $url['data'] : null;
         $active = (isset($url['active'])) ? $url['active'] : null;
 
-        if ((!empty($id)) && (!empty($data))) {
+        if ((!empty($id)) && !empty($data) && self::isOnlyDigit($id)) {
             if (self::ExecuteEditPayment($id, $name, $data, $active)){
                 self::$editPaymentGood = true;
                 return true;
@@ -156,7 +164,7 @@ class module_controller {
         global $controller;
         $id = $controller->GetAllControllerRequests('URL');
 
-        if (isset($id['deleteId'])) {
+        if (isset($id['deleteId'])) && self::isOnlyDigit($id['deleteId']) {
             if (self::ExecuteDeletePayment($id['deleteId'])){
                 self::$deletedPaymentMethod = true;
                 return true;
