@@ -218,14 +218,14 @@ class webservice extends ws_xmws {
 	    /** CREATE USER **/
 	    
 	    //Check that a reseller have been set else get from settings
-	    if (isset(ws_generic::GetTagValue('resellerid', $request_data['content'])) == "0"){
+	    if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){
 	    	$reseller_id = module_controller::getConfig("user.reseller_id");
 	    } else {
 	    	$reseller_id = ws_generic::GetTagValue('resellerid', $request_data['content']);
 	    }
 	    
 	    //Check that a group id have been set else get from setting
-	    if (isset(ws_generic::GetTagValue('groupid', $request_data['content'])) == "0"){
+	    if (ws_generic::GetTagValue('groupid', $request_data['content']) == "0"){
 	    	$group_id = module_controller::getConfig("user.group_id");
 	    } else {
 	    	$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
@@ -241,44 +241,50 @@ class webservice extends ws_xmws {
 	    	ws_generic::GetTagValue('address', $request_data['content']), 
 	    	ws_generic::GetTagValue('postcode', $request_data['content']), 
 	    	ws_generic::GetTagValue('phone', $request_data['content']), 
-	    	ws_generic::GetTagValue('password', $request_data['content'])
+	    	fs_director::GenerateRandomPassword('8', 4)
 	    	)
 	    ){
-	    	$response_xml .= ws_xmws::NewXMLTag('create_billing', '0');
+	    	$response_xml .= ws_xmws::NewXMLTag('create_user', '0');
 	    } else {
 	    	$response_xml .= ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
-	    	$response_xml .= ws_xmws::NewXMLTag('create_billing', '1');
+	    	$response_xml .= ws_xmws::NewXMLTag('create_user', '1');
 	    }
 	    
 	    /** CREATE INVOICE **/
-	    
-	    $pk_id = ws_generic::GetTagValue('pk_id', $request_data['content']);
-	    $pk_price = module_controller::ApiPackage($pk_id)['hosting'];
-	    $period = ws_generic::GetTagValue('period', $request_data['content']);
-	    $domain = ws_generic::GetTagValue('domain', $request_data['content']);
-	    $web_help = ws_generic::GetTagValue('web_help', $request_data['content']);
-	    
-	    $json = json_decode($pk_price, true);
-	    $pk_price = null;
-	    foreach($json['hosting'] as $key=>$host){
-	    	if($host['month'] == $period){
-	    		$pk_price = $host['price'];
-	    	}
-	    }
-
-	    $desc = array('pk_id'=>$pk_id, 'price'=>$pk_price, 'period'=>$period, 'domain'=>$domain, 'web_help'=>$web_help);
-	    $desc = json_encode($desc);
-	    if(module_controller::ExecuteCreateInvoice( 
-	    	ws_generic::GetTagValue('user_id', $request_data['content']), 
-	    	ws_generic::GetTagValue('amount', $request_data['content']),
-	    	ws_generic::GetTagValue('type', $request_data['content']),
-			$desc,
-	    	ws_generic::GetTagValue('token', $request_data['content'])
-	    	)){
-	    	$response_xml .= ws_xmws::NewXMLTag('create_invoice', '1');
-	    } else{
-	    	$response_xml .= ws_xmws::NewXMLTag('create_invoice', '0');
-	    }
+	    //check if the user have been created
+	    if(!module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content']))){
+		    $response_xml .= ws_xmws::NewXmlTag('create_invoice','0-user');
+	    } else {
+		    $pk_id = ws_generic::GetTagValue('packageid', $request_data['content']);
+		    $pk_price = module_controller::ApiPackage($pk_id);
+		    //print_r($pk_price);
+		    $pk_price = $pk_price['pkp_hosting'];
+		    $period = ws_generic::GetTagValue('period', $request_data['content']);
+		    $domain = ws_generic::GetTagValue('domain', $request_data['content']);
+		    $web_help = ws_generic::GetTagValue('web_help', $request_data['content']);
+		    
+		    $json = json_decode($pk_price, true);
+		    $pk_price = null;
+		    foreach($json['hosting'] as $key=>$host){
+		    	if($host['month'] == $period){
+		    		$pk_price = $host['price'];
+		    	}
+		    }
+	
+		    $desc = array('pk_id'=>$pk_id, 'price'=>$pk_price, 'period'=>$period, 'domain'=>$domain, 'web_help'=>$web_help);
+		    $desc = json_encode($desc);
+		    if(module_controller::ExecuteCreateInvoice( 
+		    	module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])), 
+		    	$pk_price,
+		    	ws_generic::GetTagValue('type', $request_data['content']),
+				$desc,
+		    	ws_generic::GetTagValue('token', $request_data['content'])
+		    	)){
+		    	$response_xml .= ws_xmws::NewXMLTag('create_invoice', '1');
+		    } else{
+		    	$response_xml .= ws_xmws::NewXMLTag('create_invoice', '0');
+		    }
+		}	
 	    
 	    $dataobject = new runtime_dataobject();
 	    $dataobject->addItemValue('response', '');
