@@ -1,8 +1,9 @@
 <?php
 
 /**
- * Functions for reseller_billing API itegration
+ * Reseller billing api integration
  *
+ * @package Reseller billing -> api
  * @author Martin Kollerup
  * @copyright martinkole
  * @link http://www.kmweb.dk/
@@ -18,10 +19,11 @@ class zpanelx{
 
 	/**
 	* PHP mail function to send mail in UTF-8.
-	* @return true on success and false on fail
+	* 
 	* @author Martinkolle
+	* @return bool true on succes | false on failure
 	*/
-	function sendemail($emailto, $emailsubject, $emailbody) {
+	static function sendemail($emailto, $emailsubject, $emailbody) {
 
 		$fromEmail = self::getConfig('error_email');
 		$fromEmailName = self::getConfig('error_emailName');
@@ -39,9 +41,9 @@ class zpanelx{
 		* Generate a password for the payer.
 		* There is fallback to mt:rand() if openssl not is supported
 		* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
-		* @return password
+		* @return string password
 	*/
-	function generatePassword($length = 8) {
+	static function generatePassword($length = 8) {
 			if(function_exists('openssl_random_pseudo_bytes')) {
 				$password = base64_encode(openssl_random_pseudo_bytes($length, $strong));
 				if($strong == TRUE)
@@ -61,11 +63,12 @@ class zpanelx{
 	}
 
 	/**
-		* Generate the token the payment should be specified with.
-		* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
-		* @return token
+	* Generate the token the payment should be specified with.
+	* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
+	* @return string token
 	*/
-	function generateToken($length = 24) {
+	
+	static function generateToken($length = 24) {
 		$characters = '0123456789';
 		$characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; 
 		$charactersLength = strlen($characters)-1;
@@ -78,82 +81,12 @@ class zpanelx{
 	}
 
 	/**
-	* Create the client through XMWS
-	* @author Martinkolle
-	* @return redirect on success else add error
-	*/
-	function addUser($payPeriod, $packageId, $token, $password, $username, $email, $fullname, $address, $postcode, $telephone, $website, $website_help){
-
-		$data = "<pk_id>".$packageId."</pk_id>";
-		$package = self::api("reseller_billing", "Package", $data);
-
-		if (!empty($package['xmws']['content']['package']['id'])) {	
-
-			$package_name 	= $package['xmws']['content']['package']['name'];
-			$hosting 		= $package['xmws']['content']['package']['hosting'];
-			$domain 		= $package['xmws']['content']['package']['domain'];
-
-			$json = json_decode($hosting, true);
-			$packagePrice = null;
-			foreach($json['hosting'] as $key=>$host){
-				if($host['month'] == $payPeriod){
-					$packagePrice = $host['price'];
-				}
-			}
-		}
-		else {
-			self::error("Error getting package data: function addUser", true);
-			return false;
-		}
-
-		$data = '
-			<resellerid>'.self::getConfig('reseller_id').'</resellerid>
-			<username>'.$username.'</username>
-			<packageid>'.$packageId.'</packageid>
-			<groupid>'.self::getConfig('group_id').'</groupid>
-			<fullname>'.$fullname.'</fullname>
-			<email>'.$email.'</email>
-			<postcode>'.$postcode.'</postcode>
-			<address>'.$address.'</address>
-			<phone>'.$telephone.'</phone>
-			<password>'.$password.'</password>';
-
-		$addUser 		= self::api("reseller_billing", "CreateClient", $data);
-		if($addUser['xmws']['content']['code'] == "1"){
-
-			$userId 	= $addUser['xmws']['content']['uid'];
-			$todaydate 	= date("Y-m-d");// current date
-			$newdate 	= strtotime(date("Y-m-d", strtotime($todaydate)) . $hostingTime." month");
-			$newdate 	= date('Y-m-d', $newdate);
-
-			$desc = array('pk_id'=>$packageId, 'price'=>$packagePrice, 'period'=>$payPeriod, 'domain'=>$website, 'web_help'=>$website_help);
-			$desc = json_encode($desc);
-			$data = "<user_id>".$userId."</user_id>
-					<amount>".$packagePrice."</amount>
-					<type>Initial Signup</type>
-					<desc>".$desc."</desc>
-					<token>".$token."</token>";
-			$addInvoice = self::api("reseller_billing", "CreateInvoice", $data, self::getConfig('zpanel_url'), self::getConfig('api'));
-			if($addInvoice['xmws']['content']['code'] == "1"){
-				header('Location: pay.php?id='.$token);
-			} else{
-				zpanelx::error("Error creating invoice");
-				self::sendemail(self::getConfig('error_email'), "Error creating invoice", "The invoice have not been created for user: ".$username."(".$userId.")" );
-			}
-		} else{
-			zpanelx::error("Error creating account");
-			self::sendemail(self::getConfig('error_email'), "Error creating account", "A new account have tried to be created, but failed");	
-		}
-	}
-
-	/**
-	 * Get the config values
+	 * Get the config.php values
 	 * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
 	*/
 	public static function getConfig( $key, $default = null )
 	{
-		if( !class_exists('zConfig') )
-		{
+		if(!class_exists('zConfig')) {
 			require_once('config.php');
 		}
 		$config = new zConfig;
@@ -169,7 +102,7 @@ class zpanelx{
 	/**
 	 * Get the main template and insert variables
 	 * @author Martinkolle
-	 * @return template
+	 * @return string template
 	*/
 	static function template($title,$head,$body){
 
@@ -196,9 +129,11 @@ class zpanelx{
 	/**
 	* Connection to the API using xmws
 	* @author Martinkolle
-	* @return array Mysql
+	* @return array
 	*/
 	static function api($module, $function, $data, $url ="", $api ="", $user = "", $pass =""){
+		//Find the url and api from the config.php.
+		//This can be used if you are having different API connections to different servers on ZPX
 		if(empty($url)){
 			$url = self::getConfig("zpanel_url");
 		}
@@ -206,24 +141,25 @@ class zpanelx{
 			$api = self::getConfig("zpanel_api");
 		}
 		
+		//Do the url have the scheme
 		$parsed = parse_url($url);
-		if (empty($parsed['scheme'])) 
+		if (empty($parsed['scheme'])) {
 			$url = "http://$url";
-		//echo $url;
-		//echo $api;
-
+		}
+		
 		if(!class_exists('xmwsclient')){
 			require_once('xmwsclient.class.php');
 		}
 		$xmws = new xmwsclient();
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
-		//echo $xmws->BuildRequest();
 		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
+		
+		//return error when wrong response code
 		if($xml['xmws']['response'] != "1101"){
-			self::error("Wrong response code ".$xml['xmws']['response'],false,true);
+			self::error($xml['xmws']['content']." (".$xml['xmws']['response'].")",false,true);
 		}
-		return $xml;
+		return $xml['xmws']['content'];
 	}
 
 	/**
