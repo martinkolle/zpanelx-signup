@@ -27,19 +27,19 @@ else if(!preg_match("/^[a-zA-Z0-9]+$/", $token)){
 $data     = "<token>".$token."</token>";
 $invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
 
-if($invoice['xmws']['content']['code'] == "0"){
+if($invoice['code'] == "0"){
      zpanelx::error("Invoice id was not found",false,true);
 } 
 
-elseif($invoice['xmws']['content']['code'] == "1"){
-     $inv_user      = $invoice['xmws']['content']['invoice']['user'];
-     $desc          = $invoice['xmws']['content']['invoice']['desc'];
+elseif($invoice['code'] == "1"){
+     $inv_user      = $invoice['invoice']['user'];
+     $desc          = $invoice['invoice']['desc'];
      $obj           = json_decode($desc);
      $inv_amount    = $obj->{'price'};
      $user_payperiod= $obj->{'period'};
      $package_id    = $obj->{'pk_id'};
-     $inv_status    = $invoice['xmws']['content']['invoice']['status'];
-     $inv_id        = $invoice['xmws']['content']['invoice']['id'];
+     $inv_status    = $invoice['invoice']['status'];
+     $inv_id        = $invoice['invoice']['id'];
 }
 else{
      zpanelx::error('Invoice data could not be loaded',false,true);
@@ -54,19 +54,20 @@ elseif($inv_status == "1"){
 $data = "<profile_id>".$inv_user."</profile_id><account_id>".$inv_user."</account_id><payment>1</payment>";
 $account = zpanelx::api("reseller_billing", "Pay", $data);
      
-     if (!empty($account['xmws']['content']['account']['id'])) {
-          $user_alias      = $account['xmws']['content']['account']['alias'];
-          $user_id         = $account['xmws']['content']['account']['id'];
-          $user_email      = $account['xmws']['content']['account']['email'];
-          $payments        = $account['xmws']['content']['payments'];
-          $profile_fullname= $account['xmws']['content']['profile']['fullname'];
+     if (!empty($account['account']['id'])) {
+          $user_alias      = $account['account']['alias'];
+          $user_id         = $account['account']['id'];
+          $user_email      = $account['account']['email'];
+          $payments        = $account['payments'];
+          $profile_fullname= $account['profile']['fullname'];
      } 
      else{
           zpanelx::error("Error getting account data",false,true);
      }
      
      //Check if we have more than one payment method we have different arrays
-     $payments = (is_array($payments['payment'][0])) ? $payments['payment'] : $payments;
+     $payments = (is_array(isset($payments['payment'][0]))) ? $payments['payment'] : $payments;
+    $paymethods = null;
 
      foreach($payments as $row){
           $paymethod = file_get_contents('templates/paymethod.html');
@@ -80,8 +81,8 @@ $account = zpanelx::api("reseller_billing", "Pay", $data);
 $data = "<pk_id>".$package_id."</pk_id>";
 $package = zpanelx::api("reseller_billing", "Package", $data);
 
-if (!empty($package['xmws']['content']['package']['name'])) {
-     $package_name    = $package['xmws']['content']['package']['name'];
+if (!empty($package['package']['name'])) {
+     $package_name    = $package['package']['name'];
 } 
 else{
      zpanelx::error("Error getting package data".$data,false,true);
