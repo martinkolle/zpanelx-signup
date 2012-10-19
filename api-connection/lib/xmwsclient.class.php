@@ -93,23 +93,51 @@ class xmwsclient {
      * @return string The XML repsonse. 
      */
     function PostRequest($url, $data, $optional_headers = null) {
-        $params = array('http' => array(
-                'method' => 'POST',
-                'content' => $data
-                ));
-        if ($optional_headers !== null) {
-            $params['http']['header'] = $optional_headers;
+
+        if(function_exists('curl_version')){
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)');
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/xml',
+                'Content-Length: ' . strlen($data)
+            ));                                                                                                                  
+
+            if(curl_exec($curl) === false){
+                 zpanelx::error('Curl error: ' . curl_error($curl), false, true);
+            } else{
+                $content = curl_exec($curl);
+            }
+            //print_r($content);
+            curl_close($curl);
+
+        } else if(file_get_contents(__FILE__) && ini_get('allow_url_fopen')){
+
+            $params = array('http' => array(
+                    'method' => 'POST',
+                    'content' => $data
+                    ));
+            if ($optional_headers !== null) {
+                $params['http']['header'] = $optional_headers;
+            }
+            $ctx = stream_context_create($params);
+            $fp = @fopen($url, 'r', false, $ctx);
+            if (!$fp) {
+                zpanelx::error("Problem reading data from " . $url . " ".error_get_last(),false,true);
+            }
+            $content = @stream_get_contents($fp);
+            if ($content == false) {
+                zpanelx::error("Problem reading data from " . $url . " ".error_get_last(),false,true);
+            }
+
+        } else {
+            zpanelx::error("Fopen or/and allow_url_fopen is disabled. <br /> cURL is not installed.<br />Please activate / install one of them, to get this to work. ",false,true);
         }
-        $ctx = stream_context_create($params);
-        $fp = @fopen($url, 'r', false, $ctx);
-        if (!$fp) {
-            zpanelx::error("Problem reading data from " . $url . "",false,true);
-        }
-        $response = @stream_get_contents($fp);
-        if ($response == false) {
-            zpanelx::error("Problem reading data from " . $url . "",false,true);
-        }
-        return $response;
+        //print_r($content);
+        return $content;
     }
 
     /**
@@ -121,7 +149,7 @@ class xmwsclient {
         print_r($this->ResponseToArray($xml));
         echo "</pre>";
     }
-    
+
     /**
     * A simple way to build an XML section for the <content> tag, perfect for multiple data lines etc.
     * @param string $name The name of the section <tag>.
@@ -136,8 +164,8 @@ class xmwsclient {
     $xml .= "\t</" . $name . ">\n";
     return $xml;
     }
-    
-    
+
+
     /**
     * Takes an XML string and converts it into a usable PHP array.
     * @param $contents string The XML content to convert to a PHP array.
