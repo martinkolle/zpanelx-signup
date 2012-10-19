@@ -117,11 +117,6 @@ if (isset($_POST['submit'])) {
 			zpanelx::error("Error creating billing");
 			zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: ".$username."(".$email.") Error code:". $createBilling['create_invoice'] );
 		}
-		
-		
-		
-		
-		//zpanelx::addUser($payperiod, $packageid, zpanelx::generateToken(), zpanelx::generatePassword(), $username, $email, $fullname, $address, $postcode, $telephone, $website, $transfer_help);
 	}
 }//end submit
 
