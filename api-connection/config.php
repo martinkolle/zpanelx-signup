@@ -31,7 +31,7 @@ class zConfig {
 	* Using this will override user.reseller_id in reseller_billing. 
 	* Only set this variable if you are having multiple sign-up sites 
 	* and the users should be assigned to different resellers accounts.
-	* Default is 0
+	* Disabled is 0
 	*/
 	public $reseller_id = '0';
 
@@ -39,7 +39,7 @@ class zConfig {
 	* Using this will override user.groupid in reseller_billing. 
 	* Only set this variable if you are having multiple sign-up sites 
 	* and the users should be assigned to different groups
-	* Default is 0
+	* Disabled is 0
 	*/
 	public $group_id = '0';
 }
