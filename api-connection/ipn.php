@@ -18,7 +18,7 @@ include('lib/ipnlistener.php');
 
 //Get the setting
 $data     = "<settings><setting>system.test</setting><setting>payment.email_paypal</setting><setting>payment.cs</setting><setting>payment.email_error</setting></settings>";
-$setting  = zpanelx::api("reseller_billing", "setting", $data);
+$setting  = zpanelx::api("reseller_billing", "Setting", $data);
 $setting  = $setting['settings'];
 
 $listener = new IpnListener();
