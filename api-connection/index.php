@@ -4,7 +4,7 @@
  * List all packages
  *
  * @author MaouKami
- * @copyright MaouKami
+ * @copyright Martinkolle
  * @link http://www.kmweb.dk/
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
@@ -23,8 +23,10 @@ if(empty($listPackages)){
 }
 
 //Check how the array is build. xmws.class is gennerating different arrays based on the number of packages. 
-$listPackages = (is_array(isset($listPackages['package'][0]))) ? $listPackages['package'] : $listPackages;
+$listPackages = (isset($listPackages['package'][0])) ? $listPackages['package'] : $listPackages;
 //print_r($listPackages);
+$list = null;
+
 foreach($listPackages as $row){
 
     //List the prices for the package and find the cheapest
@@ -45,11 +47,12 @@ foreach($listPackages as $row){
     
     $packetlist = str_replace('{{packagename}}',$row['name'],$packetlist);
     $packetlist = str_replace('{{packageid}}',$row['id'],$packetlist);
-    $packetlist = str_replace('{{desc}}',"Prices beginning from " . $price,$packetlist);
+    $packetlist = str_replace('{{price}}',"Prices beginning from " . $price,$packetlist);
+    $list .= $packetlist;
 }
 
 	$template = file_get_contents('templates/index.html');
-    $template = str_replace('{{packageList}}', $packetlist, $template);
+    $template = str_replace('{{packageList}}', $list, $template);
 	$template = str_replace('{{action}}', "./billing.php", $template);
 	$title 	  = "Buy hosting";
 	
@@ -65,5 +68,5 @@ window.onload=function(){
 
 //return template
 echo zpanelx::template($title, $head, $template);
-//print_r(zpanelx::$zerror);
+print_r(zpanelx::$zerror);
 ?>
