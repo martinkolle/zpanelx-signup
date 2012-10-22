@@ -12,6 +12,9 @@ include ('lib/functions.php');
 
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $head = null;
+$title = null;
+$template = null;
+$package_name = null;
 
 //Are there a id?
 if(empty($id)){
@@ -90,9 +93,7 @@ if (isset($_POST['submit'])) {
 	//If no error have been added create the user
 	if(empty(zpanelx::$zerror)){
 		$token = zpanelx::generateToken();
-		
-		$data = '
-		<resellerid>'.zpanelx::getConfig('reseller_id').'</resellerid>
+		$data = '<resellerid>'.zpanelx::getConfig('reseller_id').'</resellerid>
 		<groupid>'.zpanelx::getConfig('group_id').'</groupid>
 		<username>'.$username.'</username>
 		<fullname>'.$fullname.'</fullname>
@@ -100,7 +101,6 @@ if (isset($_POST['submit'])) {
 		<postcode>'.$postcode.'</postcode>
 		<address>'.$address.' </address>
 		<phone>'.$telephone.'</phone>
-		
 		<packageid>'.$packageid.'</packageid>
 		<period>'.$payperiod.'</period>
 		<type>Initial Signup</type>		
@@ -110,13 +110,17 @@ if (isset($_POST['submit'])) {
 		';
 		
 		$createBilling = zpanelx::api("reseller_billing", "CreateBilling", $data);
-		
+
 		if($createBilling['create_user'] == "1" && $createBilling['create_invoice'] == "1"){
 			header('Location: pay.php?id='.$token);
+
 		} else{
+			echo $data;
+			print_r($createBilling);
 			zpanelx::error("Error creating billing");
 			zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: ".$username."(".$email.") Error code:". $createBilling['create_invoice'] );
 		}
+
 	}
 }//end submit
 
@@ -130,17 +134,22 @@ if (!empty($package['package']['id'])) {
 	$domain 		= $package['package']['domain'];
 }
 else {
-	zpanelx::error("Error getting package data", true);
+	zpanelx::error("Error getting package data", true, false);
 }
 
 //Adding the price from xmws to input fields
 if(!empty($package_name)){
 
+	//Get the setting
+	$data     	= "<settings><setting>payment.cs</setting></settings>";
+	$setting 	= zpanelx::api("reseller_billing", "Setting", $data);
+	$cs  		= $setting['settings']['payment.cs'];
+
 	$payoptions = json_decode($hosting, true);
 	$payoption 	= null;
 
 	foreach($payoptions['hosting'] as $option){
-		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".zpanelx::getConfig('cs')." ".$option['price']."</input><br />";
+		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".$cs." ".$option['price']."</input><br />";
 	}
 	//Insert values to template
 	$template = file_get_contents('templates/billing.html');
@@ -160,7 +169,7 @@ if(!empty($package_name)){
 	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "Website", $template));
 
 } else{
-	zpanelx::error("Invalid package selected");
+	zpanelx::error("Invalid package selected", false, true);
 }
 
 echo zpanelx::template($title, $head, $template);
