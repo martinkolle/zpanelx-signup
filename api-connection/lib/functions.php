@@ -154,10 +154,10 @@ class zpanelx{
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
 		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-		
+		//print_r($xmws->Request($xmws->BuildRequest()));
 		//return error when wrong response code
 		if($xml['xmws']['response'] != "1101"){
-			self::error($xml['xmws']['content']." (".$xml['xmws']['response'].")",false,true);
+			self::error("Wrong response code: ".$xml['xmws']['content']." (".$xml['xmws']['response'].")",false,true);
 		}
 		return $xml['xmws']['content'];
 	}
