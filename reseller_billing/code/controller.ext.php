@@ -33,7 +33,6 @@ class module_controller {
     static $updatedSettings;
     static $editedEmail;
     static $editEmail;
-    static $version = "10005";
 
     /**
     * Yeah, "must have" functions for the module.
@@ -56,41 +55,33 @@ class module_controller {
         $name = $controller->GetControllerRequest('URL', 'module');
         return "/modules/".$name;
     }
-    
-    static function isOnlyDigit($value){
-        if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i",$value)){
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     /**
     * LET ME SAY... DIFFERENT VIEWS IN MODULES! BUUUUH JAH!!
     */
-    static function getView(){
+    function getView(){
         global $controller;
         $url = $controller->GetAllControllerRequests('URL');
         $url = (array_key_exists('view', $url)) ? $url['view'] : false;
         return  $url;
     }
-    static function getViewInvoice(){
+    function getViewInvoice(){
         $url = self::getView();
         return ($url == 'invoice') ? true : false;
     }
-    static function getViewPayment(){
+    function getViewPayment(){
         $url = self::getView();
         return ($url == 'payment_method') ? true : false;
     }
-    static function getViewPackage(){
+    function getViewPackage(){
         $url = self::getView();
         return ($url == 'package') ? true : false;
     }
-    static function getViewSetting(){
+    function getViewSetting(){
         $url = self::getView();
         return ($url == 'setting') ? true : false;
     }
-    static function getViewEmail(){
+    function getViewEmail(){
         $url = self::getView();
         return ($url == 'email') ? true : false;
     }
@@ -144,7 +135,7 @@ class module_controller {
         $data   = (isset($url['data'])) ? $url['data'] : null;
         $active = (isset($url['active'])) ? $url['active'] : null;
 
-        if ((!empty($id)) && !empty($data) && self::isOnlyDigit($id)) {
+        if ((!empty($id)) && (!empty($data))) {
             if (self::ExecuteEditPayment($id, $name, $data, $active)){
                 self::$editPaymentGood = true;
                 return true;
@@ -164,7 +155,7 @@ class module_controller {
         global $controller;
         $id = $controller->GetAllControllerRequests('URL');
 
-        if (isset($id['deleteId']) && self::isOnlyDigit($id['deleteId'])) {
+        if (isset($id['deleteId'])) {
             if (self::ExecuteDeletePayment($id['deleteId'])){
                 self::$deletedPaymentMethod = true;
                 return true;
@@ -753,7 +744,7 @@ static function getEmail() {
             FROM x_packages a
               LEFT JOIN x_rb_price b
                 ON a.pk_id_pk = b.pk_id
-                AND b.pkp_hosting IS NOT NULL AND b.pkp_domain IS NOT NULL
+                AND b.pkp_hosting IS NOT NULL OR b.pkp_domain IS NOT NULL
             WHERE a.pk_id_pk = ? AND a.pk_deleted_ts IS NULL
         ");
         $stmt->execute(array($pk_id));
@@ -867,12 +858,11 @@ static function getEmail() {
         return $response;
     }
 
-
-   static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
+    static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
         global $zdbh;
         // Check for spaces and remove if found...
         $username = strtolower(str_replace(' ', '', $username));
-
+        
         if(empty($reseller_id)){
             $reseller_id = self::getConfig("user.reseller_id");
         }
@@ -880,37 +870,110 @@ static function getEmail() {
         if(empty($groupid)){
             $groupid = self::getConfig("user.group_id");
         }
-
         $reseller = ctrl_users::GetUserDetail($reseller_id);
+        // Check for errors before we continue...
+        if (fs_director::CheckForEmptyValue(self::ApiCreateClientCheckError($username, $packageid, $groupid, $email, $password))) {
+            return false;
+        }
+        runtime_hook::Execute('OnBeforeCreateClient');
+        // No errors found, so we can add the user to the database...
+        $sql = $zdbh->prepare("INSERT INTO x_accounts (
+                                        ac_user_vc,
+                                        ac_pass_vc,
+                                        ac_email_vc,
+                                        ac_package_fk,
+                                        ac_group_fk,
+                                        ac_usertheme_vc,
+                                        ac_usercss_vc,
+                                        ac_reseller_fk,
+                                        ac_enabled_in,
+                                        ac_created_ts) VALUES (
+                                        '" . $username . "',
+                                        '" . md5($password) . "',
+                                        '" . $email . "',
+                                        '" . $packageid . "',
+                                        '" . $groupid . "',
+                                        '" . $reseller['usertheme'] . "',
+                                        '" . $reseller['usercss'] . "',
+                                        " . $reseller_id . ",
+                                        '0',
+                                        " . time() . ")");
+        $sql->execute();
+        // Now lets pull back the client ID so that we can add their personal address details etc...
+        $client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk='" . $reseller_id . "' ORDER BY ac_id_pk DESC")->Fetch();
+        $sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk,
+                                        ud_fullname_vc,
+                                        ud_group_fk,
+                                        ud_package_fk,
+                                        ud_address_tx,
+                                        ud_postcode_vc,
+                                        ud_phone_vc,
+                                        ud_created_ts) VALUES (
+                                         ". $client['ac_id_pk'] . ",
+                                        '" . $fullname . "',
+                                        '" . $packageid . "',
+                                        '" . $groupid . "',
+                                        '" . $address . "',
+                                        '" . $post . "',
+                                        '" . $phone . "',
+                                         " . time() . ")");
+        $sql->execute();
+        // Now we add an entry into the bandwidth table, for the user for the upcoming month.
+        $sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (" . $client['ac_id_pk'] . "," . date("Ym", time()) . ", 0, 0)");
+        $sql->execute();
+        // Lets create the client diectories
+        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username);
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username, 0755);
+        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/public_html");
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/public_html", 0755);
+        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/backups");
+        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/backups", 0755);        
+        self::$username = $username;
+        runtime_hook::Execute('OnAfterCreateClient');
+        return true;
+    }
 
-        //Check for errors
-        if(!fs_director::CheckForEmptyValue($username)){
-            $sql = $zdbh->prepare('SELECT ac_user_vc FROM x_accounts WHERE ac_user_vc=? AND ac_deleted_ts IS NULL LIMIT 1');
-            $sql->execute(array($username));
-
-            if ($sql->rowCount() < 0 ) {
+    static function ApiCreateClientCheckError($username, $packageid, $groupid, $email, $password="") {
+        global $zdbh;
+        $username = strtolower(str_replace(' ', '', $username));
+        // Check to make sure the username is not blank or exists before we go any further...
+        if (!fs_director::CheckForEmptyValue($username)) {
+            $sql = "SELECT COUNT(*) FROM x_accounts WHERE UPPER(ac_user_vc)='" . strtoupper($username) . "' AND ac_deleted_ts IS NULL";
+            if ($numrows = $zdbh->query($sql)) {
+                if ($numrows->fetchColumn() <> 0) {
+                    self::$allreadyexists = true;
+                    return false;
+                }
+            }
+            if (!self::IsValidUserName($username)) {
                 return false;
             }
+        } else {
+            return false;
         }
-
-        if(!fs_director::CheckForEmptyValue($packageid)){
-            $sql = $zdbh->prepare('SELECT pk_id_pk FROM x_packages WHERE pk_id_pk=? AND pk_deleted_ts IS NULL LIMIT 1');
-            $sql->execute(array($packageid));
-
-            if ($sql->rowCount() < 0 ) {
-                return false;
+        // Check to make sure the packagename is not blank and exists before we go any further...
+        if (!fs_director::CheckForEmptyValue($packageid)) {
+            $sql = "SELECT COUNT(*) FROM x_packages WHERE pk_id_pk='" . $packageid . "' AND pk_deleted_ts IS NULL";
+            if ($numrows = $zdbh->query($sql)) {
+                if ($numrows->fetchColumn() == 0) {
+                    return false;
+                }
             }
+        } else {
+            return false;
         }
-
-        if(!fs_director::CheckForEmptyValue($groupid)){
-            $sql = $zdbh->prepare('SELECT ug_id_pk FROM x_groups WHERE ug_id_pk=?  LIMIT 1');
-            $sql->execute(array($groupid));
-
-            if ($sql->rowCount() < 0 ) {
-                return false;
+        // Check to make sure the groupname is not blank and exists before we go any further...
+        if (!fs_director::CheckForEmptyValue($groupid)) {
+            $sql = "SELECT COUNT(*) FROM x_groups WHERE ug_id_pk='" . $groupid . "'";
+            if ($numrows = $zdbh->query($sql)) {
+                if ($numrows->fetchColumn() == 0) {
+                    return;
+                }
             }
+        } else {
+            return false;
         }
-
+        // Check for invalid characters in the email and that it exists...
         if (!fs_director::CheckForEmptyValue($email)) {
             if (!self::IsValidEmail($email)) {
                 return false;
@@ -918,42 +981,14 @@ static function getEmail() {
         } else {
             return false;
         }
-
-        runtime_hook::Execute('OnBeforeCreateClient');
-        // No errors found, so we can add the user to the database...
-        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts, ac_enabled_in) VALUES (
-            :username, :password, :email, :packageid, :groupid, :resellertheme, :resellercss, " . $reseller_id . ", " . time() . ", 0)");
-        $sql->bindParam(':username', $username);
-        $sql->bindParam(':password', md5($password));
-        $sql->bindParam(':email', $email);
-        $sql->bindParam(':packageid', $packageid);
-        $sql->bindParam(':groupid', $groupid);
-        $sql->bindParam(':resellertheme', $reseller['usertheme']);
-        $sql->bindParam(':resellercss', $reseller['usercss']);
-        $sql->execute();
-        // Now lets pull back the client ID so that we can add their personal address details etc...
-        $client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk=" . $reseller_id . " ORDER BY ac_id_pk DESC")->Fetch();
-        $sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:userid, :fullname, :packageid, :groupid, :address, :postcode, :phone, " . time() . ")");
-        $sql->bindParam(':userid', $client['ac_id_pk']);
-        $sql->bindParam(':fullname', $fullname);
-        $sql->bindParam(':packageid', $packageid);
-        $sql->bindParam(':groupid', $groupid);
-        $sql->bindParam(':address', $address);
-        $sql->bindParam(':postcode', $post);
-        $sql->bindParam(':phone', $phone);
-        $sql->execute();
-        // Now we add an entry into the bandwidth table, for the user for the upcoming month.
-        $sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (" . $client['ac_id_pk'] . "," . date("Ym", time()) . ", 0, 0)");
-        $sql->execute();
-        // Lets create the client diectories
-        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username);
-        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username, 0777);
-        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html", 0777);
-        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups", 0777);
-       
-        runtime_hook::Execute('OnAfterCreateClient');
+        // Check for password length...
+        if (!fs_director::CheckForEmptyValue($password)) {
+            if (strlen($password) < ctrl_options::GetOption('password_minlength')) {
+                return false;
+            }
+        } else {
+            return false;
+        }
 
         return true;
     }

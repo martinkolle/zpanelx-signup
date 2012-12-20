@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 <name>Reseller Billing</name>
-<version>100</version>
+<version>1000</version>
 <defaultcat>Reseller</defaultcat>
-<type>user</user>
 <desc>Billing system</desc>
 <authorname>Martin Kollerup</authorname>
 <authoremail>martiinkolle@gmail.com</authoremail>
