@@ -109,7 +109,7 @@ if (isset($_POST['submit'])) {
 		<token>'.$token.'</token>
 		';
 		
-		$createBilling = zpanelx::api("reseller_billing", "CreateBilling", $data);
+		$createBilling = zpanelx::api("reseller_billing", "CreateClient", $data);
 
 		if($createBilling['create_user'] == "1" && $createBilling['create_invoice'] == "1"){
 			header('Location: pay.php?id='.$token);
