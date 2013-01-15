@@ -101,7 +101,7 @@ class ajax {
 		$error 		= array();
 				
 		// Get version From module.xml
-		$mod_xml 		= "/etc/zpanel/panel/modules/reseller_billing/module.xml";
+		$mod_xml 		= "/etc/zpanel/panel/modules/billing/module.xml";
 		$mod_config 	= new xml_reader(fs_filehandler::ReadFileContents($mod_xml));
 		$mod_config->Parse();
 		$version_new 	= $mod_config->document->version[0]->tagData;
@@ -130,9 +130,9 @@ class ajax {
 
 		$outout = "";
 		if($module){
-			exec("zppy upgrade user_billing", $output);
+			exec("zppy upgrade billing", $output);
 		}else {
-			exec("zppy install user_billing", $output);
+			exec("zppy install billing", $output);
 		}
 		print_r($output);
 		$logReturn = false;//($_GET['log']) ? $_GET['log'] : false;

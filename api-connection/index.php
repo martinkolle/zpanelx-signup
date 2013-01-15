@@ -1,5 +1,4 @@
 <?php
-
 /**
  * List all packages
  *
@@ -8,14 +7,14 @@
  * @link http://www.kmweb.dk/
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
+error_reporting(E_ERROR);
 include ('lib/functions.php');
 
 $head = null;
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $packetlist = null;
-
 //Get packages from zpanelx
-$listPackages = zpanelx::api("reseller_billing", "PackageList", "");
+$listPackages = zpanelx::api("billing", "PackageList", "");
 //print_r($listPackages);
 
 if(empty($listPackages)){
@@ -36,7 +35,7 @@ foreach($listPackages as $row){
         array_push($price, $host['price']);
     }
     $price = min($price);
-    $packetlist = file_get_contents('templates/packagelist.html');
+    $packetlist = file_get_contents('themes/packagelist.tpl');
     
     //If a id have been added to the url it will be checked.
     if(preg_match('/^\d+$/', $id) && $id == $row['id']){
@@ -51,10 +50,10 @@ foreach($listPackages as $row){
     $list .= $packetlist;
 }
 
-	$template = file_get_contents('templates/index.html');
+	$template = file_get_contents('themes/index.tpl');
     $template = str_replace('{{packageList}}', $list, $template);
 	$template = str_replace('{{action}}', "./billing.php", $template);
-	$title 	  = "Buy hosting";
+	$title 	  = "Buy Hosting";
 	
 	$head = '<script type="text/javascript">
 window.onload=function(){

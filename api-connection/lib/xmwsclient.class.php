@@ -57,6 +57,7 @@ class xmwsclient {
      */
     function Request($post_xml) {
         $full_wsurl = $this->wsurl . "/api/" . $this->module;
+        //echo $full_wsurl.'<br>';
         return $this->PostRequest($full_wsurl, $post_xml);
     }
 

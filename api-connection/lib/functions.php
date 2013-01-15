@@ -10,7 +10,7 @@
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
  
- error_reporting(E_ALL);
+//error_reporting(E_ERROR);
 
 class zpanelx{
 	static $newUserError;
@@ -90,6 +90,7 @@ class zpanelx{
 			require_once('config.php');
 		}
 		$config = new zConfig;
+		//$config->__construct();
 		$class_vars = get_class_vars('zConfig');
 		if( array_key_exists($key, $class_vars) ){
 			return $class_vars[$key];
@@ -106,7 +107,9 @@ class zpanelx{
 	*/
 	static function template($title,$head,$body){
 
-		$template = file_get_contents('templates/default.html');
+		$template = file_get_contents('theme/includes/header.tpl');
+		$template = file_get_contents('theme/includes/body.tpl');
+		$template = file_get_contents('theme/includes/footer.tpl');
 
 		if(!is_array(zpanelx::$zerror)){
 			$template = str_replace('{{error}}', "", $template);
@@ -146,6 +149,7 @@ class zpanelx{
 		if (empty($parsed['scheme'])) {
 			$url = "http://$url";
 		}
+
 		
 		if(!class_exists('xmwsclient')){
 			require_once('xmwsclient.class.php');
@@ -154,7 +158,11 @@ class zpanelx{
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
 		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-		//print_r($xmws->Request($xmws->BuildRequest()));
+		//echo($function);
+		//print_r($data);
+		echo('<br><b>'.$function.'</b><br>');
+		print_r($xmws->Request($xmws->BuildRequest()));
+		echo('<br>');
 		//return error when wrong response code
 		if($xml['xmws']['response'] != "1101"){
 			self::error("Wrong response code: ".$xml['xmws']['content']." (".$xml['xmws']['response'].")",false,true);

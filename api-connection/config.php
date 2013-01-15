@@ -1,31 +1,31 @@
 <?php
-/**
- * Config file for zpanelx signup
- * @author Martinkolle
-*/
+
 class zConfig {
 
-	/**
-	* Welcome to the config file for Reseller billing API connection
-	* Please set this:
-	*
-	* $error_email
-	* $zpanel_api
-	* $zpanel_url
-	*/
-
+	
 	public $test = true; //false for NOT
 	public $DEBUG = true; //false disable
+	
+   	static $zpanel_api;
+   	static $zpanel_url;
+   	
+    //Database connection
+   	static $mysql_host = 'localhost';
+   	static $mysql_user = 'root';
+   	static $mysql_pass = '';
+	//recaptcha public key
+	public $rc_public_key = '';
+	//recaptcha private key
+	public $rc_private_key = '';
 
-	//Enter your api key! Find with gatekeeper, or in the zpanel_core.x_settings
-	public $zpanel_api = 'ee8795c8c53bfdb3b2cc595186b68912';
-
-	//enter url to your zpanel panel
-	public $zpanel_url = 'http://panel.local';
+    //Config
+   	public $server_cfg;
 
 	//Email settings
 	public $error_email = '';
 	public $error_emailName = '';
+
+
 
 	/**
 	* Using this will override user.reseller_id in reseller_billing. 
@@ -42,4 +42,25 @@ class zConfig {
 	* Disabled is 0
 	*/
 	public $group_id = '0';
+
+	/*****************************************
+	    @Author: Aderemi Adewale (modpluz @ ZPanel Forums)
+	    Fetch API Key and Control Panel URL the Old Fashioned way
+	 *****************************************/
+	 
+	function __construct(){
+		if(!class_exists('zServer') && is_file('zserver.php')) {
+			require_once('zserver.php');
+		}
+
+	    $zServer = new zServer();
+	    $server_cfg = $zServer->_getConfig(self::$mysql_host,self::$mysql_user,self::$mysql_pass);
+	    if(is_array($server_cfg)){
+	        self::$zpanel_api = $server_cfg['api_key'];
+	         self::$zpanel_url = $server_cfg['panel_url'];
+	    }
+	}
+	 
+
+
 }
