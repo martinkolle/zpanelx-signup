@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_billing` (
   `blg_remind` varchar(100) NOT NULL,
   `blg_desc` text NOT NULL,
   PRIMARY KEY (`blg_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+)   DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_billing`
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_invoice` (
   `inv_token` varchar(255) NOT NULL,
   `inv_status` int(9) NOT NULL DEFAULT '2',
   PRIMARY KEY (`inv_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+)   DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_invoice`
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_mail` (
   `message` text NOT NULL,
   `header` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_mail`
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_payment` (
   `pm_data` text NOT NULL,
   `pm_active` int(9) NOT NULL,
   PRIMARY KEY (`pm_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+)   DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_payment`
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_price` (
   `pkp_domain` text COMMENT 'domain price -json',
   `pkp_hosting` text COMMENT 'hosting price -json',
   PRIMARY KEY (`pkp_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+)   DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_price`
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `x_rb_settings` (
   `title` varchar(255) NOT NULL,
   `desc` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+)   DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `x_rb_settings`

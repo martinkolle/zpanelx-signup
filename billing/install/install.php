@@ -1,6 +1,6 @@
 <?php
 
-die();
+//die();
 /**
  * @package zpanelx
  * @subpackage modules->reseller_billing->install
