@@ -6,17 +6,21 @@ class zConfig {
 	public $test = true; //false for NOT
 	public $DEBUG = true; //false disable
 	
-   	static $zpanel_api;
-   	static $zpanel_url;
+   	static $zpanel_api = 'API_KEY_HERE'; // API Key can be found in your zpanel database
+   	static $zpanel_url = 'localhost'; //or IP/URL of zpanel server
    	
     //Database connection
+    /* The database connection is only needed if the API key is not set
+	 * For security reason the less place you have to have your database credentials in plain text the better
+	 * if you do need to use the database connection you will have to uncomment the function at the bottom of this file
+	 */ 
    	static $mysql_host = 'localhost';
    	static $mysql_user = 'root';
    	static $mysql_pass = '';
-	//recaptcha public key
-	public $rc_public_key = '';
-	//recaptcha private key
-	public $rc_private_key = '';
+	
+	//Recaptcha keys
+	public $rc_public_key = ''; //recaptcha public key
+	public $rc_private_key = ''; //recaptcha private key
 
     //Config
    	public $server_cfg;
@@ -24,8 +28,6 @@ class zConfig {
 	//Email settings
 	public $error_email = '';
 	public $error_emailName = '';
-
-
 
 	/**
 	* Using this will override user.reseller_id in reseller_billing. 
@@ -48,6 +50,7 @@ class zConfig {
 	    Fetch API Key and Control Panel URL the Old Fashioned way
 	 *****************************************/
 	 
+	/* Function Only needed if API key is not set
 	function __construct(){
 		if(!class_exists('zServer') && is_file('zserver.php')) {
 			require_once('zserver.php');
@@ -60,7 +63,7 @@ class zConfig {
 	         self::$zpanel_url = $server_cfg['panel_url'];
 	    }
 	}
-	 
+	 */
 
 
 }

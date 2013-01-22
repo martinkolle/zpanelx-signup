@@ -104,7 +104,7 @@ if (isset($_POST['submit'])) {
 
 	//is the username already used?
 	$data = "<username>".$username."</username>";
-	$usernameExits = zpanelx::api("billing", "UsernameExits", $data);
+	$usernameExits = zpanelx::api("reseller_billing", "UsernameExits", $data);
 
 	if($usernameExits['code'] != "3"){
 		zpanelx::error($usernameExits['human']);
@@ -132,14 +132,14 @@ if (isset($_POST['submit'])) {
 		<token>'.$token.'</token>
 		';
 		
-		$createBilling = zpanelx::api("billing", "CreateClient", $data);
+		$createBilling = zpanelx::api("reseller_billing", "CreateClient", $data);
         //echo($createBilling);
         //echo('<br>s');
         //create invoice
         if($createBilling['code'] == "1"){
             //Request for the package prices
             $data = "<pk_id>".$id."</pk_id>";
-            $package = zpanelx::api("billing", "Package", $data);
+            $package = zpanelx::api("reseller_billing", "Package", $data);
             if (!empty($package['package']['id'])) {
                 $hosting_options = json_decode($package['package']['hosting'], true);
                 //print_r($hosting);
@@ -163,7 +163,7 @@ if (isset($_POST['submit'])) {
 		                <token>'.$token.'</token>
 		                ';
                     
-                		$createInvoice = zpanelx::api("billing", "CreateInvoice", $data);                    
+                		$createInvoice = zpanelx::api("reseller_billing", "CreateInvoice", $data);                    
                     }
                 }
 	            //$package_name 	= $package['package']['name'];
@@ -189,7 +189,7 @@ if (isset($_POST['submit'])) {
 
 //Request for the package prices
 $data = "<pk_id>".$id."</pk_id>";
-$package = zpanelx::api("billing", "Package", $data);
+$package = zpanelx::api("reseller_billing", "Package", $data);
 //print_r($package);
 if (!empty($package['package']['id'])) {
 	$package_name 	= $package['package']['name'];
@@ -205,7 +205,7 @@ if(!empty($package_name)){
 
 	//Get the setting
 	$data     	= "<settings><setting>payment.cs</setting></settings>";
-	$setting 	= zpanelx::api("billing", "Setting", $data);
+	$setting 	= zpanelx::api("reseller_billing", "Setting", $data);
 	$cs  		= $setting['settings']['payment.cs'];
 
 	$payoptions = json_decode($hosting, true);

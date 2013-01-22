@@ -52,7 +52,7 @@ elseif($inv_status == "1"){
 }
 
 $data = "<profile_id>".$inv_user."</profile_id><account_id>".$inv_user."</account_id><payment>1</payment>";
-$account = zpanelx::api("billing", "Pay", $data);
+$account = zpanelx::api("reseller_billing", "Pay", $data);
      
      if (!empty($account['account']['id'])) {
           $user_alias      = $account['account']['alias'];
@@ -70,7 +70,7 @@ $account = zpanelx::api("billing", "Pay", $data);
     $paymethods = null;
 
      foreach($payments as $row){
-          $paymethod = file_get_contents('templates/paymethod.tpl');
+          $paymethod = file_get_contents('themes/paymethod.tpl');
 
           $paymethod = str_replace('{{paycode}}',$row['data'],$paymethod);
           $paymethod = str_replace('{{payname}}',$row['name'],$paymethod);
@@ -88,7 +88,7 @@ else{
      zpanelx::error("Error getting package data".$data,false,true);
 }
 
-$form = file_get_contents('templates/pay.tpl');
+$form = file_get_contents('themes/pay.tpl');
     
 //Add the paymethods, price and title
 $form = str_replace('{{payment}}',$paymethods,$form);

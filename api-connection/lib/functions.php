@@ -107,9 +107,9 @@ class zpanelx{
 	*/
 	static function template($title,$head,$body){
 
-		$template = file_get_contents('theme/includes/header.tpl');
-		$template = file_get_contents('theme/includes/body.tpl');
-		$template = file_get_contents('theme/includes/footer.tpl');
+		$template = file_get_contents('./themes/includes/header.tpl');
+		$template .= file_get_contents('./themes/includes/body.tpl');
+		$template .= file_get_contents('./themes/includes/footer.tpl');
 
 		if(!is_array(zpanelx::$zerror)){
 			$template = str_replace('{{error}}', "", $template);

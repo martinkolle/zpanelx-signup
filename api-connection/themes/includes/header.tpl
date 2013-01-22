@@ -12,7 +12,7 @@
 <meta name="robots" content="index" />
 <meta name="robots" content="all/follow"  />
 <meta content="general" name="rating" />
-<link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico" />
-<link href="css/style.css" rel="stylesheet" type="text/css">	
+<link rel="shortcut icon" type="image/x-icon" href="themes/images/favicon.ico" />
+<link href="themes/css/style.css" rel="stylesheet" type="text/css">	
 	{{head}}
 </head>
