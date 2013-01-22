@@ -14,7 +14,7 @@ $head = null;
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $packetlist = null;
 //Get packages from zpanelx
-$listPackages = zpanelx::api("reseller_billing", "PackageList", "");
+$listPackages = zpanelx::api("billing", "PackageList", "");
 //print_r($listPackages);
 
 if(empty($listPackages)){

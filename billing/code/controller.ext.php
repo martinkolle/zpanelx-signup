@@ -2,7 +2,7 @@
 
 /**
  * @package zpanelx
- * @subpackage modules->reseller_billing
+ * @subpackage modules->billing
  * @author Martin Kollerup
  * @copyright martinkole
  * @link http://www.kmweb.dk/

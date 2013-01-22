@@ -117,7 +117,7 @@ class ajax {
 	
 	static function installModule(){
 		
-		$module = true; //ui_module::CheckModuleExists("user_billing");
+		$module = true; //ui_module::CheckModuleExists("billing");
 		$repo = "";
 		$repo1 = "";
 		exec("zppy repo list", $repo, $repo1);

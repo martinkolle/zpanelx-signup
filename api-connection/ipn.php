@@ -18,7 +18,7 @@ include('lib/ipnlistener.php');
 
 //Get the setting
 $data     = "<settings><setting>system.test</setting><setting>payment.email_paypal</setting><setting>payment.cs</setting><setting>payment.email_error</setting></settings>";
-$setting  = zpanelx::api("reseller_billing", "setting", $data);
+$setting  = zpanelx::api("billing", "setting", $data);
 $setting  = $setting['settings'];
 
 $listener = new IpnListener();
@@ -67,7 +67,7 @@ if ($verified) {
 
     //Check if the invoice id exits or have been paid
     $data     = "<token>".$invoice."</token>";
-    $invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
+    $invoice  = zpanelx::api("billing", "Invoice", $data);
 
     if($invoice['code'] == "0"){
         zpanelx::error("Invoice id was not found");
@@ -100,7 +100,7 @@ if ($verified) {
     }
 
     $data = "<method>Paypal</method><user_id>".$inv_user."</user_id><txn_id>".$txn_id."</txn_id><token>".$invoice."</token>";
-    $invoice = zpanelx::api("reseller_billing", "Payment", $data);
+    $invoice = zpanelx::api("billing", "Payment", $data);
 
     switch($invoice['code']){
         case "1":

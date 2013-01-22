@@ -25,7 +25,7 @@ else if(!preg_match("/^[a-zA-Z0-9]+$/", $token)){
 }
 
 $data     = "<token>".$token."</token>";
-$invoice  = zpanelx::api("reseller_billing", "Invoice", $data);
+$invoice  = zpanelx::api("billing", "Invoice", $data);
 
 if($invoice['code'] == "0"){
      zpanelx::error("Invoice id was not found",false,true);
@@ -52,7 +52,7 @@ elseif($inv_status == "1"){
 }
 
 $data = "<profile_id>".$inv_user."</profile_id><account_id>".$inv_user."</account_id><payment>1</payment>";
-$account = zpanelx::api("reseller_billing", "Pay", $data);
+$account = zpanelx::api("billing", "Pay", $data);
      
      if (!empty($account['account']['id'])) {
           $user_alias      = $account['account']['alias'];
@@ -79,7 +79,7 @@ $account = zpanelx::api("reseller_billing", "Pay", $data);
 
 //get the package name
 $data = "<pk_id>".$package_id."</pk_id>";
-$package = zpanelx::api("reseller_billing", "Package", $data);
+$package = zpanelx::api("billing", "Package", $data);
 
 if (!empty($package['package']['name'])) {
      $package_name    = $package['package']['name'];
