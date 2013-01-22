@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
-<name>Reseller Billing</name>
-<version>100</version>
+<name>Billing</name>
+<version>10.0.0</version>
 <defaultcat>Reseller</defaultcat>
-<desc>Reseller Billing System.</desc>
+<desc>Billing System</desc>
 <type>user</type>
 <authorname>Martin Kollerup and Others</authorname>
 <authoremail>rob@brownweb.com.au</authoremail>
