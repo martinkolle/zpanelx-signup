@@ -162,7 +162,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 			<div class="module">
 				<div class="module-inner">
 				<img src="<@ ModuleDir @>/assets/payment.png" class="menu" />
-				<span>Payment methods</span>
+				<span>Payment Options</span>
 				</div>
 			</div>
 		</a>
@@ -170,7 +170,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 			<div class="module">
 				<div class="module-inner">
 				<img src="<@ ModuleDir @>/assets/package.png" class="menu" />
-				<span>Package price</span>
+				<span>Package Price</span>
 				</div>
 			</div>
 		</a>
