@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>{{title}}</title>
+<title>{{title}} - ZPanel Billing</title>
 <meta name="description" content="ZPanel Billing Module" />
 <meta name="keywords" content="" />
 <meta http-equiv="cache-control" content="cache" />
