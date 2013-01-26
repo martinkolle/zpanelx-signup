@@ -17,10 +17,10 @@
 <authoremail>rob@brownweb.com.au</authoremail>
 <authorurl>http://www.brownweb.com.au</authorurl>
 <<<<<<< HEAD
-<moduleupdateurl>http://www.brownweb.com.au/zpanel/billing.xml</moduleupdateurl>
+<moduleupdateurl>http://repo.zpanel.co.nz/core.xml</moduleupdateurl>
 </module>
 =======
-<modulepdateurl>http://www.brownweb.com.au/zpanel/billing.xml</moduleupdateurl>
+<modulepdateurl>http://repo.zpanel.co.nz/core.xml</moduleupdateurl>
 </module>
 <<<<<<< HEAD
 >>>>>>> 3ba0861f3eca2f38fbcb8e467a5047adb7c89e36
