@@ -41,7 +41,7 @@ class webservice extends ws_xmws {
 
 	public function CreateInvoice(){
 
-		$response = null;
+		$response = "";
 		$request_data = $this->RawXMWSToArray($this->wsdata);
 		$contenttags = $this->XMLDataToArray($request_data['content']);
 
@@ -163,7 +163,6 @@ class webservice extends ws_xmws {
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
 
 		$row = module_controller::ApiPackage($contenttags['pk_id']);
-
 		$response = ws_xmws::NewXMLTag('package', 	
 			ws_xmws::NewXMLTag('name',$row['pk_name_vc']).
 			ws_xmws::NewXMLTag('id', $row['pk_id_pk']).
@@ -255,7 +254,7 @@ class webservice extends ws_xmws {
 	public function CreateClient() {
 		$request_data = $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
-		$response_xml = null;
+		$response_xml = "";
 
 		//Check that a reseller have been set else use get from settings
 		if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){
@@ -271,25 +270,11 @@ class webservice extends ws_xmws {
 			$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
 		}
 
-		if(!module_controller::ApiCreateClient(
-			$reseller_id, 
-			ws_generic::GetTagValue('username', $request_data['content']), 
-			ws_generic::GetTagValue('packageid', $request_data['content']), 
-			$group_id, 
-			ws_generic::GetTagValue('fullname', $request_data['content']), 
-			ws_generic::GetTagValue('email', $request_data['content']), 
-			ws_generic::GetTagValue('address', $request_data['content']), 
-			ws_generic::GetTagValue('postcode', $request_data['content']), 
-			ws_generic::GetTagValue('phone', $request_data['content']), 
-			ws_generic::GetTagValue('password', $request_data['content'])
-			)
-		){
-
-			$response_xml = ws_xmws::NewXMLTag('code', '0');
-		} else {
-			$response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
-			$response_xml .= ws_xmws::NewXMLTag('code', '1');
-		}
+        module_controller::ApiCreateClient($reseller_id, ws_generic::GetTagValue('username', $request_data['content']), ws_generic::GetTagValue('packageid', $request_data['content']), $group_id, ws_generic::GetTagValue('fullname', $request_data['content']), ws_generic::GetTagValue('email', $request_data['content']), ws_generic::GetTagValue('address', $request_data['content']), ws_generic::GetTagValue('postcode', $request_data['content']), ws_generic::GetTagValue('phone', $request_data['content']), ws_generic::GetTagValue('password', $request_data['content']));
+            
+		$response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
+		$response_xml .= ws_xmws::NewXMLTag('code', '1');
+        
 		$dataobject = new runtime_dataobject();
 		$dataobject->addItemValue('response', '');
 		$dataobject->addItemValue('content', $response_xml);

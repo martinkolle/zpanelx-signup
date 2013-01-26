@@ -639,25 +639,15 @@ static function getEmail() {
         global $zdbh;
         $date = date("Y-m-d");// current date
 
-        $stmt = $zdbh->prepare("
-            INSERT INTO x_rb_invoice(
-                inv_user, 
-                inv_amount, 
-                inv_type, 
-                inv_date, 
-                inv_desc, 
-                inv_token) 
-            VALUES (
-                :user,
-                :amount,
-                :type,
-                :date,
-                :desc,
-                :token
-            )");
-        $query = array(':user'=>$user, ':amount'=>$amount, ':type'=>$type, ':date'=>$date, ':desc'=>$desc, ':token'=>$token);
-        if(!$stmt->execute($query)){
-            return false;
+        $stmt = $zdbh->prepare("INSERT INTO x_rb_invoice(inv_user, inv_amount, inv_type, inv_date, inv_desc, inv_token) VALUES (:user, :amount, :type, :date, :desc, :token)");
+		$stmt->bindParam(':user', $user);
+		$stmt->bindParam(':amount', $amount);
+		$stmt->bindParam(':type', $type);
+		$stmt->bindParam(':date', $date);
+		$stmt->bindParam(':desc', $desc);
+		$stmt->bindParam(':token', $token);
+		if(!$stmt->execute()){
+		return false;
         } else{
             if($email){
                 $profile = self::ApiProfile($user);
@@ -744,8 +734,7 @@ static function getEmail() {
             FROM x_packages a
               LEFT JOIN x_rb_price b
                 ON a.pk_id_pk = b.pk_id
-                AND b.pkp_hosting IS NOT NULL OR b.pkp_domain IS NOT NULL
-            WHERE a.pk_id_pk = ? AND a.pk_deleted_ts IS NULL
+                WHERE a.pk_id_pk = ? AND a.pk_deleted_ts IS NULL
         ");
         $stmt->execute(array($pk_id));
         return $stmt->fetch();
@@ -860,9 +849,11 @@ static function getEmail() {
 
     static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
         global $zdbh;
+		        	
         // Check for spaces and remove if found...
         $username = strtolower(str_replace(' ', '', $username));
         
+      
         if(empty($reseller_id)){
             $reseller_id = self::getConfig("user.reseller_id");
         }
@@ -872,64 +863,72 @@ static function getEmail() {
         }
         $reseller = ctrl_users::GetUserDetail($reseller_id);
         // Check for errors before we continue...
+			
         if (fs_director::CheckForEmptyValue(self::ApiCreateClientCheckError($username, $packageid, $groupid, $email, $password))) {
             return false;
         }
         runtime_hook::Execute('OnBeforeCreateClient');
         // No errors found, so we can add the user to the database...
-        $sql = $zdbh->prepare("INSERT INTO x_accounts (
-                                        ac_user_vc,
-                                        ac_pass_vc,
-                                        ac_email_vc,
-                                        ac_package_fk,
-                                        ac_group_fk,
-                                        ac_usertheme_vc,
-                                        ac_usercss_vc,
-                                        ac_reseller_fk,
-                                        ac_enabled_in,
-                                        ac_created_ts) VALUES (
-                                        '" . $username . "',
-                                        '" . md5($password) . "',
-                                        '" . $email . "',
-                                        '" . $packageid . "',
-                                        '" . $groupid . "',
-                                        '" . $reseller['usertheme'] . "',
-                                        '" . $reseller['usercss'] . "',
-                                        " . $reseller_id . ",
-                                        '0',
-                                        " . time() . ")");
+        $crypto = new runtime_hash;
+        $crypto->SetPassword($password);
+        $randomsalt = $crypto->RandomSalt();
+        $crypto->SetSalt($randomsalt);
+        $secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
+        
+        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts) VALUES (
+:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :resellerid, :time)");
+        $sql->bindParam(':resellerid', $reseller_id);
+        $time = time();
+        $sql->bindParam(':time', $time);
+        $sql->bindParam(':username', $username);
+        $sql->bindParam(':password', $secure_password);
+        $sql->bindParam(':passsalt', $randomsalt);
+        $sql->bindParam(':email', $email);
+        $sql->bindParam(':packageid', $packageid);
+        $sql->bindParam(':groupid', $groupid);
+        $sql->bindParam(':resellertheme', $reseller['usertheme']);
+        $sql->bindParam(':resellercss', $reseller['usercss']);
         $sql->execute();
-        // Now lets pull back the client ID so that we can add their personal address details etc...
-        $client = $zdbh->query("SELECT * FROM x_accounts WHERE ac_reseller_fk='" . $reseller_id . "' ORDER BY ac_id_pk DESC")->Fetch();
-        $sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk,
-                                        ud_fullname_vc,
-                                        ud_group_fk,
-                                        ud_package_fk,
-                                        ud_address_tx,
-                                        ud_postcode_vc,
-                                        ud_phone_vc,
-                                        ud_created_ts) VALUES (
-                                         ". $client['ac_id_pk'] . ",
-                                        '" . $fullname . "',
-                                        '" . $packageid . "',
-                                        '" . $groupid . "',
-                                        '" . $address . "',
-                                        '" . $post . "',
-                                        '" . $phone . "',
-                                         " . time() . ")");
+        
+		$numrows = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_reseller_fk=:resellerid ORDER BY ac_id_pk DESC");
+        $numrows->bindParam(':resellerid', $reseller_id);
+        $numrows->execute();
+        $client = $numrows->fetch();
+        
+        
+         // Now lets pull back the client ID so that we can add their personal address details etc...
+        $sql = $zdbh->prepare("INSERT INTO x_profiles (ud_user_fk, ud_fullname_vc, ud_group_fk, ud_package_fk, ud_address_tx, ud_postcode_vc, ud_phone_vc, ud_created_ts) VALUES (:userid, :fullname, :packageid, :groupid, :address, :postcode, :phone, :time)");
+        $sql->bindParam(':userid', $client['ac_id_pk']);
+        $sql->bindParam(':fullname', $fullname);
+        $sql->bindParam(':packageid', $packageid);
+        $sql->bindParam(':groupid', $groupid);
+        $sql->bindParam(':address', $address);
+        $sql->bindParam(':postcode', $post);
+        $sql->bindParam(':phone', $phone);
+        $time = time();
+        $sql->bindParam(':time', $time);
         $sql->execute();
+        
         // Now we add an entry into the bandwidth table, for the user for the upcoming month.
-        $sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (" . $client['ac_id_pk'] . "," . date("Ym", time()) . ", 0, 0)");
+		$sql = $zdbh->prepare("INSERT INTO x_bandwidth (bd_acc_fk, bd_month_in, bd_transamount_bi, bd_diskamount_bi) VALUES (:ac_id_pk, :date, 0, 0)");
+        $date = date("Ym", time());
+        $sql->bindParam(':date', $date);
+        $sql->bindParam(':ac_id_pk', $client['ac_id_pk']);
         $sql->execute();
-        // Lets create the client diectories
-        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username);
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username, 0755);
-        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/public_html");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/public_html", 0755);
-        fs_director::CreateDirectory(ctrl_options::GetOption('hosted_dir') . $username . "/backups");
-        fs_director::SetFileSystemPermissions(ctrl_options::GetOption('hosted_dir') . $username . "/backups", 0755);        
-        self::$username = $username;
+		
+		
+		// Lets create the client diectories
+        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username);
+        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username, 0777);
+        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html");
+        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html", 0777);
+        fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups");
+        fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups", 0777);
+            
         runtime_hook::Execute('OnAfterCreateClient');
+        self::$username = $username;
+        self::$resetform = true;
+        self::$ok = true;
         return true;
     }
 

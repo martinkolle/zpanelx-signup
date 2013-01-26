@@ -15,7 +15,6 @@ $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $packetlist = null;
 //Get packages from zpanelx
 $listPackages = zpanelx::api("billing", "PackageList", "");
-//print_r($listPackages);
 
 if(empty($listPackages)){
     zpanelx::error("No packages where found", false, true);
@@ -23,7 +22,6 @@ if(empty($listPackages)){
 
 //Check how the array is build. xmws.class is gennerating different arrays based on the number of packages. 
 $listPackages = (isset($listPackages['package'][0])) ? $listPackages['package'] : $listPackages;
-//print_r($listPackages);
 $list = null;
 
 foreach($listPackages as $row){

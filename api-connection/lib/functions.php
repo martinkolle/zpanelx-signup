@@ -90,7 +90,6 @@ class zpanelx{
 			require_once('config.php');
 		}
 		$config = new zConfig;
-		//$config->__construct();
 		$class_vars = get_class_vars('zConfig');
 		if( array_key_exists($key, $class_vars) ){
 			return $class_vars[$key];
@@ -158,11 +157,6 @@ class zpanelx{
 		$xmws->InitRequest($url, $module, $function, $api, $user, $pass);
 		$xmws->SetRequestData($data);
 		$xml = $xmws->XMLDataToArray($xmws->Request($xmws->BuildRequest()), 0);
-		//echo($function);
-		//print_r($data);
-		//echo('<br><b>'.$function.'</b><br>');
-		//print_r($xmws->Request($xmws->BuildRequest()));
-		//echo('<br>');
 		//return error when wrong response code
 		if($xml['xmws']['response'] != "1101"){
 			self::error("Wrong response code: ".$xml['xmws']['content']." (".$xml['xmws']['response'].")",false,true);

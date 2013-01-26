@@ -19,15 +19,16 @@
 			</div>
 
 			<div id="right" class="pay">
-				<div id="box">
+				<div id="box" style="padding: 5px;">
 					<h2>Payment period</h2>
 						<input type="hidden" name="packagename" size="20" disabled="true" value="{{packagename}}">
 						<input type="hidden" name="packageid" size="1" value="{{pid}}">
 						{{payoptions}}
 				</div>
 			</div>
+			<p>&nbsp;</p>
 			<div id="right" class="trans">
-				<div id="box">
+				<div id="box" style="padding: 5px;">
 					<h2>Transfer website</h2>
 						<input type="text" name="website" value="{{transfer_website}}" />
 						<br />
@@ -35,7 +36,7 @@
 						<input type="checkbox" name="website_help" value="no">I don't have a domain.
 				</div>
 			</div>		
-
+			<p>&nbsp;</p>
 			<div id="right" class="recapctha">
 				<div id="box" style="padding: 5px;">
 				    <h2>Captcha Challenge</h2>

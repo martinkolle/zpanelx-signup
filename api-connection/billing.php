@@ -133,8 +133,7 @@ if (isset($_POST['submit'])) {
 		';
 		
 		$createBilling = zpanelx::api("billing", "CreateClient", $data);
-        //echo($createBilling);
-        //echo('<br>s');
+        
         //create invoice
         if($createBilling['code'] == "1"){
             //Request for the package prices
@@ -142,7 +141,7 @@ if (isset($_POST['submit'])) {
             $package = zpanelx::api("billing", "Package", $data);
             if (!empty($package['package']['id'])) {
                 $hosting_options = json_decode($package['package']['hosting'], true);
-                //print_r($hosting);
+                
                 if(is_array($hosting_options['hosting'])){
                     foreach($hosting_options['hosting'] as $option){
                         if($payperiod == $option['month']){
@@ -150,9 +149,7 @@ if (isset($_POST['submit'])) {
                             break;
                         }
                     }
-                    
-                    //echo('price='.$period_amt);
-                    
+                                                           
                     if($period_amt){
                         $payment_desc = '"pk_id":'.$id.',"price":"'.$period_amt.'","period":"'.$payperiod.'"';
 		                $token = zpanelx::generateToken();
@@ -166,11 +163,7 @@ if (isset($_POST['submit'])) {
                 		$createInvoice = zpanelx::api("billing", "CreateInvoice", $data);                    
                     }
                 }
-	            //$package_name 	= $package['package']['name'];
-	            //$hosting 		= $package['package']['hosting'];
-	            //$domain 		= $package['package']['domain'];
-            //} else {
-	           //zpanelx::error("Error getting package data", true, false);
+	            
             }        
         }
         
@@ -178,8 +171,7 @@ if (isset($_POST['submit'])) {
 			header('Location: pay.php?id='.$token);
 
 		} else{
-			//echo $data;
-			print_r($createBilling);
+			
 			zpanelx::error("Error creating billing");
 			zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: ".$username."(".$email.") Error code:". $createBilling['create_invoice'] );
 		}
@@ -190,7 +182,7 @@ if (isset($_POST['submit'])) {
 //Request for the package prices
 $data = "<pk_id>".$id."</pk_id>";
 $package = zpanelx::api("billing", "Package", $data);
-//print_r($package);
+
 if (!empty($package['package']['id'])) {
 	$package_name 	= $package['package']['name'];
 	$hosting 		= $package['package']['hosting'];

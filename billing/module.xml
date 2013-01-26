@@ -3,10 +3,26 @@
 <name>Billing</name>
 <version>10.0.0</version>
 <defaultcat>Reseller</defaultcat>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<desc>Billing System.</desc>
+=======
 <desc>Billing System</desc>
+>>>>>>> 3ba0861f3eca2f38fbcb8e467a5047adb7c89e36
+=======
+<desc>Billing System</desc>
+>>>>>>> 3ba0861f3eca2f38fbcb8e467a5047adb7c89e36
 <type>user</type>
 <authorname>Martin Kollerup and Others</authorname>
 <authoremail>rob@brownweb.com.au</authoremail>
 <authorurl>http://www.brownweb.com.au</authorurl>
+<<<<<<< HEAD
+<moduleupdateurl>http://www.brownweb.com.au/zpanel/billing.xml</moduleupdateurl>
+</module>
+=======
 <modulepdateurl>http://www.brownweb.com.au/zpanel/billing.xml</moduleupdateurl>
 </module>
+<<<<<<< HEAD
+>>>>>>> 3ba0861f3eca2f38fbcb8e467a5047adb7c89e36
+=======
+>>>>>>> 3ba0861f3eca2f38fbcb8e467a5047adb7c89e36
