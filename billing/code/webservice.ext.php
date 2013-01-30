@@ -41,7 +41,7 @@ class webservice extends ws_xmws {
 
 	public function CreateInvoice(){
 
-		$response = "";
+		$response = NULL;
 		$request_data = $this->RawXMWSToArray($this->wsdata);
 		$contenttags = $this->XMLDataToArray($request_data['content']);
 
@@ -254,7 +254,7 @@ class webservice extends ws_xmws {
 	public function CreateClient() {
 		$request_data = $this->RawXMWSToArray($this->wsdata);
 		$contenttags 	= $this->XMLDataToArray($request_data['content']);
-		$response_xml = "";
+		$response_xml = NULL;
 
 		//Check that a reseller have been set else use get from settings
 		if (ws_generic::GetTagValue('resellerid', $request_data['content']) == "0"){

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 <name>Billing</name>
-<version>10.0.0</version>
+<version>10.0.1</version>
 <defaultcat>Reseller</defaultcat>
-<desc>Billing System</desc>
-<type>user</type>
+<desc>Billing System.</desc>
+<type>User</type>
 <authorname>Martin Kollerup and Others</authorname>
 <authoremail>rob@brownweb.com.au</authoremail>
 <authorurl>http://www.brownweb.com.au</authorurl>
-<modulepdateurl>http://repo.zpanel.co.nz/core.xml</moduleupdateurl>
+<moduleupdateurl>http://repo.zpanel.co.nz/core.xml</moduleupdateurl>
 </module>

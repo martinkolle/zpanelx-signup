@@ -8,7 +8,7 @@
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 error_reporting(E_ERROR);
-include ('lib/functions.php');
+require_once('lib/functions.php');
 
 $head = null;
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
@@ -33,6 +33,7 @@ foreach($listPackages as $row){
         array_push($price, $host['price']);
     }
     $price = min($price);
+	$price = zpanelx::getConfig('currency_symbol').$price;
     $packetlist = file_get_contents('themes/packagelist.tpl');
     
     //If a id have been added to the url it will be checked.

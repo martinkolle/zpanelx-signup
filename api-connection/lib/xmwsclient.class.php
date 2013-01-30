@@ -107,12 +107,10 @@ class xmwsclient {
                 'Content-Length: ' . strlen($data)
             ));                                                                                                                  
 
-            if(curl_exec($curl) === false){
-                 zpanelx::error('Curl error: ' . curl_error($curl), false, true);
-            } else{
-                $content = curl_exec($curl);
-            }
-            //print_r($content);
+            //if(curl_exec($curl) === false){
+            //     zpanelx::error('Curl error: ' . curl_error($curl), false, true);
+            //}
+            $content = curl_exec($curl);
             curl_close($curl);
 
         } else if(file_get_contents(__FILE__) && ini_get('allow_url_fopen')){

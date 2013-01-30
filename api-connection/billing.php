@@ -8,7 +8,7 @@
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 error_reporting(E_ERROR);
-include ('lib/functions.php');
+require_once('lib/functions.php');
 
 $id = (isset($_GET['id'])) ? $_GET['id'] : "";
 $head = null;
@@ -89,9 +89,7 @@ if (isset($_POST['submit'])) {
 		}
 	}
 
-    //TODO: re-enable Captcha
-	//disabling captcha for dev purpose
-	/*if (empty($captcha_response) || empty($captcha_challenge)) {
+    if (empty($captcha_response) || empty($captcha_challenge)) {
 		zpanelx::error("Captcha Challenge is missing");
 	} else {
           //$privatekey = getConfig('rc_private_key');
@@ -100,7 +98,7 @@ if (isset($_POST['submit'])) {
           if (!$resp->is_valid) {
             zpanelx::error("Captcha Challenge is not valid");
           }
-	}*/
+	}
 
 	//is the username already used?
 	$data = "<username>".$username."</username>";
@@ -149,7 +147,7 @@ if (isset($_POST['submit'])) {
                             break;
                         }
                     }
-                                                           
+                                                          
                     if($period_amt){
                         $payment_desc = '"pk_id":'.$id.',"price":"'.$period_amt.'","period":"'.$payperiod.'"';
 		                $token = zpanelx::generateToken();
@@ -204,7 +202,7 @@ if(!empty($package_name)){
 	$payoption 	= null;
 
 	foreach($payoptions['hosting'] as $option){
-		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".$cs." ".$option['price']."</input><br />";
+		$payoption .= "<input type=\"radio\" name=\"payperiod\" value=\"".$option['month']."\">".$option['month']." month @ ".$cs." ".zpanelx::getConfig('currency_symbol').$option['price']."</input><br />";
 	}
 	//Insert values to template
 	$template = file_get_contents('themes/billing.tpl');

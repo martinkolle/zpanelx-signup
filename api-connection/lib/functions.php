@@ -43,7 +43,7 @@ class zpanelx{
 		* @link http://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php#96812
 		* @return string password
 	*/
-	static function generatePassword($length = 8) {
+	static function generatePassword($length = 9) {
 			if(function_exists('openssl_random_pseudo_bytes')) {
 				$password = base64_encode(openssl_random_pseudo_bytes($length, $strong));
 				if($strong == TRUE)

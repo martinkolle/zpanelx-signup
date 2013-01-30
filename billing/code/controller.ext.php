@@ -782,23 +782,60 @@ static function getEmail() {
         $stmt->execute(array($user_id));
         return $stmt->fetch();
     }
+	
+	static function ApiDetails($user_id){
+        global $zdbh;
+        //select profile informations
+        $stmt = $zdbh->prepare("SELECT * FROM x_accounts WHERE ac_id_pk= ?");
+        $stmt->execute(array($user_id));
+        return $stmt->fetch();
+    }
 
     static function ApiPayment($method, $user_id, $txn_id, $token){
         global $zdbh;
         $response   = "1";
-        $desc       = null;
+        $desc       = NULL;
 
         // Set that we have received the payment from paypal
-        $stmt = $zdbh->prepare("UPDATE x_rb_invoice SET inv_payment = :method, inv_payment_id = :txn_id, inv_status = :status WHERE inv_token = :token LIMIT 1");
-
-        $query = array(':method'=>$method, ':txn_id'=>$txn_id, ':token'=>$token, ':status'=>"1");
-
-        if(!$stmt->execute($query))
-        {
+        $stmt = $zdbh->prepare("UPDATE x_rb_invoice SET inv_payment = :method, inv_payment_id = :txn_id, inv_status = '1' WHERE inv_token = :token LIMIT 1");
+        $stmt->bindParam(':method', $method);
+		$stmt->bindParam(':txn_id', $txn_id);
+		$stmt->bindParam(':token', $token);
+		
+        if(!$stmt->execute()) {
            $response = "2";
         }
 
-        //Update the hosting time - when should the user expire
+        //set new account password
+        
+        $characters = '0123456789';
+		$characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$characters .= 'abcdefghijklmnopqrstuvwxyz'; 
+		$charactersLength = strlen($characters)-1;
+		$newpassword = '';
+		$length = '9';
+
+		//select some random characters
+		for ($i = 0; $i < $length; $i++) {
+			$newpassword .= $characters[mt_rand(0, $charactersLength)];
+		}
+		
+        $crypto = new runtime_hash;
+        $crypto->SetPassword($newpassword);
+        $randomsalt = $crypto->RandomSalt();
+        $crypto->SetSalt($randomsalt);
+        $secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
+						
+        $stmt = $zdbh->prepare("UPDATE x_accounts SET ac_enabled_in = '1',ac_pass_vc = :pass, ac_passsalt_vc = :salt WHERE ac_id_pk = :user_id LIMIT 1");
+		$stmt->bindParam(':user_id', $user_id);
+		$stmt->bindParam(':pass', $secure_password);
+		$stmt->bindParam(':salt', $randomsalt);
+		
+        if(!$stmt->execute()) {
+           $response = "4";
+        }
+		
+		//Update the hosting time - when should the user expire
         $stmt = $zdbh->prepare("SELECT inv_desc FROM x_rb_invoice WHERE inv_token = ?");
 
         if($stmt->execute(array($token))){
@@ -813,38 +850,38 @@ static function getEmail() {
         $date           = date('Y-m-d');
         $remind_date    = strtotime( $period." month", strtotime($date));
         $remind_date    = date('Y-m-d', $remind_date);
-
-        //activate the account
-        $stmt = $zdbh->prepare("UPDATE x_accounts SET ac_enabled_in = '1' WHERE ac_id_pk = :user_id LIMIT 1");
-        $query = array(':user_id'=>$user_id);
-
-        if(!$stmt->execute($query))
-        {
-           $response = "4";
+		$remind_date2    = strtotime( "-1 month", strtotime($remind_date));
+		$remind_date2    = date('Y-m-d', $remind_date2);
+		
+        $stmt = $zdbh->prepare("INSERT INTO x_rb_billing (blg_user, blg_inv_id, blg_duedate, blg_remind, blg_create, blg_desc) VALUES (:user_id, :inv_id, :duedate, :remind, :create, :desc)");
+		$stmt->bindParam(':user_id', $user_id);
+		$stmt->bindParam(':inv_id', $token);
+		$stmt->bindParam(':duedate', $remind_date);
+		$stmt->bindParam(':remind', $remind_date2);
+		$stmt->bindParam(':create', $date);
+		$stmt->bindParam(':desc', $desc);
+		
+        if(!$stmt->execute()) {
+           $response = "5";
         }
-
-        $stmt = $zdbh->prepare("
-            INSERT INTO x_rb_billing(
-                blg_user,
-                blg_inv_id,
-                blg_duedate,
-                blg_remind,
-                blg_create,
-                blg_desc)
-            VALUES(
-                :user_id,
-                :inv_id,
-                :duedate,
-                :remind,
-                :create,
-                :desc)");
-        $query = array(':user_id'=>$user_id, ':inv_id'=>$token, ':duedate' =>$remind_date, ':remind'=>$remind_date, ':create'=>$date, ':desc'=>$desc);
-
-        if(!$stmt->execute($query))
-        {
-           $response = "5 ";
-        }
-        return $response;
+		        $profile = self::ApiProfile($user_id);
+				$details = self::ApiDetails($user_id);
+                $email = self::getMail("user_welcome");
+                $emailtext = $email['message'];
+                $emailtext = str_replace('{{fullname}}',$profile['ud_fullname_vc'],$emailtext);
+                $emailtext = str_replace('{{zpanel_url}}',self::getConfig('system.url_billing'),$emailtext);
+				$emailtext = str_replace('{{ftp}}',self::getConfig('system.url_billing'),$emailtext);
+				$emailtext = str_replace('{{username}}',$details['ac_user_vc'],$emailtext);
+                $emailtext = str_replace('{{password}}',$newpassword,$emailtext);
+                $emailtext = str_replace('{{ns1}}',self::getConfig('domain.ns1'),$emailtext);
+                $emailtext = str_replace('{{ns2}}',self::getConfig('domain.ns2'),$emailtext);
+                $emailtext = str_replace('{{firm}}',self::getConfig('system.firm'),$emailtext);
+            	$emailsubject = $email['subject'];
+            	$emailsubject = str_replace('{{firm}}',self::getConfig('system.firm'),$emailsubject);
+            	
+                self::sendemail(self::getUserEmail($user_id), $emailsubject, $emailtext);
+                
+			return $response;
     }
 
     static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
@@ -875,8 +912,8 @@ static function getEmail() {
         $crypto->SetSalt($randomsalt);
         $secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
         
-        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts) VALUES (
-:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :resellerid, :time)");
+        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts, ac_enabled_in) VALUES (
+:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :resellerid, :time, 0)");
         $sql->bindParam(':resellerid', $reseller_id);
         $time = time();
         $sql->bindParam(':time', $time);
@@ -916,7 +953,6 @@ static function getEmail() {
         $sql->bindParam(':ac_id_pk', $client['ac_id_pk']);
         $sql->execute();
 		
-		
 		// Lets create the client diectories
         fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username);
         fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username, 0777);
@@ -927,8 +963,6 @@ static function getEmail() {
             
         runtime_hook::Execute('OnAfterCreateClient');
         self::$username = $username;
-        self::$resetform = true;
-        self::$ok = true;
         return true;
     }
 

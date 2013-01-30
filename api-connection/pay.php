@@ -9,8 +9,7 @@
  * @license GPL (http://www.gnu.org/licenses/gpl.html)
  */
 
-include ('lib/functions.php');
-include ('lib/xmwsclient.class.php');
+require_once ('lib/functions.php');
 
 $head = null;
 $token = isset($_GET['id']) ? $_GET['id'] : "";
@@ -92,7 +91,7 @@ $form = file_get_contents('themes/pay.tpl');
     
 //Add the paymethods, price and title
 $form = str_replace('{{payment}}',$paymethods,$form);
-$form = str_replace('{{pay}}', $inv_amount, $form); //Maybe add currency.. but this means one more request to db...
+$form = str_replace('{{pay}}', zpanelx::getConfig('currency_symbol').$inv_amount, $form);
 $form = str_replace('{{package_name}}', $package_name , $form);
 $form = str_replace('{{period}}', $user_payperiod , $form);
 

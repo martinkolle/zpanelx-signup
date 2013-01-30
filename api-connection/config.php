@@ -29,6 +29,10 @@ class zConfig {
 	public $error_email = '';
 	public $error_emailName = '';
 
+
+	//Locale Settings
+	public $currency_symbol = '$';
+	
 	/**
 	* Using this will override user.reseller_id in reseller_billing. 
 	* Only set this variable if you are having multiple sign-up sites 
