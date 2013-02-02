@@ -1,0 +1,4 @@
+#!/bin/sh
+
+php5 /etc/zpanel/panel/modules/billing/cron/pay.php > /dev/null
+echo "Complete" > /etc/zpanel/panel/modules/billing/cron/cron.pay.log

@@ -89,10 +89,12 @@ if (isset($_POST['submit'])) {
 		}
 	}
 
-    if (empty($captcha_response) || empty($captcha_challenge)) {
+    //TODO: re-enable Captcha
+	//disabling captcha for dev purpose
+	if (empty($captcha_response) || empty($captcha_challenge)) {
 		zpanelx::error("Captcha Challenge is missing");
 	} else {
-          //$privatekey = getConfig('rc_private_key');
+          $privatekey = getConfig('rc_private_key');
           $resp = recaptcha_check_answer(zpanelx::getConfig('rc_private_key'),$_SERVER["REMOTE_ADDR"],$captcha_challenge,$captcha_response);
 
           if (!$resp->is_valid) {
@@ -210,17 +212,17 @@ if(!empty($package_name)){
 	$template = str_replace('{{packagename}}', htmlentities($package_name, ENT_QUOTES), $template);
 	$template = str_replace('{{payoptions}}', $payoption, $template);
 	$template = str_replace('{{pid}}', $id, $template);
-	$template = str_replace('{{captcha_pub_key}}', zpanelx::getConfig('rc_public_key'), $template);
+	$template = str_replace('{{recaptcha}}', recaptcha_get_html(zpanelx::getConfig('rc_public_key'), NULL, zpanelx::getConfig('use_ssl')), $template);
 	$title 	  = "Buy hosting";
 
 	//if post use the entered value, else enter the default values
-	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "Username", $template));
-	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "Email", $template));
-	$template = ($fullname ? str_replace('{{fullname}}', $fullname, $template) : str_replace('{{fullname}}', "Full name", $template));
-	$template = ($address ? str_replace('{{address}}', $address, $template) : str_replace('{{address}}', "Address", $template));
-	$template = ($postcode ? str_replace('{{postcode}}', $postcode, $template) : str_replace('{{postcode}}', "Post code", $template));
-	$template = ($telephone ? str_replace('{{telephone}}', $telephone, $template) : str_replace('{{telephone}}', "Telephone", $template));
-	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "Website", $template));
+	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "", $template));
+	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "", $template));
+	$template = ($fullname ? str_replace('{{fullname}}', $fullname, $template) : str_replace('{{fullname}}', "", $template));
+	$template = ($address ? str_replace('{{address}}', $address, $template) : str_replace('{{address}}', "", $template));
+	$template = ($postcode ? str_replace('{{postcode}}', $postcode, $template) : str_replace('{{postcode}}', "", $template));
+	$template = ($telephone ? str_replace('{{telephone}}', $telephone, $template) : str_replace('{{telephone}}', "", $template));
+	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "", $template));
 
 } else{
 	zpanelx::error("Invalid package selected", false, true);

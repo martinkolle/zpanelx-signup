@@ -1,0 +1,4 @@
+<?php
+shell_exec("cp /etc/zpanel/panel/modules/billing/cron/zpanelx-billing-cron /etc/cron.daily/");
+shell_exec("chmod 755 /etc/cron.daily/zpanelx-billing-cron");
+?>
