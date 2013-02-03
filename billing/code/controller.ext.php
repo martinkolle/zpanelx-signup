@@ -62,7 +62,7 @@ class module_controller {
     function getView(){
         global $controller;
         $url = $controller->GetAllControllerRequests('URL');
-        $url = (array_key_exists('view', $url)) ? $url['view'] : false;
+        $url = (array_key_exists('view', $url)) ? $url['view'] : 'invoice';
         return  $url;
     }
     function getViewInvoice(){
