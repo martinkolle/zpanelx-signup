@@ -1,9 +1,7 @@
-
-
 <body>
 <div id="header">
 <br />
-<img src="themes/images/logo.png" alt="Web Hosting">
+<img src="themes/{{theme}}/images/logo.png" alt="Web Hosting">
 <br />
 <hr />
 </div>

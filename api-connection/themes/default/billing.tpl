@@ -27,11 +27,9 @@
 				</div>
 			</div>
 			<div id="right" class="trans">
-			<p>&nbsp;</p>
-			<div id="right" class="trans">
 				<div id="box" style="padding: 5px;">
 					<h2>Transfer website</h2>
-						<input type="text" name="website" value="{{transfer_website}}" />
+						<input type="text" name="website" value="{{transfer_website}}" placeholder="www.yourdomain.com"/>
 						<br />
 						<input type="checkbox" name="website_help" value="dns">I want help to DNS transfer <br />
 						<input type="checkbox" name="website_help" value="no">I don't have a domain.

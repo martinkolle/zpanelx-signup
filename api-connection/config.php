@@ -3,13 +3,17 @@
 class zConfig {
 
 	
-	public $test = true; //false for NOT
+	public $test = true; //true will enable Paypal Sandbox
 	public $DEBUG = true; //false disable
 	
-   	static $zpanel_api = 'API_KEY_HERE'; // API Key can be found in your zpanel database
-   	static $zpanel_url = 'localhost'; //or IP/URL of zpanel server
+   	static $zpanel_api = ''; // API Key can be found in your zpanel database
+   	static $zpanel_url = ''; //or IP/URL of zpanel server
    	public $use_ssl = 'false';
 	
+	public $theme = 'default'; //themes are in a subdirectory in the themes folder
+	public $control_panel = ''; //external url to your Zpanel installation you have to include 'http://' or 'https://'
+	public $webmail_url = ''; //external url to your Webmail you have to include 'http://' or 'https://'
+	public $company = ''; //Your webhosting Comany Name
     //Database connection
     /* The database connection is only needed if the API key is not set
 	 * For security reason the less place you have to have your database credentials in plain text the better
@@ -28,11 +32,10 @@ class zConfig {
 
 	//Email settings
 	public $error_email = '';
-	public $error_emailName = '';
-
+	public $error_emailName = ''; // Displayed Name on the error email
 
 	//Locale Settings
-	public $currency_symbol = '$';
+	public $currency_symbol = '$'; //for Pounds use '&pound;' , for Yen use '&yen;' , for Euro use '&euro;'
 	
 	/**
 	* Using this will override user.reseller_id in reseller_billing. 
@@ -69,6 +72,4 @@ class zConfig {
 	    }
 	}
 	 */
-
-
 }
