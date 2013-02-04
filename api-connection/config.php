@@ -53,23 +53,4 @@ class zConfig {
 	*/
 	public $group_id = '0';
 
-	/*****************************************
-	    @Author: Aderemi Adewale (modpluz @ ZPanel Forums)
-	    Fetch API Key and Control Panel URL the Old Fashioned way
-	 *****************************************/
-	 
-	/* Function Only needed if API key is not set
-	function __construct(){
-		if(!class_exists('zServer') && is_file('zserver.php')) {
-			require_once('zserver.php');
-		}
-
-	    $zServer = new zServer();
-	    $server_cfg = $zServer->_getConfig(self::$mysql_host,self::$mysql_user,self::$mysql_pass);
-	    if(is_array($server_cfg)){
-	        self::$zpanel_api = $server_cfg['api_key'];
-	         self::$zpanel_url = $server_cfg['panel_url'];
-	    }
-	}
-	 */
 }
