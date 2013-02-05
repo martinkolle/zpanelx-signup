@@ -16,9 +16,9 @@ body:before {content: "";position: fixed;top: -10px;left: -10px;width: 110%;heig
 #bottom{height:9%; position: static/relative/absolute/fixed;}
 #error{background:#FE1818 !important; margin-bottom:20px;display:none;}
 
-#right.pay{height:100px;max-height:170px;}
-#right.trans{height:150px;margin-top:20px;}
-#right.recapctha{height:180px;margin-top:20px;}
+#right.pay{height:100%;}
+#right.trans{height:100%;margin-top:15px;}
+#right.recapctha{height:100%;margin-top:15px;}
 
 
 input, textarea {padding: 9px;border: solid 0px #E5E5E5;outline: 0;background: #FFFFFF;font-size:17px;border-radius:5px;box-shadow: 0px 0px 4px 0px rgb(153, 153, 153); margin-bottom:8px;}
@@ -39,9 +39,6 @@ h2{color: rgb(44, 158, 201);font-size:25px;margin:0;}
 #price{float:left;}
 #login{width:50%;}
 #information{position: static;margin-left: 50%;width: 50%;border-left: 1px solid black;padding-left: 20px;margin-top: -140px;}
-
-#right.trans{opacity:0.8;}
-
 .pay-button{
 background-color: #40B3DF;
 background-image: -webkit-gradient(linear, left top, left bottom, from(#40B3DF), to(#2C9EC9));

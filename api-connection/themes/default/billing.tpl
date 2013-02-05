@@ -13,13 +13,13 @@
 						<input type="text" name="fullname" value="{{fullname}}" placeholder="Full Name">
 						<textarea name="address" cols="25" placeholder="Address">{{address}}</textarea>
 						<input type="number" name="postcode" size="20" value="{{postcode}}" placeholder="Postcode">
-						<input type="tel" name="telephone" value="{{telephone}}" placeholder="Telephone">
+						<input type="tel" name="telephone" value="{{telephone}} placeholder="Telephone">
 					</div>
 				</div>
 			</div>
 
 			<div id="right" class="pay">
-				<div id="box" style="padding: 5px;">
+				<div id="box">
 					<h2>Payment period</h2>
 						<input type="hidden" name="packagename" size="20" disabled="true" value="{{packagename}}">
 						<input type="hidden" name="packageid" size="1" value="{{pid}}">
@@ -27,7 +27,7 @@
 				</div>
 			</div>
 			<div id="right" class="trans">
-				<div id="box" style="padding: 5px;">
+				<div id="box">
 					<h2>Transfer website</h2>
 						<input type="text" name="website" value="{{transfer_website}}" placeholder="www.yourdomain.com"/>
 						<br />
