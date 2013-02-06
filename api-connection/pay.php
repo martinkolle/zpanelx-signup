@@ -64,7 +64,7 @@ $payments = (is_array(isset($payments['payment'][0]))) ? $payments['payment'] : 
 $paymethods = null;
 
 foreach ($payments as $row) {
-    $paymethod = file_get_contents('themes/' . $theme . 'paymethod.tpl');
+    $paymethod = file_get_contents('themes/' . $theme . '/paymethod.tpl');
 
     $paymethod = str_replace('{{paycode}}', $row['data'], $paymethod);
     $paymethod = str_replace('{{payname}}', $row['name'], $paymethod);
@@ -81,7 +81,7 @@ if (!empty($package['package']['name'])) {
     zpanelx::error("Error getting package data" . $data, false, true);
 }
 
-$form = file_get_contents('themes/' . $theme . 'pay.tpl');
+$form = file_get_contents('themes/' . $theme . '/pay.tpl');
 
 //Add the paymethods, price and title
 $form = str_replace('{{payment}}', $paymethods, $form);
