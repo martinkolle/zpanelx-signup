@@ -1,15 +1,5 @@
 <?php
 
-//die();
-/**
- * @package zpanelx
- * @subpackage modules->reseller_billing->install
- * @author Martin Kollerup
- * @copyright martinkole
- * @link http://www.kmweb.dk/
- * @license GPL (http://www.gnu.org/licenses/gpl.html)
- */
-
 include('../../../cnf/db.php');
 include('../../../dryden/db/driver.class.php');
 include('../../../dryden/debug/logger.class.php');
@@ -21,13 +11,6 @@ include('../../../dryden/ctrl/users.class.php');
 include('../../../dryden/fs/director.class.php');
 include('../../../inc/dbc.inc.php');
 
-/**
- * Restore MySQL dump using PHP
- * (c) 2006 Daniel15
- * Version: 0.2
- * @link http://dan.cx/blog/2006/12/restore-mysql-dump-using-php
- */
- 
 global $zdbh;
 
 // Name of the file
@@ -59,6 +42,4 @@ foreach ($lines as $line)
 	}
 }
 ?>
-<h1>It looks like the database have been installed. But who knows?</h1>
-<p>If the database not have been installed, please find the dump in /etc/zpanel/panel/modules/billing/install/zpanel_core.sql
-<p>Please delete the folder /install/ with succesfull install.</p>
+Installation Complete

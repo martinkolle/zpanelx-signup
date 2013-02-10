@@ -39,7 +39,7 @@ $companyname = (isset($_POST["companyname"])) ? filter_var($_POST["companyname"]
 $fullname = (isset($_POST["fullname"])) ? filter_var($_POST["fullname"], FILTER_SANITIZE_STRING) : "";
 $address = (isset($_POST["address"])) ? ($_POST["address"]) : "";
 $transfer_help = (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
-$ssl_support = (isset($_POST["ssl_support"])) ? filter_var($_POST["ssl_support"], FILTER_SANITIZE_STRING) : "";
+$buy_domain = (isset($_POST["buy_domain"])) ? filter_var($_POST["buy_domain"], FILTER_SANITIZE_STRING) : "";
 $website = (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
 $postcode = (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
@@ -96,25 +96,24 @@ if (isset($_POST['submit'])) {
 		zpanelx::error("Captcha Challenge is missing");
 	} else {
 		$privatekey = zpanelx::getConfig('rc_private_key');
-		$resp = recaptcha_check_answer(zpanelx::getConfig('rc_private_key'), $_SERVER["REMOTE_ADDR"], $captcha_challenge, $captcha_response);
+		$resp = recaptcha_check_answer($privatekey, $_SERVER["REMOTE_ADDR"], $captcha_challenge, $captcha_response);
 
 		if (!$resp -> is_valid) {
 			zpanelx::error("Captcha Challenge is not valid");
-		}
-	}
+		} else {
 
-	//is the username already used?
-	$data = "<username>" . $username . "</username>";
-	$usernameExits = zpanelx::api("billing", "UsernameExits", $data);
+			//is the username already used?
+			$data = "<username>" . $username . "</username>";
+			$usernameExits = zpanelx::api("billing", "UsernameExits", $data);
 
-	if ($usernameExits['code'] != "3") {
-		zpanelx::error($usernameExits['human']);
-	}
-	//If no error have been added create the user
-	if (empty(zpanelx::$zerror)) {
-		$token = zpanelx::generateToken();
-		$pwd = zpanelx::generatePassword();
-		$data = '<resellerid>' . zpanelx::getConfig('reseller_id') . '</resellerid>
+			if ($usernameExits['code'] != "3") {
+				zpanelx::error($usernameExits['human']);
+			}
+			//If no error have been added create the user
+			if (empty(zpanelx::$zerror)) {
+				$token = zpanelx::generateToken();
+				$pwd = zpanelx::generatePassword();
+				$data = '<resellerid>' . zpanelx::getConfig('reseller_id') . '</resellerid>
 		<groupid>' . zpanelx::getConfig('group_id') . '</groupid>
 		<username>' . $username . '</username>
 		<companyname>' . $companyname . '</companyname>
@@ -128,51 +127,52 @@ if (isset($_POST['submit'])) {
 		<type>Initial Signup</type>		
 		<domain>' . $website . '</domain>
 		<password>' . $pwd . '</password>
-		<web_help>' . $transfer_help . '</web_help>
-		<web_help>' . $ssl_support . '</web_help>
-		<token>' . $token . '</token>
+		<transfer_help>' . $transfer_help . '</transfer_help>
+		<buy_domain>' . $buy_domain . '</buy_domain>
 		';
 
-		$createBilling = zpanelx::api("billing", "CreateClient", $data);
+				$createBilling = zpanelx::api("billing", "CreateClient", $data);
 
-		//create invoice
-		if ($createBilling['code'] == "1") {
-			//Request for the package prices
-			$data = "<pk_id>" . $id . "</pk_id>";
-			$package = zpanelx::api("billing", "Package", $data);
-			if (!empty($package['package']['id'])) {
-				$hosting_options = json_decode($package['package']['hosting'], true);
+				//create invoice
+				if ($createBilling['code'] == "1") {
+					//Request for the package prices
+					$data = "<pk_id>" . $id . "</pk_id>";
+					$package = zpanelx::api("billing", "Package", $data);
+					if (!empty($package['package']['id'])) {
+						$hosting_options = json_decode($package['package']['hosting'], true);
 
-				if (is_array($hosting_options['hosting'])) {
-					foreach ($hosting_options['hosting'] as $option) {
-						if ($payperiod == $option['month']) {
-							$period_amt = $option['price'];
-							break;
-						}
-					}
+						if (is_array($hosting_options['hosting'])) {
+							foreach ($hosting_options['hosting'] as $option) {
+								if ($payperiod == $option['month']) {
+									$period_amt = $option['price'];
+									break;
+								}
+							}
 
-					if ($period_amt) {
-						$payment_desc = '"pk_id":' . $id . ',"price":"' . $period_amt . '","period":"' . $payperiod . '"';
-						$token = zpanelx::generateToken();
-						$data = '<user_id>' . $createBilling['uid'] . '</user_id>
+							if ($period_amt) {
+								$payment_desc = '"pk_id":' . $id . ',"price":"' . $period_amt . '","period":"' . $payperiod . '"';
+								$token = zpanelx::generateToken();
+								$data = '<user_id>' . $createBilling['uid'] . '</user_id>
 		                <amount>' . $period_amt . '</amount>
 		                <desc>{' . $payment_desc . '}</desc>
 		                <type>Initial Signup</type>
 		                <token>' . $token . '</token>
 		                ';
 
-						$createInvoice = zpanelx::api("billing", "CreateInvoice", $data);
+								$createInvoice = zpanelx::api("billing", "CreateInvoice", $data);
+							}
+						}
 					}
 				}
+
+				if ($createBilling['code'] == "1" && $createInvoice['code'] == "1") {
+					header('Location: pay.php?id=' . $token);
+				} else {
+
+					zpanelx::error("Error creating billing");
+					zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: " . $username . "(" . $email . ") Error code:" . $createBilling['create_invoice']);
+				}
 			}
-		}
-
-		if ($createBilling['code'] == "1" && $createInvoice['code'] == "1") {
-			header('Location: pay.php?id=' . $token);
-		} else {
-
-			zpanelx::error("Error creating billing");
-			zpanelx::sendemail(zpanelx::getConfig('error_email'), "Error creating billing", "The invoice have not been created for user: " . $username . "(" . $email . ") Error code:" . $createBilling['create_invoice']);
 		}
 	}
 }//end submit
@@ -208,17 +208,31 @@ if (!empty($package_name)) {
 	$template = str_replace('{{packagename}}', htmlentities($package_name, ENT_QUOTES), $template);
 	$template = str_replace('{{payoptions}}', $payoption, $template);
 	$template = str_replace('{{pid}}', $id, $template);
-	$template = str_replace('{{recaptcha}}', recaptcha_get_html(zpanelx::getConfig('rc_public_key'), NULL, zpanelx::getConfig('use_ssl')), $template);
+	$template = str_replace('{{recaptcha}}', recaptcha_get_html(zpanelx::getConfig('rc_public_key'), $verify -> error, zpanelx::getConfig('use_ssl')), $template);
 	$title = "Buy hosting";
 
 	//if post use the entered value, else enter the default values
+	if ($buy_domain === 'yes') {
+		$buy_checked = 'checked';
+		} else {
+			$buy_checked = '';
+		} 
+		
+	if ($transfer_help === 'yes') {
+		$transfer_checked = 'checked';
+		} else {
+			$transfer_checked= '';
+		} 
 	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "", $template));
 	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "", $template));
 	$template = ($fullname ? str_replace('{{fullname}}', $fullname, $template) : str_replace('{{fullname}}', "", $template));
 	$template = ($address ? str_replace('{{address}}', $address, $template) : str_replace('{{address}}', "", $template));
 	$template = ($postcode ? str_replace('{{postcode}}', $postcode, $template) : str_replace('{{postcode}}', "", $template));
 	$template = ($telephone ? str_replace('{{telephone}}', $telephone, $template) : str_replace('{{telephone}}', "", $template));
-	$template = ($telephone ? str_replace('{{transfer_website}}', $website, $template) : str_replace('{{transfer_website}}', "", $template));
+	$template = ($website ? str_replace('{{website}}', $website, $template) : str_replace('{{website}}', "", $template));
+	$template = ($buy_checked ? str_replace('{{buy_checked}}', $buy_checked, $template) : str_replace('{{buy_checked}}', "", $template));
+	$template = ($transfer_checked ? str_replace('{{transfer_checked}}', $transfer_checked, $template) : str_replace('{{transfer_checked}}', "", $template));
+	$template = str_replace('<input type="radio" name="payperiod" value="' . $payperiod . '">', '<input type="radio" name="payperiod" value="' . $payperiod . '" checked>', $template);
 } else {
 	zpanelx::error("Invalid package selected", false, true);
 }

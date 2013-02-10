@@ -342,7 +342,11 @@ class module_controller {
 ******/
     function getPackages(){
         global $zdbh;
-        $sql = "SELECT * FROM x_packages LEFT JOIN x_rb_price ON x_packages.pk_id_pk = x_rb_price.pk_id WHERE x_packages.pk_deleted_ts IS NULL";
+        $sql = "SELECT * FROM x_packages 
+				LEFT JOIN x_rb_price ON x_packages.pk_id_pk = x_rb_price.pk_id
+				LEFT JOIN x_quotas ON x_packages.pk_id_pk = x_quotas.qt_package_fk
+				WHERE x_packages.pk_deleted_ts IS NULL";
+				
         $numrows = $zdbh->query($sql);
         if ($numrows->fetchColumn() <> 0) {
             $sql = $zdbh->prepare($sql);
@@ -354,7 +358,17 @@ class module_controller {
                     'name' => $row['pk_name_vc'],
                     'reseller' => $row['pk_reseller_fk'],
                     'hosting' => $row['pkp_hosting'],
-                    'domain' => $row['pkp_domain']
+                    'domain' => $row['pkp_domain'],
+                    'qdomain' => $row['qt_domains_in'],
+                    'qsubdomain' => $row['qt_subdomains_in'],
+                    'qparkdomain' => $row['qt_parkeddomains_in'],
+                    'qmailboxes' => $row['qt_mailboxes_in'],
+                    'qforwarders' => $row['qt_forwarders_in'],
+                    'qdistlist' => $row['qt_distlists_in'],
+                    'qftp' => $row['qt_ftpaccounts_in'],
+                    'qmysql' => $row['qt_mysql_in'],
+                    'qspace' => $row['qt_diskspace_bi'],
+                    'qband' => $row['qt_bandwidth_bi']
                 ));
             }
             return $res;
@@ -884,7 +898,7 @@ static function getEmail() {
 			return $response;
     }
 
-    static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password) {
+    static function ApiCreateClient($reseller_id, $username, $packageid, $groupid, $fullname, $email, $address, $post, $phone, $password, $domain, $transfer_help, $buy_domain) {
         global $zdbh;
 		        	
         // Check for spaces and remove if found...
@@ -960,7 +974,43 @@ static function getEmail() {
         fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/public_html", 0777);
         fs_director::CreateDirectory(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups");
         fs_director::SetFileSystemPermissions(ctrl_options::GetSystemOption('hosted_dir') . $username . "/backups", 0777);
-            
+        
+        if ($domain == false ) {
+        	$domain = 'No Domain Specified';
+        }
+        if ($transfer_help === 'yes') {
+        	$transfer_help = 'The customer would like help to transfer the domain';
+        } else {
+        	$transfer_help = 'No help is required to transfer the domain';
+        }
+		
+		if ($buy_domain === 'yes') {
+			$buy_domain = 'The Customer would like to buy a domain';
+		} else {
+			$buy_domain = 'No domain purchase required';
+		}
+		
+        $email = self::getMail("user_signup");
+        $emailtext = $email['message'];
+        $emailtext = str_replace('{{fullname}}',$fullname,$emailtext);
+		$emailtext = str_replace('{{username}}',$username,$emailtext);
+        $emailtext = str_replace('{{reseller_id}}',$reseller_id,$emailtext);
+        $emailtext = str_replace('{{packageid}}',$packageid,$emailtext);
+		$emailtext = str_replace('{{groupid}}',$groupid,$emailtext);
+		$emailtext = str_replace('{{email}}',$email,$emailtext);
+		$emailtext = str_replace('{{address}}',$address,$emailtext);
+		$emailtext = str_replace('{{post}}',$post,$emailtext);
+		$emailtext = str_replace('{{phone}}',$phone,$emailtext);
+		$emailtext = str_replace('{{domain}}',$domain,$emailtext);
+		$emailtext = str_replace('{{phone}}',$phone,$emailtext);
+		$emailtext = str_replace('{{transfer_help}}',$transfer_help,$emailtext);
+		$emailtext = str_replace('{{buy_domain}}',$buy_domain,$emailtext);
+		$emailtext = str_replace('{{firm}}',self::getConfig('system.firm'),$emailtext);
+        $emailsubject = $email['subject'];
+            	
+        self::sendemail(self::getConfig('email.contact_email'), $emailsubject, $emailtext);
+				
+				    
         runtime_hook::Execute('OnAfterCreateClient');
         self::$username = $username;
         return true;

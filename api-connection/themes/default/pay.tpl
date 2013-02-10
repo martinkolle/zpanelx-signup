@@ -9,7 +9,7 @@
 		<div id="box" style="width:690px;height:105px;">
 			<h2>Ready to get hosting?</h2>
 			You are nearly finish. Choose one of the payment method at the left.<br />
-			When the payment is accepted will your account be activated, and you will<br /> receive a email with the given informations. Thanks for choosing {{firm}}.
+			When the payment is accepted will your account be activated, and you will<br /> receive a email with the given informations. Thanks for choosing {{company}}.
 		</div>
 		{{payment}}
 

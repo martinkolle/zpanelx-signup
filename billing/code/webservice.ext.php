@@ -21,7 +21,17 @@ class webservice extends ws_xmws {
 				ws_xmws::NewXMLTag('id', $value['id']).
 				ws_xmws::NewXMLTag('reseller', $value['reseller']).
 				ws_xmws::NewXMLTag('domain', $value['domain']).
-				ws_xmws::NewXMLTag('hosting', $value['hosting'])
+				ws_xmws::NewXMLTag('hosting', $value['hosting']).
+				ws_xmws::NewXMLTag('qdomain', $value['qdomain']).
+				ws_xmws::NewXMLTag('qsubdomain', $value['qsubdomain']).
+				ws_xmws::NewXMLTag('qparkdomain', $value['qparkdomain']).
+				ws_xmws::NewXMLTag('qmailboxes', $value['qmailboxes']).
+				ws_xmws::NewXMLTag('qforwarders', $value['qforwarders']).
+				ws_xmws::NewXMLTag('qdistlist', $value['qdistlist']).
+				ws_xmws::NewXMLTag('qftp', $value['qftp']).
+				ws_xmws::NewXMLTag('qmysql', $value['qmysql']).
+				ws_xmws::NewXMLTag('qspace', $value['qspace']).
+				ws_xmws::NewXMLTag('qband', $value['qband'])
 				);
 			}
 		}
@@ -270,7 +280,8 @@ class webservice extends ws_xmws {
 			$group_id = ws_generic::GetTagValue('groupid', $request_data['content']);
 		}
 
-        module_controller::ApiCreateClient($reseller_id, ws_generic::GetTagValue('username', $request_data['content']), ws_generic::GetTagValue('packageid', $request_data['content']), $group_id, ws_generic::GetTagValue('fullname', $request_data['content']), ws_generic::GetTagValue('email', $request_data['content']), ws_generic::GetTagValue('address', $request_data['content']), ws_generic::GetTagValue('postcode', $request_data['content']), ws_generic::GetTagValue('phone', $request_data['content']), ws_generic::GetTagValue('password', $request_data['content']));
+        module_controller::ApiCreateClient($reseller_id, ws_generic::GetTagValue('username', $request_data['content']), ws_generic::GetTagValue('packageid', $request_data['content']), $group_id, ws_generic::GetTagValue('fullname', $request_data['content']), ws_generic::GetTagValue('email', $request_data['content']), ws_generic::GetTagValue('address', $request_data['content']), ws_generic::GetTagValue('postcode', $request_data['content']), 
+        ws_generic::GetTagValue('phone', $request_data['content']), ws_generic::GetTagValue('password', $request_data['content']), ws_generic::GetTagValue('domain', $request_data['content']), ws_generic::GetTagValue('transfer_help', $request_data['content']), ws_generic::GetTagValue('buy_domain', $request_data['content']));
             
 		$response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
 		$response_xml .= ws_xmws::NewXMLTag('code', '1');

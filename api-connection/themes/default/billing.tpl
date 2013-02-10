@@ -13,7 +13,7 @@
 						<input type="text" name="fullname" value="{{fullname}}" placeholder="Full Name">
 						<textarea name="address" cols="25" placeholder="Address">{{address}}</textarea>
 						<input type="number" name="postcode" size="20" value="{{postcode}}" placeholder="Postcode">
-						<input type="tel" name="telephone" value="{{telephone}} placeholder="Telephone">
+						<input type="tel" name="telephone" value="{{telephone}}" placeholder="Telephone">
 					</div>
 				</div>
 			</div>
@@ -28,11 +28,11 @@
 			</div>
 			<div id="right" class="trans">
 				<div id="box">
-					<h2>Transfer website</h2>
-						<input type="text" name="website" value="{{transfer_website}}" placeholder="www.yourdomain.com"/>
+					<h2>Transfer Domain</h2>
+						<input type="text" name="website" value="{{website}}" placeholder="www.yourdomain.com"/>
 						<br />
-						<input type="checkbox" name="website_help" value="dns">I want help to DNS transfer <br />
-						<input type="checkbox" name="website_help" value="no">I don't have a domain.
+						<input type="checkbox" name="transfer_help" value="yes" {{transfer_checked}}>I want help to DNS transfer <br />
+						<input type="checkbox" name="buy_domain" value="yes" {{buy_checked}}>I don't have a domain.
 				</div>
 			</div>		
 
