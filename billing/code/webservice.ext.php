@@ -281,7 +281,7 @@ class webservice extends ws_xmws {
 		}
 
         module_controller::ApiCreateClient($reseller_id, ws_generic::GetTagValue('username', $request_data['content']), ws_generic::GetTagValue('packageid', $request_data['content']), $group_id, ws_generic::GetTagValue('fullname', $request_data['content']), ws_generic::GetTagValue('email', $request_data['content']), ws_generic::GetTagValue('address', $request_data['content']), ws_generic::GetTagValue('postcode', $request_data['content']), 
-        ws_generic::GetTagValue('phone', $request_data['content']), ws_generic::GetTagValue('password', $request_data['content']), ws_generic::GetTagValue('domain', $request_data['content']), ws_generic::GetTagValue('transfer_help', $request_data['content']), ws_generic::GetTagValue('buy_domain', $request_data['content']));
+        ws_generic::GetTagValue('phone', $request_data['content']), ws_generic::GetTagValue('password', $request_data['content']), ws_generic::GetTagValue('domain', $request_data['content']), ws_generic::GetTagValue('transfer_help', $request_data['content']), ws_generic::GetTagValue('buy_domain', $request_data['content']), ws_generic::GetTagValue('ssl_support', $request_data['content']));
             
 		$response_xml = ws_xmws::NewXMLTag('uid', module_controller::getUsernameId(ws_generic::GetTagValue('username', $request_data['content'])));
 		$response_xml .= ws_xmws::NewXMLTag('code', '1');
