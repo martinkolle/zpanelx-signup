@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>{{title}} - {{comapny}}</title>
+<title>{{title}} - {{company}}</title>
 <meta name="description" content="ZPanel Billing Module" />
 <meta name="keywords" content="{{title}} - {{company}}" />
 <meta http-equiv="Content-Language" content="en" />

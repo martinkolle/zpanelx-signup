@@ -106,6 +106,9 @@ class zpanelx {
 	static function template($title, $head, $body) {
 		$company = zpanelx::getConfig('company');
 		$theme = zpanelx::getConfig('theme');
+		$control_panel = zpanelx::getConfig('control_panel');
+		$webmail_url = zpanelx::getConfig('webmail_url');
+		
 		$template = file_get_contents('./themes/' . $theme . '/includes/header.tpl');
 		$template .= file_get_contents('./themes/' . $theme . '/includes/body.tpl');
 		$template .= file_get_contents('./themes/' . $theme . '/includes/footer.tpl');
@@ -126,6 +129,8 @@ class zpanelx {
 		$template = ($body) ? str_replace('{{body}}', $body, $template) : str_replace('{{body}}', "", $template);
 		$template = str_replace('{{theme}}', $theme, $template);
 		$template = str_replace('{{company}}', $company, $template);
+		$template = str_replace('{{panel_url}}', $control_panel, $template);
+		$template = str_replace('{{webmail_url}}', $webmail_url, $template);
 		return $template;
 	}
 
