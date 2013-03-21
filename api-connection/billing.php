@@ -40,7 +40,6 @@ $fullname = (isset($_POST["fullname"])) ? filter_var($_POST["fullname"], FILTER_
 $address = (isset($_POST["address"])) ? ($_POST["address"]) : "";
 $transfer_help = (isset($_POST["transfer_help"])) ? filter_var($_POST["transfer_help"], FILTER_SANITIZE_STRING) : "";
 $buy_domain = (isset($_POST["buy_domain"])) ? filter_var($_POST["buy_domain"], FILTER_SANITIZE_STRING) : "";
-$ssl_support = (isset($_POST["ssl_support"])) ? filter_var($_POST["ssl_support"], FILTER_SANITIZE_STRING) : "";
 $website = (isset($_POST["website"])) ? filter_var($_POST["website"], FILTER_SANITIZE_STRING) : "";
 
 $postcode = (isset($_POST['postcode'])) ? $_POST["postcode"] : "";
@@ -115,23 +114,22 @@ if (isset($_POST['submit'])) {
 				$token = zpanelx::generateToken();
 				$pwd = zpanelx::generatePassword();
 				$data = '<resellerid>' . zpanelx::getConfig('reseller_id') . '</resellerid>
-        <groupid>' . zpanelx::getConfig('group_id') . '</groupid>
-        <username>' . $username . '</username>
-        <companyname>' . $companyname . '</companyname>
-        <fullname>' . $fullname . '</fullname>
-        <email>' . $email . '</email>
-        <postcode>' . $postcode . '</postcode>
-        <address>' . $address . ' </address>
-        <phone>' . $telephone . '</phone>
-        <packageid>' . $packageid . '</packageid>
-        <period>' . $payperiod . '</period>
-        <type>Initial Signup</type>		
-        <domain>' . $website . '</domain>
-        <password>' . $pwd . '</password>
-        <transfer_help>' . $transfer_help . '</transfer_help>
-        <buy_domain>' . $buy_domain . '</buy_domain>
-        <ssl_support>' . $ssl_support . '</ssl_support>
-        ';
+		<groupid>' . zpanelx::getConfig('group_id') . '</groupid>
+		<username>' . $username . '</username>
+		<companyname>' . $companyname . '</companyname>
+		<fullname>' . $fullname . '</fullname>
+		<email>' . $email . '</email>
+		<postcode>' . $postcode . '</postcode>
+		<address>' . $address . ' </address>
+		<phone>' . $telephone . '</phone>
+		<packageid>' . $packageid . '</packageid>
+		<period>' . $payperiod . '</period>
+		<type>Initial Signup</type>		
+		<domain>' . $website . '</domain>
+		<password>' . $pwd . '</password>
+		<transfer_help>' . $transfer_help . '</transfer_help>
+		<buy_domain>' . $buy_domain . '</buy_domain>
+		';
 
 				$createBilling = zpanelx::api("billing", "CreateClient", $data);
 
@@ -224,11 +222,6 @@ if (!empty($package_name)) {
 		$transfer_checked = 'checked';
 		} else {
 			$transfer_checked= '';
-		}
-		if ($ssl_support === 'yes') {
-		$transfer_checked = 'checked';
-		} else {
-			$transfer_checked= '';
 		} 
 	$template = ($username ? str_replace('{{username}}', $username, $template) : str_replace('{{username}}', "", $template));
 	$template = ($email ? str_replace('{{email}}', $email, $template) : str_replace('{{email}}', "", $template));
@@ -239,7 +232,6 @@ if (!empty($package_name)) {
 	$template = ($website ? str_replace('{{website}}', $website, $template) : str_replace('{{website}}', "", $template));
 	$template = ($buy_checked ? str_replace('{{buy_checked}}', $buy_checked, $template) : str_replace('{{buy_checked}}', "", $template));
 	$template = ($transfer_checked ? str_replace('{{transfer_checked}}', $transfer_checked, $template) : str_replace('{{transfer_checked}}', "", $template));
-	$template = ($ssl_support ? str_replace('{{ssl_support}}', $ssl_support, $template) : str_replace('{{ssl_support}}', "", $template));
 	$template = str_replace('<input type="radio" name="payperiod" value="' . $payperiod . '">', '<input type="radio" name="payperiod" value="' . $payperiod . '" checked>', $template);
 } else {
 	zpanelx::error("Invalid package selected", false, true);

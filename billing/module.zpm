@@ -178,7 +178,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 			<div class="module">
 				<div class="module-inner">
 				<img src="<@ ModuleDir @>/assets/setting.png" class="menu" />
-				<span>System Settings</span>
+				<span>Settings</span>
 				</div>
 			</div>
 		</a>
@@ -186,7 +186,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 			<div class="module">
 				<div class="module-inner">
 				<img src="<@ ModuleDir @>/assets/email.png" class="menu" />
-				<span>Email Settings</span>
+				<span>Emails</span>
 				</div>
 			</div>
 		</a>
@@ -388,7 +388,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 
 <% if ViewSetting %>
 <div class="zform_wrapper">
-		<h2><: Billing settings :></h2>
+		<h2><: Reseller billing settings :></h2>
 		<form action="./?module=billing&view=setting&action=UpdateConfigs" method="post">
 		<table id="reseller" class="setting">
 			<tbody>
@@ -412,7 +412,7 @@ $('installRB').bPopup({ content:'iframe',loadUrl:'./modules/billing/install/inst
 
 <% if ViewEmail %>
 <div class="zform_wrapper">
-		<h2><: Billing settings :></h2>
+		<h2><: Reseller billing settings :></h2>
 		Don't edit the name! This will be disabled in a newer version!
 		<form action="./?module=billing&view=setting&action=UpdateConfigs" method="post">
 		<table id="reseller" class="setting">

@@ -363,7 +363,7 @@ class module_controller {
                     'qsubdomain' => $row['qt_subdomains_in'],
                     'qparkdomain' => $row['qt_parkeddomains_in'],
                     'qmailboxes' => $row['qt_mailboxes_in'],
-                    'qforwarders' => $row['qt_forwarders_in'],
+                    'qforwarders' => $row['qt_fowarders_in'],
                     'qdistlist' => $row['qt_distlists_in'],
                     'qftp' => $row['qt_ftpaccounts_in'],
                     'qmysql' => $row['qt_mysql_in'],
@@ -926,7 +926,8 @@ static function getEmail() {
         $crypto->SetSalt($randomsalt);
         $secure_password = $crypto->CryptParts($crypto->Crypt())->Hash;
         
-        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts, ac_enabled_in) VALUES (:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :resellerid, :time, 0)");
+        $sql = $zdbh->prepare("INSERT INTO x_accounts (ac_user_vc, ac_pass_vc, ac_passsalt_vc, ac_email_vc, ac_package_fk, ac_group_fk, ac_usertheme_vc, ac_usercss_vc, ac_reseller_fk, ac_created_ts, ac_enabled_in) VALUES (
+:username, :password, :passsalt, :email, :packageid, :groupid, :resellertheme, :resellercss, :resellerid, :time, 0)");
         $sql->bindParam(':resellerid', $reseller_id);
         $time = time();
         $sql->bindParam(':time', $time);
@@ -992,20 +993,19 @@ static function getEmail() {
         $email = self::getMail("user_signup");
         $emailtext = $email['message'];
         $emailtext = str_replace('{{fullname}}',$fullname,$emailtext);
-        $emailtext = str_replace('{{username}}',$username,$emailtext);
+		$emailtext = str_replace('{{username}}',$username,$emailtext);
         $emailtext = str_replace('{{reseller_id}}',$reseller_id,$emailtext);
         $emailtext = str_replace('{{packageid}}',$packageid,$emailtext);
-        $emailtext = str_replace('{{groupid}}',$groupid,$emailtext);
-        $emailtext = str_replace('{{email}}',$email,$emailtext);
-        $emailtext = str_replace('{{address}}',$address,$emailtext);
-        $emailtext = str_replace('{{post}}',$post,$emailtext);
-        $emailtext = str_replace('{{phone}}',$phone,$emailtext);
-        $emailtext = str_replace('{{domain}}',$domain,$emailtext);
-        $emailtext = str_replace('{{phone}}',$phone,$emailtext);
-        $emailtext = str_replace('{{transfer_help}}',$transfer_help,$emailtext);
-        $emailtext = str_replace('{{buy_domain}}',$buy_domain,$emailtext);
-        $emailtext = str_replace('{{ssl_support}}',$ssl_support,$emailtext);
-        $emailtext = str_replace('{{firm}}',self::getConfig('system.firm'),$emailtext);
+		$emailtext = str_replace('{{groupid}}',$groupid,$emailtext);
+		$emailtext = str_replace('{{email}}',$email,$emailtext);
+		$emailtext = str_replace('{{address}}',$address,$emailtext);
+		$emailtext = str_replace('{{post}}',$post,$emailtext);
+		$emailtext = str_replace('{{phone}}',$phone,$emailtext);
+		$emailtext = str_replace('{{domain}}',$domain,$emailtext);
+		$emailtext = str_replace('{{phone}}',$phone,$emailtext);
+		$emailtext = str_replace('{{transfer_help}}',$transfer_help,$emailtext);
+		$emailtext = str_replace('{{buy_domain}}',$buy_domain,$emailtext);
+		$emailtext = str_replace('{{firm}}',self::getConfig('system.firm'),$emailtext);
         $emailsubject = $email['subject'];
             	
         self::sendemail(self::getConfig('email.contact_email'), $emailsubject, $emailtext);
@@ -1168,11 +1168,10 @@ CREATE TABLE IF NOT EXISTS `x_rb_billing` (
         }
 
         $query->prepare("INSERT INTO `x_rb_mail` (`id`, `name`, `subject`, `message`, `header`) VALUES
-(1, 'user_payment', 'Pay for hosting', '<p>{{fullname}}, we''re very pleased you''ve created an account with us.</p>\r\n<p>If for some reason you were unable to complete your order, please follow the \r\nfollowing link:</p>\r\n<p><a href=\"{{billing_url}}/pay.php?id={{token}}\">{{billing_url}}/pay.php?id={{token}}</a></p>\r\n<p>Once your payment is accepted, we will send your login credentails.</p>\r\n\r\nRegards, {{firm}}', ''),
-(2, 'user_welcome', 'Welcome to {{firm}}', '<p><b>Welcome, {{username}}!</b></p>\r\n<p>Thank you for choosing us for your web hosting services. This email contains \r\nall the information you need to get started.</p>\r\n<p><b>Your control panel:</b></p>\r\n<p>{{zpanel_url}}<br>\r\nUsername: {{username}}<br>\r\npassword: {{password}}<br />\r\n</p>\r\n<p><b>Adding your domain name:</b></p>\r\n<p>This should be the first thing you do.</p>\r\n<ul>\r\n <li>Login to your control panel</li>\r\n    <li>Click ''Domains''</li>\r\n  <li>This page allows you to add new domain names</li>\r\n   <li>Then go to Advanced --&gt; DNS Settings --&gt; Select your domain name --&gt; \r\n  Click ''add default records''</li>\r\n</ul>\r\n<p>The last thing to do is change the name server settings with your domain \r\nregistrar to the following:</p>\r\n<p>{{ns1}}<br>\r\n{{ns2}}</p>\r\n<p>Domain names should resolve to our service within 1 hour, however can take up \r\nto 48 hours.</p>\r\n<p><b>FTP:</b></p>\r\n<ul>\r\n  <li>Login to your control panel</li>\r\n    <li>Click ''FTP Accounts''</li>\r\n <li>Create a username and password</li>\r\n</ul>\r\n<p>FTP can then be accessed using a range of free programs (we recommend \r\nFileZilla) with the address line:</p>\r\n<p>ftp.[your-domain-name].[ext] <br /> \r\nor {{ftp}}</p>\r\n\r\nRegards, {{firm}}', ''),
+(1, 'user_payment', 'Pay for hosting', '<p>{{fullname}}, we''re very pleased you''ve created an account with us.</p>\r\n<p>If for some reason you was unable to complete your order, please follow the \r\nfollowing link:</p>\r\n<p><a href=\"{{billing_url}}/pay.php?id={{token}}\">{{billing_url}}/pay.php?id={{token}}</a></p>\r\n<p>Once your payment is accepted, we will send your login credentails.</p>\r\n\r\nRegards, {{firm}}', ''),
+(2, 'user_welcome', 'Welcome at {{firm}}', '<p><b>Welcome, {{username}}!</b></p>\r\n<p>Thank you for choosing us for your web hosting services. This email contains \r\nall the information you need to get started.</p>\r\n<p><b>Your control panel:</b></p>\r\n<p>{{zpanel_url}}<br>\r\nUsername: {{username}}<br>\r\npassword: {{password}}<br />\r\n</p>\r\n<p><b>Adding your domain name:</b></p>\r\n<p>This should be the first thing you do.</p>\r\n<ul>\r\n <li>Login to your control panel</li>\r\n    <li>Click ''Domains''</li>\r\n  <li>This page allows you to add new domain names</li>\r\n   <li>Then go to Advanced --&gt; DNS Settings --&gt; Select your domain name --&gt; \r\n  Click ''add default records''</li>\r\n</ul>\r\n<p>The last thing to do is change the name server settings with your domain \r\nregistrar to the following:</p>\r\n<p>{{ns1}}<br>\r\n{{ns2}}</p>\r\n<p>Domain names should resolve to our service within 1 hour, however can take up \r\nto 48 hours.</p>\r\n<p><b>FTP:</b></p>\r\n<ul>\r\n  <li>Login to your control panel</li>\r\n    <li>Click ''FTP Accounts''</li>\r\n <li>Create a username and password</li>\r\n</ul>\r\n<p>FTP can then be accessed using a range of free programs (we recommend \r\nFileZilla) with the address line:</p>\r\n<p>ftp.[your-domain-name].[ext] <br /> \r\nor {{ftp}}</p>\r\n\r\nRegards, {{firm}}', ''),
 (3, 'user_expire', 'Account is going to be disabled', 'Dear {{fullname}}<br />\r\n\r\n<b>Your account at {{firm}} will expire in {{days}} days.</b>\r\n<br />\r\nIf you want to renew, please follow the link below. \r\n<br />\r\n{{billing_url}}/pay.php?id={{token}}\r\n<br />\r\nIf you don''t want, we will say thanks for the partnership. \r\n</br>\r\nRegards, {{firm}}', ''),
-(4, 'user_signup', 'A new user has signed up for hosting', 'Congratulations <br /><br /> A New user has signed up {{username}} <br /><br /> <hr /> Details :<br /> Name : {{fullname}}<br /> Email : {{email}}<br /> Address : {{address}} {{post}}<br /> Phone : {{phone}}<br /> <br /> <hr /> {{domain}} {{transfer_help}} {{buy_domain}} {{ssl_support}}', ''),
-(5, 'user_disabled', '{{firm}}: {{username}} have been disabled', 'Dear {{fullname}},\r\n\r\nYour hosting account at {{firm}} have been disabled because you do not have  paid. \r\n\r\nIf you want to reactivate your account, please contact us at {{contact_mail}} <br /><br />\r\n\r\nRegards, {{firm}}', '');
+(4, 'user_disabled', '{{firm}}: {{username}} have been disabled', 'Dear {{fullname}},\r\n\r\nYour hosting account at {{firm}} have been disabled because you do not have  paid. \r\n\r\nIf you want to reactivate your account, please contact us at {{contact_mail}} <br /><br />\r\n\r\nRegards, {{firm}}', '');
 ");
 
         if($query->execute()){

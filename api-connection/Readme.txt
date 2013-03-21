@@ -1,6 +1,6 @@
 ZpanalX - Auto Billing Module
 
-Version 10.0.4
+Version 10.0.5
 ================================================================
 Edit config.php
 
@@ -32,3 +32,16 @@ index.tpl Place Holders ( these are all set in your Zpanel->Reseller->Package Ma
 {{distlists}}
 
 ================================================================
+
+** I have created a freehosting.php for people that would like to offer free hosting. 
+If you do not want to offer free hosting delete this file as it is possible for someone 
+to get an invoice number and post it to freehosting.php and they will have an active account.
+
+To add the payment option go to the zpanel => billing module => Payment Options and add
+
+Name :	Free ( this can be whatever you would like it to be )
+
+Data :	<form name="form" method="post" action="freehosting.php">
+	<input name="invoice" value="{{invoice}}" type="hidden">
+	<input name="first_name" value="{{user_firstname}}" type="hidden">
+	</form>
