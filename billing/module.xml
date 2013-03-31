@@ -8,5 +8,5 @@
 <authorname>Martin Kollerup and Others</authorname>
 <authoremail>rob@brownweb.com.au</authoremail>
 <authorurl>http://www.brownweb.com.au</authorurl>
-<moduleupdateurl>http://repo.zpanel.co.nz/core.xml</moduleupdateurl>
+<updateurl>http://repo.zpanel.co.nz/core.xml</updateurl>
 </module>
