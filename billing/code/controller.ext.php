@@ -990,7 +990,7 @@ static function getEmail() {
 			$buy_domain = 'No domain purchase required';
 		}
 		
-        $email = self::getMail("user_signup");
+        $emailtext = self::getMail("user_signup");
         $emailtext = $email['message'];
         $emailtext = str_replace('{{fullname}}',$fullname,$emailtext);
 		$emailtext = str_replace('{{username}}',$username,$emailtext);
