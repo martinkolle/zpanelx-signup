@@ -45,10 +45,38 @@ foreach ($listPackages as $row) {
 	} else {
 		$packetlist = str_replace('{{selectedpackage}}', "", $packetlist);
 	}
+	$bandwidth = $row['qband'];
+	$minGB = '1024000000';
+	$minMB = '1024000';
+	if ($bandwidth >= $minGB) {
+		$bandwidth = $bandwidth / $minGB;
+		$bandwidth = $bandwidth . " GB";
+	} else {
+		$bandwidth = $bandwidth / $minMB;
+		$bandwidth = $bandwidth . " MB";
+	}
+	$webspace = $row['qspace'];
+	if ($webspace >= $minGB) {
+		$webspace = $webspace / $minGB;
+		$webspace = $webspace . " GB";
+	} else {
+		$webspace = $webspace / $minMB;
+		$webspace = $webspace . " MB";
+	}
 
 	$packetlist = str_replace('{{packagename}}', $row['name'], $packetlist);
 	$packetlist = str_replace('{{packageid}}', $row['id'], $packetlist);
-	$packetlist = str_replace('{{price}}', "Prices beginning from " . $price, $packetlist);
+	$packetlist = str_replace('{{price}}', "Only " . $price . " Per Month", $packetlist);
+	$packetlist = str_replace('{{space}}', $webspace, $packetlist);
+	$packetlist = str_replace('{{bandwidth}}', $bandwidth, $packetlist);
+	$packetlist = str_replace('{{mailboxes}}', $row['qmailboxes'], $packetlist);
+	$packetlist = str_replace('{{mysql}}', $row['qmysql'], $packetlist);
+	$packetlist = str_replace('{{ftp}}', $row['qftp'], $packetlist);
+	$packetlist = str_replace('{{domains}}', $row['qdomain'], $packetlist);
+	$packetlist = str_replace('{{subdomains}}', $row['qsubdomain'], $packetlist);
+	$packetlist = str_replace('{{parkeddomains}}', $row['qparkeddomains'], $packetlist);
+	$packetlist = str_replace('{{forwarders}}', $row['qforwarders'], $packetlist);
+	$packetlist = str_replace('{{distlists}}', $row['qdistlist'], $packetlist);
 	$list .= $packetlist;
 }
 

@@ -185,3 +185,12 @@ INSERT INTO `x_rb_settings` (`id`, `name`, `value`, `title`, `desc`) VALUES
 (20, 'user.reseller_id', '1', 'Reseller id', 'The user will be assigned to this user.'),
 (21, 'user.group_id', '3', 'User group', 'The user will be assigned to this user group. Normal user is 3'),
 (22, 'invoice.notify', '2', 'Invoice notify', 'Notify the user who not have paid their invoice after :days:');
+
+ALTER TABLE `zpanel_core`.`x_rb_mail` UNIQUE (`name`);
+
+INSERT INTO `zpanel_core`.`x_rb_mail` (`id` ,`name` ,`subject` ,`message` ,`header`) VALUES (
+NULL , 'user_signup', 'A new user has signed up for hosting', 'Congratulations <br /><br /> A New user has signed up {{username}} <br /><br /> <hr /> Details :<br /> Name : {{fullname}}<br /> Email : {{email}}<br /> Address : {{address}} {{post}}<br /> Phone : {{phone}}<br /> <br /> <hr /> {{domain}} {{transfer_help}} {{buy_domain}}', ''
+);
+
+ALTER TABLE `x_rb_mail` CHANGE `name` `name` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+ALTER TABLE `x_rb_mail` CHANGE `subject` `subject` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
